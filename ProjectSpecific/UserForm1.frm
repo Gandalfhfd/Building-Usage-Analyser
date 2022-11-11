@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "UserForm1"
-   ClientHeight    =   6765
+   ClientHeight    =   6768
    ClientLeft      =   120
    ClientTop       =   468
    ClientWidth     =   11172
@@ -46,13 +46,9 @@ Private Sub AddEventButton_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call AddEventButton_Click
 End Sub
 
-Private Sub AddEventButton_Enter()
-
-End Sub
-
 Private Sub MultiPage1_Open() ' Doesn't seem to be called
 
-MsgBox ("MultiPage1 Was Called")
+MsgBox ("MultiPage1_Open Was Called")
 
 End Sub
 
@@ -60,8 +56,8 @@ Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call GetCalendar
 End Sub
 
-Private Sub EventDate0TextBox_Change()
-
+Private Sub EventDateTextBox_Enter()
+Call GetCalendar
 End Sub
 
 Private Sub MultiPage1_Change()
