@@ -19,12 +19,17 @@ Option Explicit
 Public numEvents As Integer
 
 Private Sub AddEventButton_Click()
-
-' Check whether a category has been selected or not
+' Check whether all of the information has been completed or not
 If CategoryListBox.ListIndex = -1 Then
     MsgBox ("Please select a category")
     Exit Sub
-Else
+ElseIf EventDateTextBox.Text = "" Then
+    MsgBox ("Please select a date using the calendar. Double click on the text box to show the calendar.")
+    Exit Sub
+ElseIf NameTextBox.Text = "" Then
+    MsgBox ("Please enter an event name")
+    Exit Sub
+Else ' The user is allowed to create a new event
     ' Add 1 to the number of events for that category
     Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, 2).value = _
         Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, 2).value + 1
@@ -33,10 +38,11 @@ End If
 Dim empty_row As Long
 empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
 
-' Add data into spreadsheet
-Worksheets("Data").Cells(empty_row, "A") = CategoryListBox.value & EventDateTextBox.Text _
-    & NameTextBox.Text
+Dim UUID As String
+UUID = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 
+' Add data into spreadsheet
+Worksheets("Data").Cells(empty_row, "A") = UUID
 Worksheets("Data").Cells(empty_row, "B") = NameTextBox.Text
 Worksheets("Data").Cells(empty_row, "C") = EventDateTextBox.Text
 Worksheets("Data").Cells(empty_row, "X") = CategoryListBox.value
@@ -47,9 +53,7 @@ Call AddEventButton_Click
 End Sub
 
 Private Sub MultiPage1_Open() ' Doesn't seem to be called
-
 MsgBox ("MultiPage1_Open Was Called")
-
 End Sub
 
 Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
@@ -63,10 +67,6 @@ End Sub
 Private Sub MultiPage1_Change()
 'Create list of categories based on some cells in the specified worksheet
 CategoryListBox.RowSource = ("UserFormData!A2:A1024")
-End Sub
-
-Private Sub NoEventsButton_Click()
-MsgBox (numEvents & " events in total.")
 End Sub
 
 Private Sub SearchButton_Click()
@@ -96,12 +96,10 @@ End If
 End Sub
 
 Sub UserForm_Initialize()
-
 numEvents = Worksheets("UserFormData").Range("B2")
-
 End Sub
 
-Sub GetCalendar()
+Sub GetCalendar() ' Calendar format
     Dim dateVariable As Date
     dateVariable = CalendarForm.GetDate(DateFontSize:=11, _
         BackgroundColor:=RGB(242, 248, 238), _
@@ -118,7 +116,18 @@ Sub GetCalendar()
 If dateVariable <> 0 Then UserForm1.EventDateTextBox = Format(dateVariable, "dd/mm/yyyy")
 End Sub
 
-Function UUIDGenerator()
- 
+Function UUIDGenerator(category As String, eventDate As String, name As String) As String
+UUIDGenerator = RmSpecialChars(category) & RmSpecialChars(eventDate) & RmSpecialChars(name)
 End Function
 
+Function RmSpecialChars(inputStr As String) As String
+Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',."
+
+Dim char As Variant
+
+RmSpecialChars = inputStr
+
+For Each char In Split(SpecialCharacters, ",")
+    RmSpecialChars = Replace(RmSpecialChars, char, "")
+Next
+End Function
