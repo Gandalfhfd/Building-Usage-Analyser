@@ -1,6 +1,6 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
-   Caption         =   "UserForm1"
+   Caption         =   "Events"
    ClientHeight    =   6768
    ClientLeft      =   120
    ClientTop       =   468
@@ -15,9 +15,6 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-' Set up a public variable which stores the total number of events
-Public numEvents As Integer
-
 Private Sub AddEventButton_Click()
 ' Check whether all of the information has been completed or not
 If CategoryListBox.ListIndex = -1 Then
@@ -30,9 +27,7 @@ ElseIf NameTextBox.Text = "" Then
     MsgBox ("Please enter an event name")
     Exit Sub
 Else ' The user is allowed to create a new event
-    ' Add 1 to the number of events for that category
-    Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, 2).value = _
-        Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, 2).value + 1
+
 End If
 
 Dim empty_row As Long
@@ -41,11 +36,20 @@ empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
 Dim UUID As String
 UUID = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 
-' Add data into spreadsheet
+' Add default data into spreadsheet can be overridden by user in the future
+Dim i As Integer
+For i = 0 To 5
+    ' Add default minutes worked by each volunteer category, depending on event category selected
+    Worksheets("Data").Cells(empty_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
+Next
+
+' Add data given by user into spreadsheet
 Worksheets("Data").Cells(empty_row, "A") = UUID
 Worksheets("Data").Cells(empty_row, "B") = NameTextBox.Text
 Worksheets("Data").Cells(empty_row, "C") = EventDateTextBox.Text
+Worksheets("Data").Cells(empty_row, "D") = LocationListBox.value
 Worksheets("Data").Cells(empty_row, "X") = CategoryListBox.value
+
 End Sub
 
 Private Sub AddEventButton_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
@@ -65,6 +69,8 @@ Call GetCalendar
 End Sub
 
 Private Sub MultiPage1_Change()
+LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
+LocationListBox.ListIndex = 0
 'Create list of categories based on some cells in the specified worksheet
 CategoryListBox.RowSource = ("UserFormData!A2:A1024")
 End Sub
@@ -95,10 +101,6 @@ End If
    
 End Sub
 
-Sub UserForm_Initialize()
-numEvents = Worksheets("UserFormData").Range("B2")
-End Sub
-
 Sub GetCalendar() ' Calendar format
     Dim dateVariable As Date
     dateVariable = CalendarForm.GetDate(DateFontSize:=11, _
@@ -121,12 +123,14 @@ UUIDGenerator = RmSpecialChars(category) & RmSpecialChars(eventDate) & RmSpecial
 End Function
 
 Function RmSpecialChars(inputStr As String) As String
+' List of chars we want to remove
 Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',."
 
 Dim char As Variant
 
 RmSpecialChars = inputStr
 
+' Iterate over SpecialCharacters and remove everything that matches
 For Each char In Split(SpecialCharacters, ",")
     RmSpecialChars = Replace(RmSpecialChars, char, "")
 Next
