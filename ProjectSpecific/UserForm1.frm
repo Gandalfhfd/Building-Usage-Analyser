@@ -43,6 +43,10 @@ For i = 0 To 5
     Worksheets("Data").Cells(empty_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
 Next
 
+' Bar gross profit bit
+Worksheets("Data").Cells(empty_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
+Worksheets("Data").Cells(empty_row, 27) = "=RC[-2]*RC[-1]" ' Worksheets("NonSpecificDefaults").Cells(2, 3) * Worksheets("Data").Cells(empty_row, 25)
+
 ' Add data given by user into spreadsheet
 Worksheets("Data").Cells(empty_row, "A") = UUID
 Worksheets("Data").Cells(empty_row, "B") = NameTextBox.Text
@@ -70,7 +74,6 @@ End Sub
 
 Private Sub MultiPage1_Change()
 LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
-LocationListBox.ListIndex = 0
 'Create list of categories based on some cells in the specified worksheet
 CategoryListBox.RowSource = ("UserFormData!A2:A1024")
 End Sub
