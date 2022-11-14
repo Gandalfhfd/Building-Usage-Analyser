@@ -93,6 +93,22 @@ Private Sub EventDateTextBox_Enter()
 Call GetCalendar
 End Sub
 
+Private Sub LocationListBox_Change()
+If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" Then
+    MsgBox ("'External' should refer to an Arts out West venue.")
+ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
+    MsgBox ("'External' should refer to an Arts out West venue.")
+End If
+End Sub
+
+Private Sub RoomListBox_Change()
+If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" Then
+    MsgBox ("'External' should refer to an Arts out West venue.")
+ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
+    MsgBox ("'External' should refer to an Arts out West venue.")
+End If
+End Sub
+
 Private Sub MultiPage1_Change()
 ' Add items into listboxes based on cells in specified worksheets
 LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
