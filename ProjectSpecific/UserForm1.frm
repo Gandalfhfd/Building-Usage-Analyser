@@ -35,6 +35,9 @@ ElseIf RoomListBox.ListIndex = -1 Then
 ElseIf MorningCheckBox.value = 0 And AfternoonCheckBox.value = 0 And EveningCheckBox.value = 0 Then
     MsgBox ("Please select a time")
     Exit Sub
+ElseIf TypeListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a type")
+    Exit Sub
 Else ' The user is allowed to create a new event
 
 End If
@@ -66,7 +69,7 @@ Worksheets("Data").Cells(empty_row, 28) = RoomListBox.value
 Worksheets("Data").Cells(empty_row, 5) = MorningCheckBox.value
 Worksheets("Data").Cells(empty_row, 6) = AfternoonCheckBox.value
 Worksheets("Data").Cells(empty_row, 7) = EveningCheckBox.value
-
+Worksheets("Data").Cells(empty_row, 29) = TypeListBox.value
 End Sub
 
 Private Sub AddEventButton_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
@@ -88,7 +91,8 @@ End Sub
 Private Sub MultiPage1_Change()
 ' Add items into listboxes based on cells in specified worksheets
 LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
-CategoryListBox.RowSource = ("UserFormData!A2:A1024")
+CategoryListBox.RowSource = ("NonSpecificDefaults!D2:D1024")
+TypeListBox.RowSource = ("UserFormData!A2:A1024")
 RoomListBox.RowSource = ("NonSpecificDefaults!B2:B1024")
 End Sub
 
