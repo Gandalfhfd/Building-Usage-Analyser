@@ -107,6 +107,19 @@ If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And L
 ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
     MsgBox ("'External' should refer to an Arts out West venue.")
 End If
+
+If RoomListBox.value = "Auditorium" Then
+    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
+ElseIf RoomListBox.value = "Egremont Room" Then
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2:G1024")
+ElseIf RoomListBox.value = "Both" Then
+    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2:G1024")
+ElseIf RoomListBox.value = "External" Then
+    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2")
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2")
+End If
+
 End Sub
 
 Private Sub MultiPage1_Change()
@@ -115,6 +128,8 @@ LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
 RoomListBox.RowSource = ("NonSpecificDefaults!B2:B1024")
 CategoryListBox.RowSource = ("NonSpecificDefaults!D2:D1024")
 AudienceListBox.RowSource = ("NonSpecificDefaults!E2:E1024")
+AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
+EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2:G1024")
 TypeListBox.RowSource = ("UserFormData!A2:A1024")
 
 End Sub
