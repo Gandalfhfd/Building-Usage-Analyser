@@ -94,7 +94,7 @@ Call GetCalendar
 End Sub
 
 Private Sub LocationListBox_Change()
-If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" Then
+If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
     MsgBox ("'External' should refer to an Arts out West venue.")
 ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
     MsgBox ("'External' should refer to an Arts out West venue.")
@@ -102,7 +102,7 @@ End If
 End Sub
 
 Private Sub RoomListBox_Change()
-If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" Then
+If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And LocationListBox.ListIndex <> -1 Then
     MsgBox ("'External' should refer to an Arts out West venue.")
 ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
     MsgBox ("'External' should refer to an Arts out West venue.")
