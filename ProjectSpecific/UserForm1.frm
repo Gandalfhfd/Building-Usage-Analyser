@@ -25,78 +25,20 @@ Public TotalCapacity As String
 
 '' BUTTON CLICKING===============================================================
 
-Private Sub AddEventButton_Click()
-' Check whether all of the information has been completed or not
-If CategoryListBox.ListIndex = -1 Then
-    MsgBox ("Please select a category")
-    Exit Sub
-ElseIf EventDateTextBox.Text = "" Then
-    MsgBox ("Please select a date using the calendar. Double click on the text box to show the calendar.")
-    Exit Sub
-ElseIf NameTextBox.Text = "" Then
-    MsgBox ("Please enter an event name")
-    Exit Sub
-ElseIf LocationListBox.ListIndex = -1 Then
-    MsgBox ("Please select a location")
-    Exit Sub
-ElseIf RoomListBox.ListIndex = -1 Then
-    MsgBox ("Please select a room")
-    Exit Sub
-ElseIf MorningCheckBox.value = 0 And AfternoonCheckBox.value = 0 And EveningCheckBox.value = 0 Then
-    MsgBox ("Please select a time")
-    Exit Sub
-ElseIf TypeListBox.ListIndex = -1 Then
-    MsgBox ("Please enter a type")
-    Exit Sub
-ElseIf AudienceListBox.ListIndex = -1 Then
-    MsgBox ("Please enter an audience type")
-    Exit Sub
-ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
-    MsgBox ("Please enter a layout for the Auditorium")
-    Exit Sub
-ElseIf EgremontLayoutListBox.ListIndex = -1 Then
-    MsgBox ("Please enter a layout for the Egremont Room")
-    Exit Sub
-Else ' The user is allowed to create a new event
-
-End If
-
-Dim empty_row As Long
-empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
-
-Dim UUID As String
-UUID = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
-
-' Add default data into spreadsheet can be overridden by user in the future
-Dim i As Integer
-For i = 0 To 5
-    ' Add default minutes worked by each volunteer category, depending on event category selected
-    Worksheets("Data").Cells(empty_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
-Next
-
-' Bar gross profit bit
-Worksheets("Data").Cells(empty_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
-Worksheets("Data").Cells(empty_row, 27) = "=RC[-2]*RC[-1]" ' Worksheets("NonSpecificDefaults").Cells(2, 3) * Worksheets("Data").Cells(empty_row, 25)
-
-' Add data given by user into spreadsheet
-Worksheets("Data").Cells(empty_row, "A") = UUID
-Worksheets("Data").Cells(empty_row, "B") = NameTextBox.Text
-Worksheets("Data").Cells(empty_row, "C") = EventDateTextBox.Text
-Worksheets("Data").Cells(empty_row, "D") = LocationListBox.value
-Worksheets("Data").Cells(empty_row, "X") = CategoryListBox.value
-Worksheets("Data").Cells(empty_row, 28) = RoomListBox.value
-Worksheets("Data").Cells(empty_row, 5) = MorningCheckBox.value
-Worksheets("Data").Cells(empty_row, 6) = AfternoonCheckBox.value
-Worksheets("Data").Cells(empty_row, 7) = EveningCheckBox.value
-Worksheets("Data").Cells(empty_row, 29) = TypeListBox.value
-Worksheets("Data").Cells(empty_row, 30) = AudienceListBox.value
-Worksheets("Data").Cells(empty_row, 31) = EgremontLayoutListBox.value
-Worksheets("Data").Cells(empty_row, 32) = AuditoriumLayoutListBox.value
-
+Private Sub AddEventButton1_Click()
+Call AddEvent
 End Sub
 
-Private Sub AddEventButton_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
-Call AddEventButton_Click
+Private Sub AddEventButton1_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Call AddEvent
+End Sub
+
+Private Sub AddEventButton2_Click()
+Call AddEvent
+End Sub
+
+Private Sub AddEventButton2_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Call AddEvent
 End Sub
 
 Private Sub SearchButton_Click()
@@ -299,8 +241,78 @@ ElseIf AuditoriumCapacityTextBox.Text = "" Then ' Ignore Auditorium Capacity if 
 ElseIf EgremontCapacityTextBox.Text = "" Then ' Ignore Egremont Capacity if it is blank
     TotalCapacityTextBox.Text = AuditoriumCapacityTextBox.Text
 Else ' Find the max of the two
-    TotalCapacityTextBox.Text = max(CDbl(AuditoriumCapacityTextBox.Text), CDbl(EgremontCapacityTextBox.Text))
+    TotalCapacityTextBox.Text = min(CDbl(AuditoriumCapacityTextBox.Text), CDbl(EgremontCapacityTextBox.Text))
 End If
 
 TotalCapacity = TotalCapacityTextBox.Text
+End Function
+
+Private Function AddEvent()
+' Check whether all of the information has been completed or not
+If CategoryListBox.ListIndex = -1 Then
+    MsgBox ("Please select a category")
+    Exit Function
+ElseIf EventDateTextBox.Text = "" Then
+    MsgBox ("Please select a date using the calendar. Double click on the text box to show the calendar.")
+    Exit Function
+ElseIf NameTextBox.Text = "" Then
+    MsgBox ("Please enter an event name")
+    Exit Function
+ElseIf LocationListBox.ListIndex = -1 Then
+    MsgBox ("Please select a location")
+    Exit Function
+ElseIf RoomListBox.ListIndex = -1 Then
+    MsgBox ("Please select a room")
+    Exit Function
+ElseIf MorningCheckBox.value = 0 And AfternoonCheckBox.value = 0 And EveningCheckBox.value = 0 Then
+    MsgBox ("Please select a time")
+    Exit Function
+ElseIf TypeListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a type")
+    Exit Function
+ElseIf AudienceListBox.ListIndex = -1 Then
+    MsgBox ("Please enter an audience type")
+    Exit Function
+ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a layout for the Auditorium")
+    Exit Function
+ElseIf EgremontLayoutListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a layout for the Egremont Room")
+    Exit Function
+Else ' The user is allowed to create a new event
+
+End If
+
+Dim empty_row As Long
+empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
+
+Dim UUID As String
+UUID = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
+
+' Add default data into spreadsheet can be overridden by user in the future
+Dim i As Integer
+For i = 0 To 5
+    ' Add default minutes worked by each volunteer category, depending on event category selected
+    Worksheets("Data").Cells(empty_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
+Next
+
+' Bar gross profit bit
+Worksheets("Data").Cells(empty_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
+Worksheets("Data").Cells(empty_row, 27) = "=RC[-2]*RC[-1]" ' Worksheets("NonSpecificDefaults").Cells(2, 3) * Worksheets("Data").Cells(empty_row, 25)
+
+' Add data given by user into spreadsheet
+Worksheets("Data").Cells(empty_row, "A") = UUID
+Worksheets("Data").Cells(empty_row, "B") = NameTextBox.Text
+Worksheets("Data").Cells(empty_row, "C") = EventDateTextBox.Text
+Worksheets("Data").Cells(empty_row, "D") = LocationListBox.value
+Worksheets("Data").Cells(empty_row, "X") = CategoryListBox.value
+Worksheets("Data").Cells(empty_row, 28) = RoomListBox.value
+Worksheets("Data").Cells(empty_row, 5) = MorningCheckBox.value
+Worksheets("Data").Cells(empty_row, 6) = AfternoonCheckBox.value
+Worksheets("Data").Cells(empty_row, 7) = EveningCheckBox.value
+Worksheets("Data").Cells(empty_row, 29) = TypeListBox.value
+Worksheets("Data").Cells(empty_row, 30) = AudienceListBox.value
+Worksheets("Data").Cells(empty_row, 31) = EgremontLayoutListBox.value
+Worksheets("Data").Cells(empty_row, 32) = AuditoriumLayoutListBox.value
+Worksheets("Data").Cells(empty_row, 33) = TotalCapacityTextBox.Text
 End Function
