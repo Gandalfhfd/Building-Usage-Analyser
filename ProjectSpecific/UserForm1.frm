@@ -143,6 +143,8 @@ Else
     AuditoriumCapacityTextBox.Text = RmSpecialChars(AuditoriumCapacityTextBox.Text)
     AuditoriumCapacity = AuditoriumCapacityTextBox.Text
 End If
+
+Call TotalCapDecider
 End Sub
 
 Private Sub EgremontCapacityTextBox_Change()
@@ -150,8 +152,11 @@ Private Sub EgremontCapacityTextBox_Change()
 If CheckIfNonNegInt(EgremontCapacityTextBox.Text) = False Then
     EgremontCapacityTextBox.Text = EgremontCapacity
 Else
+    EgremontCapacityTextBox.Text = RmSpecialChars(EgremontCapacityTextBox.Text)
     EgremontCapacity = EgremontCapacityTextBox.Text
 End If
+
+Call TotalCapDecider
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -237,12 +242,12 @@ Sub GetCalendar() ' Calendar format
 If dateVariable <> 0 Then UserForm1.EventDateTextBox = Format(dateVariable, "dd/mm/yyyy")
 End Sub
 
-Function UUIDGenerator(category As String, eventDate As String, name As String) As String
+Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
 UUIDGenerator = RmSpecialChars(category) & RmSpecialChars(eventDate) _
     & RmSpecialChars(name) & Format(Now, "ss")
 End Function
 
-Function RmSpecialChars(inputStr As String) As String
+Public Function RmSpecialChars(inputStr As String) As String
 ' List of chars we want to remove
 Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',."
 Const CommaCharacter As String = ","
@@ -260,7 +265,7 @@ For Each char In Split(CommaCharacter, ".")
 Next
 End Function
 
-Function CheckIfNonNegInt(inputStr As String) As Boolean
+Public Function CheckIfNonNegInt(inputStr As String) As Boolean
 If inputStr = "" Then ' If blank, ignore
     CheckIfNonNegInt = True
 ElseIf IsNumeric(inputStr) = False Then ' Check it can be conveted to a number
@@ -272,4 +277,30 @@ ElseIf CDbl(inputStr) < 0 Then ' Check it is >= 0. CDbl used to prevent overflow
 Else ' Then it must be a non-negative integer
     CheckIfNonNegInt = True
 End If
+End Function
+
+Public Function max(x, y As Variant) As Variant
+  max = IIf(x > y, x, y)
+End Function
+
+Public Function min(x, y As Variant) As Variant
+   min = IIf(x < y, x, y)
+End Function
+
+Public Function TotalCapDecider() As String ' Highly non-generic function. Sorry!
+If AuditoriumCapacityTextBox.Text & EgremontCapacityTextBox.Text = "" Then ' Set total capacity to blank if both are blank
+    TotalCapacityTextBox.Text = ""
+ElseIf AuditoriumCapacityTextBox.Text = "0" Then ' Ignore Auditorium Capacity if it is 0
+    TotalCapacityTextBox.Text = EgremontCapacityTextBox.Text
+ElseIf EgremontCapacityTextBox.Text = "0" Then ' Ignore Egremont Capacity if it is 0
+    TotalCapacityTextBox.Text = AuditoriumCapacityTextBox.Text
+ElseIf AuditoriumCapacityTextBox.Text = "" Then ' Ignore Auditorium Capacity if it is blank
+    TotalCapacityTextBox.Text = EgremontCapacityTextBox.Text
+ElseIf EgremontCapacityTextBox.Text = "" Then ' Ignore Egremont Capacity if it is blank
+    TotalCapacityTextBox.Text = AuditoriumCapacityTextBox.Text
+Else ' Find the max of the two
+    TotalCapacityTextBox.Text = max(CDbl(AuditoriumCapacityTextBox.Text), CDbl(EgremontCapacityTextBox.Text))
+End If
+
+TotalCapacity = TotalCapacityTextBox.Text
 End Function
