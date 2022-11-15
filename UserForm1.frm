@@ -129,6 +129,24 @@ Private Sub EventDateTextBox_Enter()
 Call GetCalendar
 End Sub
 
+Private Sub AuditoriumCapacityTextBox_Change()
+
+If AuditoriumCapacityTextBox.Text = "" Then
+    ' Do nothing
+ElseIf IsNumeric(AuditoriumCapacityTextBox.Text) = False Then
+    MsgBox ("Please enter a non-negative whole number")
+    AuditoriumCapacityTextBox.Text = ""
+ElseIf Int(AuditoriumCapacityTextBox.Text) = False Then
+    MsgBox ("Please enter a non-negative whole number")
+    AuditoriumCapacityTextBox.Text = ""
+' need to check if number is actually an integer or not
+ElseIf CInt(AuditoriumCapacityTextBox.Text) < 0 Then
+    MsgBox ("Please enter a non-negative whole number")
+    AuditoriumCapacityTextBox.Text = ""
+End If
+
+End Sub
+
 '' LIST BOXES
 
 Private Sub LocationListBox_Change()
