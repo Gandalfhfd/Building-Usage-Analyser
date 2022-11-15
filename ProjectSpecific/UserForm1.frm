@@ -249,14 +249,18 @@ End Function
 
 Private Function AddEvent()
 ' Check whether all of the information has been completed or not
-If CategoryListBox.ListIndex = -1 Then
-    MsgBox ("Please select a category")
+
+If NameTextBox.Text = "" Then
+    MsgBox ("Please enter an event name")
     Exit Function
 ElseIf EventDateTextBox.Text = "" Then
     MsgBox ("Please select a date using the calendar. Double click on the text box to show the calendar.")
     Exit Function
-ElseIf NameTextBox.Text = "" Then
-    MsgBox ("Please enter an event name")
+ElseIf CategoryListBox.ListIndex = -1 Then
+    MsgBox ("Please select a category")
+    Exit Function
+ElseIf TypeListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a type")
     Exit Function
 ElseIf LocationListBox.ListIndex = -1 Then
     MsgBox ("Please select a location")
@@ -264,23 +268,21 @@ ElseIf LocationListBox.ListIndex = -1 Then
 ElseIf RoomListBox.ListIndex = -1 Then
     MsgBox ("Please select a room")
     Exit Function
+ElseIf AudienceListBox.ListIndex = -1 Then
+    MsgBox ("Please enter an audience type")
+Exit Function
 ElseIf MorningCheckBox.value = 0 And AfternoonCheckBox.value = 0 And EveningCheckBox.value = 0 Then
     MsgBox ("Please select a time")
     Exit Function
-ElseIf TypeListBox.ListIndex = -1 Then
-    MsgBox ("Please enter a type")
-    Exit Function
-ElseIf AudienceListBox.ListIndex = -1 Then
-    MsgBox ("Please enter an audience type")
-    Exit Function
 ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
     MsgBox ("Please enter a layout for the Auditorium")
+    MultiPage1.value = 2 ' Take the user to the layouts page
     Exit Function
 ElseIf EgremontLayoutListBox.ListIndex = -1 Then
     MsgBox ("Please enter a layout for the Egremont Room")
+    MultiPage1.value = 2 ' Take the user to the layouts page
     Exit Function
 Else ' The user is allowed to create a new event
-
 End If
 
 Dim empty_row As Long
