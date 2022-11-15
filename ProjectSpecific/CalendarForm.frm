@@ -244,7 +244,7 @@ Public Function GetDate(Optional SelectedDate As Date = 0, _
     Optional TodayFontColor As Long = 15773696) As Date
     
     'Set global variables
-    DateFontSize = max(DateFontSize, 9) 'Font size cannot be below 9
+    DateFontSize = Max(DateFontSize, 9) 'Font size cannot be below 9
     OkayEnabled = OkayButton
     TodayEnabled = TodayButton
     RatioToResize = DateFontSize / 9
@@ -1423,23 +1423,23 @@ End Function
 '
 ' Get the min/max of an arbitrary number of arguments
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Private Function min(ParamArray values() As Variant) As Variant
+Private Function Min(ParamArray values() As Variant) As Variant
    Dim minValue As Variant
    Dim value As Variant
    minValue = values(0)
    For Each value In values
        If value < minValue Then minValue = value
    Next
-   min = minValue
+   Min = minValue
 End Function
-Private Function max(ParamArray values() As Variant) As Variant
+Private Function Max(ParamArray values() As Variant) As Variant
    Dim maxValue As Variant
    Dim value As Variant
    maxValue = values(0)
    For Each value In values
        If value > maxValue Then maxValue = value
    Next
-   max = maxValue
+   Max = maxValue
 End Function
 
 
