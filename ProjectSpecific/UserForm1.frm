@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6765
+   ClientHeight    =   6768
    ClientLeft      =   120
    ClientTop       =   468
    ClientWidth     =   11172
@@ -15,9 +15,15 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+' Used to prevent unecessary refreshing of ListBoxes
 Public counter As Integer
 
-'' BUTTON CLICKING
+' Store user input so that it can be restored if they make a mistake
+Public AuditoriumCapacity As String
+Public EgremontCapacity As String
+Public TotalCapacity As String
+
+'' BUTTON CLICKING===============================================================
 
 Private Sub AddEventButton_Click()
 ' Check whether all of the information has been completed or not
@@ -119,7 +125,7 @@ End If
    
 End Sub
 
-'' TEXT BOXES
+'' TEXT BOXES===============================================================
 
 Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call GetCalendar
@@ -130,24 +136,33 @@ Call GetCalendar
 End Sub
 
 Private Sub AuditoriumCapacityTextBox_Change()
-
-If AuditoriumCapacityTextBox.Text = "" Then
-    ' Do nothing
-ElseIf IsNumeric(AuditoriumCapacityTextBox.Text) = False Then
-    MsgBox ("Please enter a non-negative whole number")
-    AuditoriumCapacityTextBox.Text = ""
-ElseIf Int(AuditoriumCapacityTextBox.Text) = False Then
-    MsgBox ("Please enter a non-negative whole number")
-    AuditoriumCapacityTextBox.Text = ""
-' need to check if number is actually an integer or not
-ElseIf CInt(AuditoriumCapacityTextBox.Text) < 0 Then
-    MsgBox ("Please enter a non-negative whole number")
-    AuditoriumCapacityTextBox.Text = ""
+' Input validation
+If CheckIfNonNegInt(AuditoriumCapacityTextBox.Text) = False Then
+    AuditoriumCapacityTextBox.Text = AuditoriumCapacity
+Else
+    AuditoriumCapacityTextBox.Text = RmSpecialChars(AuditoriumCapacityTextBox.Text)
+    AuditoriumCapacity = AuditoriumCapacityTextBox.Text
 End If
-
 End Sub
 
-'' LIST BOXES
+Private Sub EgremontCapacityTextBox_Change()
+' Input validation
+If CheckIfNonNegInt(EgremontCapacityTextBox.Text) = False Then
+    EgremontCapacityTextBox.Text = EgremontCapacity
+Else
+    EgremontCapacity = EgremontCapacityTextBox.Text
+End If
+End Sub
+
+Private Sub TotalCapacityTextBox_Change()
+If CheckIfNonNegInt(TotalCapacityTextBox.Text) = False Then
+    TotalCapacityTextBox.Text = TotalCapacity
+Else
+    TotalCapacity = TotalCapacityTextBox.Text
+End If
+End Sub
+
+'' LIST BOXES===============================================================
 
 Private Sub LocationListBox_Change()
 If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
@@ -167,13 +182,13 @@ End If
 If RoomListBox.value = "Auditorium" Then
     AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
 ElseIf RoomListBox.value = "Egremont Room" Then
-    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2:G1024")
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
 ElseIf RoomListBox.value = "Both" Then
     AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
-    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2:G1024")
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
 ElseIf RoomListBox.value = "External" Then
     AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2")
-    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2")
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2")
 End If
 
 End Sub
@@ -186,7 +201,7 @@ Private Sub EgremontLayoutListBox_Change()
 EgremontCapacityTextBox.Text = Worksheets("NonSpecificDefaults").Cells(EgremontLayoutListBox.ListIndex + 2, 9)
 End Sub
 
-'' MULTIPAGE
+'' MULTIPAGE===============================================================
 
 Private Sub MultiPage1_Change()
 ' Add items into listboxes based on cells in specified worksheets
@@ -203,7 +218,7 @@ End If
 counter = 1
 End Sub
 
-'' FUNCTIONS
+'' FUNCTIONS===============================================================
 
 Sub GetCalendar() ' Calendar format
     Dim dateVariable As Date
@@ -230,7 +245,7 @@ End Function
 Function RmSpecialChars(inputStr As String) As String
 ' List of chars we want to remove
 Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',."
-
+Const CommaCharacter As String = ","
 Dim char As Variant
 
 RmSpecialChars = inputStr
@@ -239,4 +254,22 @@ RmSpecialChars = inputStr
 For Each char In Split(SpecialCharacters, ",")
     RmSpecialChars = Replace(RmSpecialChars, char, "")
 Next
+
+For Each char In Split(CommaCharacter, ".")
+    RmSpecialChars = Replace(RmSpecialChars, char, "")
+Next
+End Function
+
+Function CheckIfNonNegInt(inputStr As String) As Boolean
+If inputStr = "" Then ' If blank, ignore
+    CheckIfNonNegInt = True
+ElseIf IsNumeric(inputStr) = False Then ' Check it can be conveted to a number
+    CheckIfNonNegInt = False
+ElseIf Round(CDbl(inputStr)) <> CDbl(inputStr) Then ' Check it is an integer
+    CheckIfNonNegInt = False
+ElseIf CDbl(inputStr) < 0 Then ' Check it is >= 0. CDbl used to prevent overflow.
+    CheckIfNonNegInt = False
+Else ' Then it must be a non-negative integer
+    CheckIfNonNegInt = True
+End If
 End Function
