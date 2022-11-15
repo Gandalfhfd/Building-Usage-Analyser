@@ -15,6 +15,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+Public counter As Integer
+
+'' BUTTON CLICKING
+
 Private Sub AddEventButton_Click()
 ' Check whether all of the information has been completed or not
 If CategoryListBox.ListIndex = -1 Then
@@ -40,6 +44,12 @@ ElseIf TypeListBox.ListIndex = -1 Then
     Exit Sub
 ElseIf AudienceListBox.ListIndex = -1 Then
     MsgBox ("Please enter an audience type")
+    Exit Sub
+ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a layout for the Auditorium")
+    Exit Sub
+ElseIf EgremontLayoutListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a layout for the Egremont Room")
     Exit Sub
 Else ' The user is allowed to create a new event
 
@@ -74,6 +84,8 @@ Worksheets("Data").Cells(empty_row, 6) = AfternoonCheckBox.value
 Worksheets("Data").Cells(empty_row, 7) = EveningCheckBox.value
 Worksheets("Data").Cells(empty_row, 29) = TypeListBox.value
 Worksheets("Data").Cells(empty_row, 30) = AudienceListBox.value
+Worksheets("Data").Cells(empty_row, 31) = EgremontLayoutListBox.value
+Worksheets("Data").Cells(empty_row, 32) = AuditoriumLayoutListBox.value
 
 End Sub
 
@@ -81,9 +93,33 @@ Private Sub AddEventButton_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call AddEventButton_Click
 End Sub
 
-Private Sub MultiPage1_Open() ' Doesn't seem to be called
-MsgBox ("MultiPage1_Open Was Called")
+Private Sub SearchButton_Click()
+
+' Not sure what this stuff does
+Dim c As Range
+Dim firstAddress As String
+
+' Search for a UUID. Display address if found.
+' Future improvement: a "goto" button which takes the user to the cell.
+' Future improvement: some way of knowing if multiple references are found.
+
+If SearchBox.value = "" Then
+    MsgBox ("Please enter a UUID in the search box.") ' Error msg
+Else
+    With Worksheets(2).Range("A:A") ' Look in worksheet 2 over this range of cells
+        Set c = .Find(SearchBox.Text, LookIn:=xlValues)
+        If Not c Is Nothing Then ' If anything is found, then...
+            firstAddress = c.Address
+            MsgBox ("UUID Found in cell " & c.Address)
+        Else
+            MsgBox ("UUID Not Found")
+        End If
+    End With
+End If
+   
 End Sub
+
+'' TEXT BOXES
 
 Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call GetCalendar
@@ -92,6 +128,26 @@ End Sub
 Private Sub EventDateTextBox_Enter()
 Call GetCalendar
 End Sub
+
+Private Sub AuditoriumCapacityTextBox_Change()
+
+If AuditoriumCapacityTextBox.Text = "" Then
+    ' Do nothing
+ElseIf IsNumeric(AuditoriumCapacityTextBox.Text) = False Then
+    MsgBox ("Please enter a non-negative whole number")
+    AuditoriumCapacityTextBox.Text = ""
+ElseIf Int(AuditoriumCapacityTextBox.Text) = False Then
+    MsgBox ("Please enter a non-negative whole number")
+    AuditoriumCapacityTextBox.Text = ""
+' need to check if number is actually an integer or not
+ElseIf CInt(AuditoriumCapacityTextBox.Text) < 0 Then
+    MsgBox ("Please enter a non-negative whole number")
+    AuditoriumCapacityTextBox.Text = ""
+End If
+
+End Sub
+
+'' LIST BOXES
 
 Private Sub LocationListBox_Change()
 If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
@@ -122,43 +178,32 @@ End If
 
 End Sub
 
+Private Sub AuditoriumLayoutListBox_Change()
+AuditoriumCapacityTextBox.Text = Worksheets("NonSpecificDefaults").Cells(AuditoriumLayoutListBox.ListIndex + 2, 7)
+End Sub
+
+Private Sub EgremontLayoutListBox_Change()
+EgremontCapacityTextBox.Text = Worksheets("NonSpecificDefaults").Cells(EgremontLayoutListBox.ListIndex + 2, 9)
+End Sub
+
+'' MULTIPAGE
+
 Private Sub MultiPage1_Change()
 ' Add items into listboxes based on cells in specified worksheets
-LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
-RoomListBox.RowSource = ("NonSpecificDefaults!B2:B1024")
-CategoryListBox.RowSource = ("NonSpecificDefaults!D2:D1024")
-AudienceListBox.RowSource = ("NonSpecificDefaults!E2:E1024")
-AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
-EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!G2:G1024")
-TypeListBox.RowSource = ("UserFormData!A2:A1024")
-
-End Sub
-
-Private Sub SearchButton_Click()
-
-' Not sure what this stuff does
-Dim c As Range
-Dim firstAddress As String
-
-' Search for a UUID. Display address if found.
-' Future improvement: a "goto" button which takes the user to the cell.
-' Future improvement: some way of knowing if multiple references are found.
-
-If SearchBox.value = "" Then
-    MsgBox ("Please enter a UUID in the search box.") ' Error msg
-Else
-    With Worksheets(2).Range("A:A") ' Look in worksheet 2 over this range of cells
-        Set c = .Find(SearchBox.Text, LookIn:=xlValues)
-        If Not c Is Nothing Then ' If anything is found, then...
-            firstAddress = c.Address
-            MsgBox ("UUID Found in cell " & c.Address)
-        Else
-            MsgBox ("UUID Not Found")
-        End If
-    End With
+If counter <> 1 Then
+    LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
+    RoomListBox.RowSource = ("NonSpecificDefaults!B2:B1024")
+    CategoryListBox.RowSource = ("NonSpecificDefaults!D2:D1024")
+    AudienceListBox.RowSource = ("NonSpecificDefaults!E2:E1024")
+    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
+    TypeListBox.RowSource = ("UserFormData!A2:A1024")
 End If
-   
+
+counter = 1
 End Sub
+
+'' FUNCTIONS
 
 Sub GetCalendar() ' Calendar format
     Dim dateVariable As Date
