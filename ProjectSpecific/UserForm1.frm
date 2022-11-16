@@ -31,6 +31,7 @@ Call AddEvent
 End Sub
 
 Private Sub AddEventButton1_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+' Needed because a double click is counted differently to a single click
 Call AddEvent
 End Sub
 
@@ -39,6 +40,7 @@ Call AddEvent
 End Sub
 
 Private Sub AddEventButton2_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+' Needed because a double click is counted differently to a single click
 Call AddEvent
 End Sub
 
@@ -70,21 +72,21 @@ End Sub
 
 '' TEXT BOXES===============================================================
 
-Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
-Call GetCalendar
+Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean) ' Re-show Date Picker if box has already been entered
+Call GetCalendar ' Show Date Picker
 End Sub
 
 Private Sub EventDateTextBox_Enter()
-Call GetCalendar
+Call GetCalendar ' Show Date Picker
 End Sub
 
 Private Sub AuditoriumCapacityTextBox_Change()
 ' Input validation
 If CheckIfNonNegInt(AuditoriumCapacityTextBox.Text) = False Then
-    AuditoriumCapacityTextBox.Text = AuditoriumCapacity
+    AuditoriumCapacityTextBox.Text = AuditoriumCapacity ' Revert text box to previous valid text
 Else
-    AuditoriumCapacityTextBox.Text = RmSpecialChars(AuditoriumCapacityTextBox.Text)
-    AuditoriumCapacity = AuditoriumCapacityTextBox.Text
+    AuditoriumCapacityTextBox.Text = RmSpecialChars(AuditoriumCapacityTextBox.Text) ' Remove commas and full stops/decimal points
+    AuditoriumCapacity = AuditoriumCapacityTextBox.Text ' Update variable storing valid text
 End If
 
 Call TotalCapDecider
@@ -93,20 +95,22 @@ End Sub
 Private Sub EgremontCapacityTextBox_Change()
 ' Input validation
 If CheckIfNonNegInt(EgremontCapacityTextBox.Text) = False Then
-    EgremontCapacityTextBox.Text = EgremontCapacity
+    EgremontCapacityTextBox.Text = EgremontCapacity ' Revert text box to previous valid text
 Else
-    EgremontCapacityTextBox.Text = RmSpecialChars(EgremontCapacityTextBox.Text)
-    EgremontCapacity = EgremontCapacityTextBox.Text
+    EgremontCapacityTextBox.Text = RmSpecialChars(EgremontCapacityTextBox.Text) ' Remove commas and full stops/decimal points
+    EgremontCapacity = EgremontCapacityTextBox.Text ' Update variable storing valid text
 End If
 
 Call TotalCapDecider
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
+' Input validation
 If CheckIfNonNegInt(TotalCapacityTextBox.Text) = False Then
-    TotalCapacityTextBox.Text = TotalCapacity
+    TotalCapacityTextBox.Text = TotalCapacity ' Revert text box to previous valid text
 Else
-    TotalCapacity = TotalCapacityTextBox.Text
+    TotalCapacityTextBox.Text = RmSpecialChars(TotalCapacityTextBox.Text) ' Remove commas and full stops/decimal points
+    TotalCapacity = TotalCapacityTextBox.Text ' Update variable storing valid text
 End If
 End Sub
 
@@ -258,7 +262,7 @@ If NameTextBox.Text = "" Then
 ElseIf EventDateTextBox.Text = "" Then
     MsgBox ("Please select a date using the calendar. Double click on the text box to show the calendar.")
     Exit Function
-ElseIf CategoryListBox.ListIndex = -1 Then
+ElseIf CategoryListBox.ListIndex = -1 Then ' .ListIndex = -1 means nothing has been selected yet
     MsgBox ("Please select a category")
     Exit Function
 ElseIf TypeListBox.ListIndex = -1 Then
@@ -320,35 +324,41 @@ Worksheets("Data").Cells(empty_row, 33) = TotalCapacityTextBox.Text
 End Function
 
 Private Function AuditoriumUsed()
+' To be called when Auditorium is being used
 AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
 AuditoriumCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
 End Function
 
 Private Function EgremontUsed()
+' To be called when Egremont room is being used
 EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
 EgremontCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
 End Function
 
 Private Function BothUsed()
+' To be called when both Auditorium and Egremont rooms are being used
 Call AuditoriumUsed
 Call EgremontUsed
 End Function
 
 Private Function AuditoriumNotUsed()
+' To be called when Auditorium is not being used
 AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2")
 AuditoriumCapacityTextBox.Locked = True
 AuditoriumCapacityTextBox.value = "0"
 End Function
 
 Private Function EgremontNotUsed()
+' To be called when Egremont room is not being used
 EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2")
 EgremontCapacityTextBox.Locked = True
 EgremontCapacityTextBox = "0"
 End Function
 
 Private Function NoneUsed()
+' To be called when neither room is being used
 Call AuditoriumNotUsed
 Call EgremontNotUsed
 TotalCapacityTextBox.Locked = True
