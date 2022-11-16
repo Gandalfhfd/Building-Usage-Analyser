@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6768
+   ClientHeight    =   6765
    ClientLeft      =   120
-   ClientTop       =   468
-   ClientWidth     =   11172
+   ClientTop       =   465
+   ClientWidth     =   11175
    OleObjectBlob   =   "UserForm1.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -13,6 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 ' Used to prevent unecessary refreshing of ListBoxes
@@ -126,17 +127,7 @@ ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" The
     MsgBox ("'External' should refer to an Arts out West venue.")
 End If
 
-If RoomListBox.value = "Auditorium" Then
-    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
-ElseIf RoomListBox.value = "Egremont Room" Then
-    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
-ElseIf RoomListBox.value = "Both" Then
-    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
-    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
-ElseIf RoomListBox.value = "External" Then
-    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2")
-    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2")
-End If
+CapacityListBoxDecider
 
 End Sub
 
@@ -148,6 +139,9 @@ Private Sub EgremontLayoutListBox_Change()
 EgremontCapacityTextBox.Text = Worksheets("NonSpecificDefaults").Cells(EgremontLayoutListBox.ListIndex + 2, 9)
 End Sub
 
+Private Sub AudienceListBox_Change()
+Call CapacityListBoxDecider
+End Sub
 '' MULTIPAGE===============================================================
 
 Private Sub MultiPage1_Change()
@@ -162,6 +156,7 @@ If counter <> 1 Then
     TypeListBox.RowSource = ("UserFormData!A2:A1024")
 End If
 
+' Sop this from happening again
 counter = 1
 End Sub
 
@@ -185,6 +180,7 @@ If dateVariable <> 0 Then UserForm1.EventDateTextBox = Format(dateVariable, "dd/
 End Sub
 
 Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
+' Generate uniqueish UUID. Not unique if the same event is added twice within a second
 UUIDGenerator = RmSpecialChars(category) & RmSpecialChars(eventDate) _
     & RmSpecialChars(name) & Format(Now, "ss")
 End Function
@@ -202,6 +198,7 @@ For Each char In Split(SpecialCharacters, ",")
     RmSpecialChars = Replace(RmSpecialChars, char, "")
 Next
 
+' Remove commas
 For Each char In Split(CommaCharacter, ".")
     RmSpecialChars = Replace(RmSpecialChars, char, "")
 Next
@@ -222,10 +219,12 @@ End If
 End Function
 
 Public Function max(x, y As Variant) As Variant
+' Find max of two numbers
   max = IIf(x > y, x, y)
 End Function
 
 Public Function min(x, y As Variant) As Variant
+' Find min of two numbers
    min = IIf(x < y, x, y)
 End Function
 
@@ -248,8 +247,8 @@ TotalCapacity = TotalCapacityTextBox.Text
 End Function
 
 Private Function AddEvent()
-' Check whether all of the information has been completed or not
 
+' Check whether all of the information has been completed or not
 If NameTextBox.Text = "" Then
     MsgBox ("Please enter an event name")
     Exit Function
@@ -285,11 +284,9 @@ ElseIf EgremontLayoutListBox.ListIndex = -1 Then
 Else ' The user is allowed to create a new event
 End If
 
+' Find next empty row
 Dim empty_row As Long
 empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
-
-Dim UUID As String
-UUID = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 
 ' Add default data into spreadsheet can be overridden by user in the future
 Dim i As Integer
@@ -303,7 +300,7 @@ Worksheets("Data").Cells(empty_row, 26) = Worksheets("NonSpecificDefaults").Cell
 Worksheets("Data").Cells(empty_row, 27) = "=RC[-2]*RC[-1]" ' Worksheets("NonSpecificDefaults").Cells(2, 3) * Worksheets("Data").Cells(empty_row, 25)
 
 ' Add data given by user into spreadsheet
-Worksheets("Data").Cells(empty_row, "A") = UUID
+Worksheets("Data").Cells(empty_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 Worksheets("Data").Cells(empty_row, "B") = NameTextBox.Text
 Worksheets("Data").Cells(empty_row, "C") = EventDateTextBox.Text
 Worksheets("Data").Cells(empty_row, "D") = LocationListBox.value
@@ -317,4 +314,59 @@ Worksheets("Data").Cells(empty_row, 30) = AudienceListBox.value
 Worksheets("Data").Cells(empty_row, 31) = EgremontLayoutListBox.value
 Worksheets("Data").Cells(empty_row, 32) = AuditoriumLayoutListBox.value
 Worksheets("Data").Cells(empty_row, 33) = TotalCapacityTextBox.Text
+End Function
+
+Private Function AuditoriumUsed()
+AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
+AuditoriumCapacityTextBox.Locked = False
+TotalCapacityTextBox.Locked = False
+End Function
+
+Private Function EgremontUsed()
+EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
+EgremontCapacityTextBox.Locked = False
+TotalCapacityTextBox.Locked = False
+End Function
+
+Private Function BothUsed()
+Call AuditoriumUsed
+Call EgremontUsed
+End Function
+
+Private Function AuditoriumNotUsed()
+AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2")
+AuditoriumCapacityTextBox.Locked = True
+AuditoriumCapacityTextBox.value = "0"
+End Function
+
+Private Function EgremontNotUsed()
+EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2")
+EgremontCapacityTextBox.Locked = True
+EgremontCapacityTextBox = "0"
+End Function
+
+Private Function NoneUsed()
+Call AuditoriumNotUsed
+Call EgremontNotUsed
+TotalCapacityTextBox.Locked = True
+TotalCapacityTextBox.Text = "0"
+End Function
+
+Private Function CapacityListBoxDecider()
+' Decide what to show and not show when the user selects options for audience and room
+If AudienceListBox.value = "None" Then ' "None" for audience overrides all
+    Call NoneUsed
+ElseIf RoomListBox.value = "Auditorium" Then ' Auditorium only
+    Call AuditoriumUsed
+    Call EgremontNotUsed
+ElseIf RoomListBox.value = "Egremont Room" Then ' Egremont room only
+    Call EgremontUsed
+    Call AuditoriumNotUsed
+ElseIf RoomListBox.value = "Both" Then ' Both rooms used
+    Call BothUsed
+ElseIf RoomListBox.value = "External" Then ' Neither rooms will be used
+    Call NoneUsed
+Else ' AKA nothing selected
+    Call BothUsed
+End If
 End Function
