@@ -113,6 +113,7 @@ End Sub
 '' LIST BOXES===============================================================
 
 Private Sub LocationListBox_Change()
+' Throw an error if the location doesn't match the room selected (external should be selected for anything not in Kirkgate)
 If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
     MsgBox ("'External' should refer to an Arts out West venue.")
 ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
@@ -127,6 +128,7 @@ ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" The
     MsgBox ("'External' should refer to an Arts out West venue.")
 End If
 
+' Decide what to show regarding capacity options
 CapacityListBoxDecider
 
 End Sub
@@ -140,6 +142,7 @@ EgremontCapacityTextBox.Text = Worksheets("NonSpecificDefaults").Cells(EgremontL
 End Sub
 
 Private Sub AudienceListBox_Change()
+' Decide what to show regarding capacity options
 Call CapacityListBoxDecider
 End Sub
 '' MULTIPAGE===============================================================
@@ -366,6 +369,8 @@ ElseIf RoomListBox.value = "Both" Then ' Both rooms used
     Call BothUsed
 ElseIf RoomListBox.value = "External" Then ' Neither rooms will be used
     Call NoneUsed
+    ' The user must, then, enter the total capacity. So we must allow that.
+    TotalCapacityTextBox.Locked = False
 Else ' AKA nothing selected
     Call BothUsed
 End If
