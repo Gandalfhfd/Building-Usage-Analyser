@@ -46,51 +46,52 @@ End Sub
 
 Private Sub ImportButton_Click()
 
-Dim sheet_name As String
-sheet_name = "Import"
+Dim sheetName As String
+sheetName = "Import"
 
-Call funcs.csv_Import(sheet_name)
+' Import the csv selected by the user into sheet "sheetName"
+Call funcs.csv_Import(sheetName)
 
-' Search for stuff
-' Not sure what this stuff does
-Dim c As Range
-Dim firstAddress As String
+Dim myAddress As Variant ' Store address of the word "Capacity"
 
-With Worksheets(sheet_name).Range("A:Z") ' Look in worksheet over this range of cells
-    Set c = .Find("Capacity", LookIn:=xlValues)
-    If Not c Is Nothing Then ' If anything is found, then...
-        ' Give address in R1C1 form
-        firstAddress = c.address(ReferenceStyle:=xlR1C1)
-        MsgBox ("Capacity = " & funcs.SplitR1C1(firstAddress)(0))
-    Else
-        MsgBox ("Capacity not found")
-    End If
-End With
+' Find event capacity
+Dim capacity As String ' Store event capacity
+myAddress = funcs.search("Capacity", sheetName)
+If myAddress(0) = 0 Then
+    capacity = "N/A"
+Else
+    capacity = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
+    MsgBox (capacity)
+End If
+
+'Find total sales
+Dim sold As String ' Store total sales
+myAddress = funcs.search("Sold", sheetName)
+If myAddress(0) = "0" Then
+    sold = "N/A"
+Else
+    sold = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
+    MsgBox (sold)
+End If
 
 End Sub
 
 Private Sub SearchButton_Click()
 
-' Not sure what this stuff does
 Dim c As Range
-Dim firstAddress As String
+Dim myAddress As Variant
 
 ' Search for an Event ID. Display address if found.
 ' Future improvement: a "goto" button which takes the user to the cell.
 ' Future improvement: some way of knowing if multiple references are found.
 
 If SearchBox.value = "" Then
-    MsgBox ("Please enter an Event ID in the search box.") ' Error msg
+    MsgBox ("Please enter an Event ID in the search box.")
+ElseIf funcs.search(SearchBox.Text, "Data")(0) = 0 Then
+    MsgBox ("Event ID Not Found")
 Else
-    With Worksheets("Data").Range("A:A") ' Look in worksheet 2 over this range of cells
-        Set c = .Find(SearchBox.Text, LookIn:=xlValues)
-        If Not c Is Nothing Then ' If anything is found, then...
-            firstAddress = c.address(ReferenceStyle:=xlR1C1)
-            MsgBox ("Event ID Found in cell " & firstAddress)
-        Else
-            MsgBox ("Event ID Not Found")
-        End If
-    End With
+    myAddress = funcs.search(SearchBox.Text, "Data")
+    MsgBox ("Event ID found in cell R" & myAddress(0) & "C" & myAddress(1))
 End If
    
 End Sub
