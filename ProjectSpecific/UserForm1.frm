@@ -44,26 +44,51 @@ Private Sub AddEventButton2_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call AddEvent
 End Sub
 
+Private Sub ImportButton_Click()
+
+Dim sheet_name As String
+sheet_name = "Import"
+
+Call funcs.csv_Import(sheet_name)
+
+' Search for stuff
+' Not sure what this stuff does
+Dim c As Range
+Dim firstAddress As String
+
+With Worksheets(sheet_name).Range("A:Z") ' Look in worksheet over this range of cells
+    Set c = .Find("Capacity", LookIn:=xlValues)
+    If Not c Is Nothing Then ' If anything is found, then...
+        ' Give address in R1C1 form
+        firstAddress = c.address(ReferenceStyle:=xlR1C1)
+        MsgBox ("Capacity = " & funcs.SplitR1C1(firstAddress)(0))
+    Else
+        MsgBox ("Capacity not found")
+    End If
+End With
+
+End Sub
+
 Private Sub SearchButton_Click()
 
 ' Not sure what this stuff does
 Dim c As Range
 Dim firstAddress As String
 
-' Search for a UUID. Display address if found.
+' Search for an Event ID. Display address if found.
 ' Future improvement: a "goto" button which takes the user to the cell.
 ' Future improvement: some way of knowing if multiple references are found.
 
 If SearchBox.value = "" Then
-    MsgBox ("Please enter a UUID in the search box.") ' Error msg
+    MsgBox ("Please enter an Event ID in the search box.") ' Error msg
 Else
-    With Worksheets(2).Range("A:A") ' Look in worksheet 2 over this range of cells
+    With Worksheets("Data").Range("A:A") ' Look in worksheet 2 over this range of cells
         Set c = .Find(SearchBox.Text, LookIn:=xlValues)
         If Not c Is Nothing Then ' If anything is found, then...
-            firstAddress = c.Address
-            MsgBox ("UUID Found in cell " & c.Address)
+            firstAddress = c.address(ReferenceStyle:=xlR1C1)
+            MsgBox ("Event ID Found in cell " & firstAddress)
         Else
-            MsgBox ("UUID Not Found")
+            MsgBox ("Event ID Not Found")
         End If
     End With
 End If
@@ -168,6 +193,7 @@ counter = 1
 End Sub
 
 '' FUNCTIONS===============================================================
+' Should move these into their own modules
 
 Sub GetCalendar() ' Calendar format
     Dim dateVariable As Date
@@ -195,7 +221,6 @@ End Function
 Public Function RmSpecialChars(inputStr As String) As String
 ' List of chars we want to remove
 Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',."
-Const CommaCharacter As String = ","
 Dim char As Variant
 
 RmSpecialChars = inputStr
@@ -206,9 +231,8 @@ For Each char In Split(SpecialCharacters, ",")
 Next
 
 ' Remove commas
-For Each char In Split(CommaCharacter, ".")
-    RmSpecialChars = Replace(RmSpecialChars, char, "")
-Next
+RmSpecialChars = Replace(RmSpecialChars, ",", "")
+
 End Function
 
 Public Function CheckIfNonNegInt(inputStr As String) As Boolean
