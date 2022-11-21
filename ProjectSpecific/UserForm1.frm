@@ -52,16 +52,16 @@ sheetName = "Import"
 ' Import the csv selected by the user into sheet "sheetName"
 Call funcs.csv_Import(sheetName)
 
-Dim myAddress As Variant ' Store address of the word "Capacity"
+Dim myAddress As Variant ' Store address of various things
 
-' Find event capacity
-Dim capacity As String ' Store event capacity
-myAddress = funcs.search("Capacity", sheetName)
-If myAddress(0) = 0 Then
-    capacity = "N/A"
-Else
-    capacity = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
-    MsgBox (capacity)
+' Find event row
+Dim event_row As Long
+event_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
+
+event_row = funcs.search(SearchBox.Text, "Data")(0)
+If event_row = "0" Then
+    MsgBox ("Event ID could not be found")
+    Exit Sub
 End If
 
 'Find total sales
@@ -71,8 +71,20 @@ If myAddress(0) = "0" Then
     sold = "N/A"
 Else
     sold = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
-    MsgBox (sold)
 End If
+
+Worksheets("Data").Cells(event_row, 14) = sold
+
+' Find event capacity
+Dim capacity As String ' Store event capacity
+myAddress = funcs.search("Capacity", sheetName)
+If myAddress(0) = 0 Then
+    capacity = "N/A"
+Else
+    capacity = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
+End If
+
+Worksheets("Data").Cells(event_row, 15) = capacity
 
 End Sub
 

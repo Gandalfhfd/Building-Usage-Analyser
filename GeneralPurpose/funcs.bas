@@ -49,9 +49,15 @@ Dim c As Range
 Dim R1C1address As String ' Address in R1C1 form
 Dim myAddress As Variant ' Address as array
 
-' Find event capacity
-
-'Find total sales
+If word = "" Then
+    ' Impossible address. Means nothing found.
+    ReDim myAddress(1) As Variant
+    myAddress(0) = "0"
+    myAddress(1) = "0"
+    ' Give function an output
+    search = myAddress
+    Exit Function
+End If
 
 With ActiveWorkbook.Worksheets(sheetName).Range("A:Z") ' Look in worksheet
     Set c = .Find(word, LookIn:=xlValues)
