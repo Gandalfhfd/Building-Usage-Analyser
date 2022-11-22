@@ -93,20 +93,36 @@ End If
 Dim sheetName As String
 sheetName = "Import"
 
-' Import the csv selected by the user into sheet "sheetName"
-Call funcs.csv_Import(sheetName)
 
-Dim myAddress As Variant ' Store address of various things
+Dim importSuccessTest As Boolean
+' Import the csv selected by the user into sheet "sheetName"
+importSuccessTest = funcs.csv_Import(sheetName)
+If importSuccessTest = True Then
+    ' Continue with sub
+Else
+    ' Exit sub, since a file wasn't selected
+    Exit Sub
+End If
+
+' Store address of various things
+Dim myAddress As Variant
+
+' Store whether import is successful or not.
+Dim succeeded As Boolean
+succeeded = True
 
 'Find total sales
 Dim sold As String ' Store total sales
 myAddress = funcs.search("Sold", sheetName)
 If myAddress(0) = "0" Then
     sold = "N/A"
+    MsgBox ("Number of sales could not be imported. Set to 'N/A'")
+    succeeded = False
 Else
     sold = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
 End If
 
+' Update cell with number of tickets sold
 Worksheets("Data").Cells(event_row, 14) = sold
 
 ' Find event capacity
@@ -114,11 +130,74 @@ Dim capacity As String ' Store event capacity
 myAddress = funcs.search("Capacity", sheetName)
 If myAddress(0) = 0 Then
     capacity = "N/A"
+    MsgBox ("Capacity could not be imported. Set to 'N/A'")
+    succeeded = False
 Else
     capacity = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
 End If
 
-Worksheets("Data").Cells(event_row, 15) = capacity
+' Find number of blocked seats
+Dim blocked As String ' Store number of blocked seats
+myAddress = funcs.search("Blocked", sheetName)
+If myAddress(0) = 0 Then
+    blocked = "N/A"
+    MsgBox ("Number of blocked seats could not be found.")
+    succeeded = False
+Else
+    ' Don't know why CInt is needed, but it is.
+    blocked = Worksheets(sheetName).Cells(CInt(myAddress(0) + 1), CInt(myAddress(1)))
+End If
+
+' Update cell with capacity
+Worksheets("Data").Cells(event_row, 15) = capacity - blocked
+
+If succeeded = True Then
+    MsgBox ("Import successful")
+End If
+
+End Sub
+
+Private Sub ImportCell(keyword As String, importSheet As String, exportSheet As String, _
+                        exportCell As Variant, offset As Variant, _
+                        Optional errorMsg As String = keyword & " could not be found.", _
+                        Optional substitute As String = "N/A")
+' MOVE TO FUNCTIONS SECTION, OR funcs WHEN DONE
+
+' Designed to transplant value of a cell from one sheet to another in the same workbook.
+' Could be modified to go from one workbook to another at some point, but that would require modification of the search function too.
+
+' INPUTS
+' keyword = word found near our target cell
+' importSheet = name of sheet target cell is found in
+' exportSheet = name of sheet we want to send target value to
+' exportCell = position of cell we want to send target value to. Must be 2-item array.
+' offset = 2-item array describing the offset of the target cell to the keyword
+' errorMsg = (OPTIONAL) message displayed in MsgBox if keyword is not found
+' substitute = (OPTIONAL) what will go into the exportCell if keyword is not found
+
+' OUTPUTS
+' ImportCell = Boolean which states whether this was successful or not
+
+' Store address of various things
+Dim myAddress As Variant
+
+' Store whether import is successful or not.
+Dim succeeded As Boolean
+succeeded = True
+
+'Find total sales
+Dim value As String ' Store target cell's value
+myAddress = funcs.search(keyword, importSheet)
+If myAddress(0) = "0" Then
+    value = substitute
+    MsgBox (errorMsg)
+    succeeded = False
+Else
+    value = Worksheets(importSheet).Cells(myAddress(0) + offset(0), myAddress(1) + offset(1))
+End If
+
+' Update cell with target cell value, if found, or value of 'substitue' variable if not
+Worksheets(exportSheet).Cells(exportCell(0), exportCell(1)) = value
 End Sub
 
 Private Sub ImportPreviousButton_Click()

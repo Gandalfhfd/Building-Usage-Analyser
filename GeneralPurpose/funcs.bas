@@ -1,7 +1,7 @@
 Attribute VB_Name = "funcs"
 Option Explicit
 
-Sub csv_Import(sheetName As String)
+Public Function csv_Import(sheetName As String) As Boolean
 
 ' Declare stuff
 Dim wsheet As Worksheet, file_mrf As String
@@ -19,9 +19,13 @@ If file_mrf <> "False" Then
         .TextFileCommaDelimiter = True
         .Refresh
     End With
+    ' Set exit code
+    csv_Import = True
+Else
+    csv_Import = False
 End If
 
-End Sub
+End Function
 
 Function SplitR1C1(address As String) As Variant
 SplitR1C1 = Array("", "") ' Set up as array of strings
@@ -32,8 +36,9 @@ Dim parts As Variant
 ' Split the R1C1 format into an array of two strings. First is "Rx". Second is "y"
 parts = Split(address, "C")
 ' parts(0) is "Rx". This starts parts(0) from the second character onwards
-parts(0) = Mid(parts(0), 2)
+parts(0) = Mid(parts(0), 2) ' convert to integer
 
+parts(1) = parts(1)
 ' Set function output to be separated address
 SplitR1C1 = parts
 
@@ -49,7 +54,7 @@ Function search(word As String, sheetName As String) As Variant
 
 ' Search for stuff
 Dim c As Range
-Dim R1C1address As String ' Address in R1C1 form
+Dim R1C1Address As String ' Address in R1C1 form
 Dim myAddress As Variant ' Address as array
 
 If word = "" Then
@@ -66,9 +71,9 @@ With ActiveWorkbook.Worksheets(sheetName).Range("A:Z") ' Look in worksheet
     Set c = .Find(word, LookIn:=xlValues, LookAt:=xlWhole)
     If Not c Is Nothing Then ' If anything is found, then...
         ' Give address in R1C1 form
-        R1C1address = c.address(ReferenceStyle:=xlR1C1)
+        R1C1Address = c.address(ReferenceStyle:=xlR1C1)
         ' Convert R1C1 into array
-        myAddress = funcs.SplitR1C1(R1C1address)
+        myAddress = funcs.SplitR1C1(R1C1Address)
     Else
         ' Impossible address. Means nothing found.
         ReDim myAddress(1) As Variant
