@@ -44,7 +44,51 @@ Private Sub AddEventButton2_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call AddEvent
 End Sub
 
-Private Sub ImportButton_Click()
+Private Sub DeleteButton_Click()
+' This breaks if EventID is not unique
+
+' If nothing has been selected, do nothing but tell the user
+If EventIDListBox.ListIndex = -1 Then
+    MsgBox ("Please select an event to delete")
+    Exit Sub
+End If
+
+' Store response
+Dim response
+response = MsgBox("Are you sure you want to delete " & "test", vbYesNo)
+If response = vbNo Then
+    ' Exit the sub because they don't want to delete anything
+    Exit Sub
+End If
+
+' Store location of row to be deleted
+Dim location As Variant
+location = funcs.search(EventIDListBox.value, "Data")
+
+' Unlikely, but possible that the search fails.
+If location(0) = 0 Then
+    MsgBox ("EventID Not found. ")
+End If
+
+' Delete entire row corresponding to selected event
+Sheets("Data").Rows(location(0)).Delete
+End Sub
+
+Private Sub ImportSelectedButton_Click()
+' Import data into the event that has been selected
+
+' Find event row
+Dim event_row As Long
+' Search needs to be more specific
+event_row = funcs.search(SearchBox.Text, "Data")(0)
+If SearchBox.Text = "" Then
+    MsgBox ("Please enter the Event ID into the search box so that " & _
+            "we know which event to import the data into")
+    Exit Sub
+ElseIf event_row = "0" Then
+    MsgBox ("Event ID could not be found")
+    Exit Sub
+End If
 
 Dim sheetName As String
 sheetName = "Import"
@@ -53,16 +97,6 @@ sheetName = "Import"
 Call funcs.csv_Import(sheetName)
 
 Dim myAddress As Variant ' Store address of various things
-
-' Find event row
-Dim event_row As Long
-event_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
-
-event_row = funcs.search(SearchBox.Text, "Data")(0)
-If event_row = "0" Then
-    MsgBox ("Event ID could not be found")
-    Exit Sub
-End If
 
 'Find total sales
 Dim sold As String ' Store total sales
@@ -85,12 +119,48 @@ Else
 End If
 
 Worksheets("Data").Cells(event_row, 15) = capacity
+End Sub
 
+Private Sub ImportPreviousButton_Click()
+' Import data into the event which was most recently added
+
+' Find row of event just added
+Dim current_row As Long
+current_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
+
+Dim sheetName As String
+sheetName = "Import"
+
+' Import the csv selected by the user into sheet "sheetName"
+Call funcs.csv_Import(sheetName)
+
+Dim myAddress As Variant ' Store address of various things
+
+'Find total sales
+Dim sold As String ' Store total sales
+myAddress = funcs.search("Sold", sheetName)
+If myAddress(0) = "0" Then
+    sold = "N/A"
+Else
+    sold = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
+End If
+
+Worksheets("Data").Cells(current_row, 14) = sold
+
+' Find event capacity
+Dim capacity As String ' Store event capacity
+myAddress = funcs.search("Capacity", sheetName)
+If myAddress(0) = 0 Then
+    capacity = "N/A"
+Else
+    capacity = Worksheets(sheetName).Cells(myAddress(0), myAddress(1) + 1)
+End If
+
+Worksheets("Data").Cells(current_row, 15) = capacity
 End Sub
 
 Private Sub SearchButton_Click()
 
-Dim c As Range
 Dim myAddress As Variant
 
 ' Search for an Event ID. Display address if found.
@@ -105,7 +175,7 @@ Else
     myAddress = funcs.search(SearchBox.Text, "Data")
     MsgBox ("Event ID found in cell R" & myAddress(0) & "C" & myAddress(1))
 End If
-   
+
 End Sub
 
 '' TEXT BOXES===============================================================
@@ -187,22 +257,31 @@ Private Sub AudienceListBox_Change()
 ' Decide what to show regarding capacity options
 Call CapacityListBoxDecider
 End Sub
+
+Private Sub EventIDListBox_Change()
+SearchBox.Text = EventIDListBox.value
+End Sub
+
 '' MULTIPAGE===============================================================
 
 Private Sub MultiPage1_Change()
 ' Add items into listboxes based on cells in specified worksheets
 If counter <> 1 Then
-    LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1024")
-    RoomListBox.RowSource = ("NonSpecificDefaults!B2:B1024")
-    CategoryListBox.RowSource = ("NonSpecificDefaults!D2:D1024")
-    AudienceListBox.RowSource = ("NonSpecificDefaults!E2:E1024")
-    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
-    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
-    TypeListBox.RowSource = ("UserFormData!A2:A1024")
+    LocationListBox.RowSource = ("NonSpecificDefaults!A2:A1048576")
+    RoomListBox.RowSource = ("NonSpecificDefaults!B2:B1048576")
+    CategoryListBox.RowSource = ("NonSpecificDefaults!D2:D1048576")
+    AudienceListBox.RowSource = ("NonSpecificDefaults!E2:E1048576")
+    AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1048576")
+    EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1048576")
+    TypeListBox.RowSource = ("UserFormData!A2:A1048576")
 End If
+counter = 1
+
+' We want this to continually update
+EventIDListBox.RowSource = ("Data!A2:A32768")
 
 ' Sop this from happening again
-counter = 1
+
 End Sub
 
 '' FUNCTIONS===============================================================
@@ -227,8 +306,8 @@ End Sub
 
 Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
 ' Generate uniqueish UUID. Not unique if the same event is added twice within a second
-UUIDGenerator = RmSpecialChars(category) & RmSpecialChars(eventDate) _
-    & RmSpecialChars(name) & Format(Now, "ss")
+UUIDGenerator = RmSpecialChars(category) & RmSpecialChars(name) _
+                & RmSpecialChars(eventDate) & Format(Now, "ss")
 End Function
 
 Public Function RmSpecialChars(inputStr As String) As String
@@ -362,14 +441,14 @@ End Function
 
 Private Function AuditoriumUsed()
 ' To be called when Auditorium is being used
-AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1024")
+AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1048576")
 AuditoriumCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
 End Function
 
 Private Function EgremontUsed()
 ' To be called when Egremont room is being used
-EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1024")
+EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1048576")
 EgremontCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
 End Function

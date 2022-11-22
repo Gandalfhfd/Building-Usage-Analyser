@@ -44,6 +44,9 @@ Function search(word As String, sheetName As String) As Variant
 ' Output location, if found.
 ' If not found, output (0,0)
 
+' Output: 1D array with 2 values.
+' First is row where item was found. Second is column
+
 ' Search for stuff
 Dim c As Range
 Dim R1C1address As String ' Address in R1C1 form
@@ -60,7 +63,7 @@ If word = "" Then
 End If
 
 With ActiveWorkbook.Worksheets(sheetName).Range("A:Z") ' Look in worksheet
-    Set c = .Find(word, LookIn:=xlValues)
+    Set c = .Find(word, LookIn:=xlValues, LookAt:=xlWhole)
     If Not c Is Nothing Then ' If anything is found, then...
         ' Give address in R1C1 form
         R1C1address = c.address(ReferenceStyle:=xlR1C1)
@@ -79,3 +82,25 @@ search = myAddress
 
 End Function
 
+'Function SubtractFromRange(oldRange As Range, subtrahendRange As Range) As Range
+'' look up subtrahend if you don't know what it means
+'' Take set oldRange and set subtrahendRange. Do SubtractFromRange = oldrange - subtrahendRange.
+'' Can return empty set
+'
+'' FUNCTION IS VERY SLOW DON'T USE
+'
+'Dim rCell As Range ' Store current cell being considered
+'
+'For Each rCell In oldRange
+'    If Not IsEmpty(Intersect(rCell, subtrahendRange)) Then
+'        ' If intersection is nonempty, then we don't want this cell, so don't add it to new range.
+'    ElseIf SubtractFromRange Is Nothing Then
+'        ' This is the first rCell and we want to add to the new range, so we have to do
+'        '   something different because SubtractFromRange is currently empty.
+'        Set SubtractFromRange = rCell
+'    Else
+'        ' We want rCell to be in the new range, so we add it on.
+'        Set SubtractFromRange = Union(SubtractFromRange, rCell)
+'    End If
+'Next
+'End Function
