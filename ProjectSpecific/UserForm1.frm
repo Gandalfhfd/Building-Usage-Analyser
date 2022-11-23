@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6768
+   ClientHeight    =   6765
    ClientLeft      =   120
-   ClientTop       =   468
-   ClientWidth     =   11172
+   ClientTop       =   465
+   ClientWidth     =   11175
    OleObjectBlob   =   "UserForm1.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -26,22 +26,22 @@ Public TotalCapacity As String
 
 '' BUTTON CLICKING===============================================================
 
-Private Sub AddEventButton1_Click()
-Call AddEvent
+Private Sub EventButton1_Click()
+Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub AddEventButton1_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventButton1_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
-Call AddEvent
+Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub AddEventButton2_Click()
-Call AddEvent
+Private Sub EventButton2_Click()
+Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub AddEventButton2_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventButton2_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
-Call AddEvent
+Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
 Private Sub DeleteButton_Click()
@@ -300,6 +300,12 @@ End Sub
 
 Private Sub EventIDListBox_Change()
 SearchBox.Text = EventIDListBox.value
+
+EventIDUpdaterLabel1.Caption = "Selected Event ID: " & EventIDListBox.value
+EventIDUpdaterLabel2.Caption = "Selected Event ID: " & EventIDListBox.value
+EventIDUpdaterLabel3.Caption = "Selected Event ID: " & EventIDListBox.value
+EventIDUpdaterLabel4.Caption = "Selected Event ID: " & EventIDListBox.value
+EventIDUpdaterLabel5.Caption = "Selected Event ID: " & EventIDListBox.value
 End Sub
 
 '' MULTIPAGE===============================================================
@@ -320,6 +326,22 @@ End If
 ' Sop this from happening again
 counter = 1
 
+End Sub
+
+'' CHECKBOXES==============================================================
+Private Sub EditToggleCheckBox1_Click()
+' Change some button captions and checkbox values
+Call ToggleEditMode(EditToggleCheckBox1.value)
+End Sub
+
+Private Sub EditToggleCheckBox2_Click()
+' Change some button captions and checkbox values
+Call ToggleEditMode(EditToggleCheckBox2.value)
+End Sub
+
+Private Sub EditToggleCheckBox3_Click()
+' Change some button captions and checkbox values
+Call ToggleEditMode(EditToggleCheckBox3.value)
 End Sub
 
 '' FUNCTIONS===============================================================
@@ -407,10 +429,15 @@ End If
 TotalCapacity = TotalCapacityTextBox.Text
 End Function
 
-Private Function AddEvent()
+Private Function AddEvent(mode As Boolean)
+' mode = True = Add event
+' mode = False = Edit event
 
 ' Check whether all of the information has been completed or not
-If NameTextBox.Text = "" Then
+If mode = True And EventIDListBox.ListIndex = -1 Then
+    MsgBox ("You are in edit mode. Please select an event to edit on the Home page")
+    Exit Function
+ElseIf NameTextBox.Text = "" Then
     MsgBox ("Please enter an event name")
     Exit Function
 ElseIf EventDateTextBox.Text = "" Then
@@ -445,36 +472,41 @@ ElseIf EgremontLayoutListBox.ListIndex = -1 Then
 Else ' The user is allowed to create a new event
 End If
 
-' Find next empty row
-Dim empty_row As Long
-empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
+Dim my_row As Long
+If mode = False Then
+    ' Next available row
+    my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
+ElseIf mode = True Then
+    ' Row corresponds to the row of the event selected by the user
+    my_row = funcs.search(SearchBox.Text, "Data")(0)
+End If
 
 ' Add default data into spreadsheet can be overridden by user in the future
 Dim i As Integer
 For i = 0 To 5
     ' Add default minutes worked by each volunteer category, depending on event category selected
-    Worksheets("Data").Cells(empty_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
+    Worksheets("Data").Cells(my_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
 Next
 
 ' Bar gross profit bit
-Worksheets("Data").Cells(empty_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
-Worksheets("Data").Cells(empty_row, 27) = "=RC[-2]*RC[-1]" ' Worksheets("NonSpecificDefaults").Cells(2, 3) * Worksheets("Data").Cells(empty_row, 25)
+Worksheets("Data").Cells(my_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
+Worksheets("Data").Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 
 ' Add data given by user into spreadsheet
-Worksheets("Data").Cells(empty_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
-Worksheets("Data").Cells(empty_row, "B") = NameTextBox.Text
-Worksheets("Data").Cells(empty_row, "C") = EventDateTextBox.Text
-Worksheets("Data").Cells(empty_row, "D") = LocationListBox.value
-Worksheets("Data").Cells(empty_row, "X") = CategoryListBox.value
-Worksheets("Data").Cells(empty_row, 28) = RoomListBox.value
-Worksheets("Data").Cells(empty_row, 5) = MorningCheckBox.value
-Worksheets("Data").Cells(empty_row, 6) = AfternoonCheckBox.value
-Worksheets("Data").Cells(empty_row, 7) = EveningCheckBox.value
-Worksheets("Data").Cells(empty_row, 29) = TypeListBox.value
-Worksheets("Data").Cells(empty_row, 30) = AudienceListBox.value
-Worksheets("Data").Cells(empty_row, 31) = EgremontLayoutListBox.value
-Worksheets("Data").Cells(empty_row, 32) = AuditoriumLayoutListBox.value
-Worksheets("Data").Cells(empty_row, 33) = TotalCapacityTextBox.Text
+Worksheets("Data").Cells(my_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
+Worksheets("Data").Cells(my_row, "B") = NameTextBox.Text
+Worksheets("Data").Cells(my_row, "C") = EventDateTextBox.Text
+Worksheets("Data").Cells(my_row, "D") = LocationListBox.value
+Worksheets("Data").Cells(my_row, "X") = CategoryListBox.value
+Worksheets("Data").Cells(my_row, 28) = RoomListBox.value
+Worksheets("Data").Cells(my_row, 5) = MorningCheckBox.value
+Worksheets("Data").Cells(my_row, 6) = AfternoonCheckBox.value
+Worksheets("Data").Cells(my_row, 7) = EveningCheckBox.value
+Worksheets("Data").Cells(my_row, 29) = TypeListBox.value
+Worksheets("Data").Cells(my_row, 30) = AudienceListBox.value
+Worksheets("Data").Cells(my_row, 31) = EgremontLayoutListBox.value
+Worksheets("Data").Cells(my_row, 32) = AuditoriumLayoutListBox.value
+Worksheets("Data").Cells(my_row, 33) = TotalCapacityTextBox.Text
 End Function
 
 Private Function AuditoriumUsed()
@@ -590,3 +622,26 @@ Worksheets(exportSheet).Cells(exportCell(0), exportCell(1)) = value
 ImportCell = succeeded
 End Function
 
+Private Sub ToggleEditMode(state As Boolean)
+If state = True Then
+    ' Update captions
+    EventButton1.Caption = "Edit Selected Event"
+    EventButton2.Caption = "Edit Selected Event"
+    EventButton3.Caption = "Edit Selected Event"
+    
+    ' Tick all of the other edit checkboxes
+    EditToggleCheckBox1.value = True
+    EditToggleCheckBox2.value = True
+    EditToggleCheckBox3.value = True
+ElseIf state = False Then
+    ' Update captions
+    EventButton1.Caption = "Add New Event"
+    EventButton2.Caption = "Add New Event"
+    EventButton3.Caption = "Add New Event"
+    
+    ' Untick all of the other edit checkboxes
+    EditToggleCheckBox1.value = False
+    EditToggleCheckBox2.value = False
+    EditToggleCheckBox3.value = False
+End If
+End Sub
