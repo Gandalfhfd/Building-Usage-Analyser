@@ -110,3 +110,29 @@ End Function
 '    End If
 'Next
 'End Function
+
+Public Function ReverseArray(arr As Variant) As Variant
+' Return a reversed array
+
+' Regular index
+Dim i As Integer
+
+Dim j As Integer
+j = UBound(arr)
+' loop from the LBound of arr to the midpoint of arr
+Dim temp As Variant
+For i = LBound(arr) To ((UBound(arr) - LBound(arr) + 1) \ 2)
+    'swap the elements
+    temp = arr(i)
+    arr(i) = arr(j)
+    arr(j) = temp
+    ' decrement the upper index
+    j = j - 1
+Next
+
+ReverseArray = arr
+End Function
+
+Public Function ArrLen(arr As Variant) As Integer
+ArrLen = UBound(arr) - LBound(arr) + 1
+End Function

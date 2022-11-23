@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6765
+   ClientHeight    =   6768
    ClientLeft      =   120
-   ClientTop       =   465
-   ClientWidth     =   11175
+   ClientTop       =   468
+   ClientWidth     =   11172
    OleObjectBlob   =   "UserForm1.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -432,7 +432,7 @@ Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 ' Add data given by user into spreadsheet
 Worksheets(sheet).Cells(my_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, "B") = NameTextBox.Text
-Worksheets(sheet).Cells(my_row, "C") = EventDateTextBox.Text
+Worksheets(sheet).Cells(my_row, "C") = ConvertDate(EventDateTextBox.Text)
 Worksheets(sheet).Cells(my_row, "D") = LocationListBox.value
 Worksheets(sheet).Cells(my_row, "X") = CategoryListBox.value
 Worksheets(sheet).Cells(my_row, 28) = RoomListBox.value
@@ -700,3 +700,17 @@ Dim trueCapacity As Integer
 trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 15) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
 Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
 End Sub
+
+Private Function ConvertDate(myDate As String) As String
+' Designed to convert date stored as date into format Excel recognises
+
+Dim dateArr As Variant
+' Split date into arrays, using "/" as delimiter
+dateArr = Split(myDate, "/")
+
+' Reverse array
+dateArr = funcs.ReverseArray(dateArr)
+
+' Join it back together
+ConvertDate = Join(dateArr, "-")
+End Function
