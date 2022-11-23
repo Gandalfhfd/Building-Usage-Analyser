@@ -549,10 +549,14 @@ Private Sub TransferInfo(mode As String)
 ' Store which row we're working on. Depends on what we're after.
 Dim my_row As Long
 
+' Not strictly necessary. Used to avoid too much hard-coding.
+Dim dataSheetName As String
+dataSheetName = "Data"
+
 If mode = "Selected" Then
-    my_row = funcs.search(SearchBox.Text, "Data")(0)
+    my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
 ElseIf mode = "Previous" Then
-    my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
+    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).Row
 Else
     MsgBox ("Programmer error in Private Sub TransferInfo")
     Exit Sub
@@ -576,7 +580,7 @@ End If
 Dim succeeded As Boolean
 succeeded = True
 
-'Find total sales
+'Find total number of ticket sales
 Dim tempSuccessCheck As Boolean
 Dim exportCell() As Variant
 Dim offset() As Variant
@@ -584,7 +588,7 @@ Dim offset() As Variant
 exportCell = Array(my_row, 14)
 offset = Array(0, 1)
 
-tempSuccessCheck = ImportCell("Sold", sheetName, "Data", exportCell, offset)
+tempSuccessCheck = ImportCell("Sold", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -592,7 +596,7 @@ End If
 
 ' Find event capacity
 exportCell(1) = 15
-tempSuccessCheck = ImportCell("Capacity", sheetName, "Data", exportCell, offset)
+tempSuccessCheck = ImportCell("Capacity", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -601,14 +605,39 @@ End If
 ' Find number of blocked seats
 exportCell(1) = 34
 offset = Array(1, 0)
-tempSuccessCheck = ImportCell("Blocked", sheetName, "Data", exportCell, offset)
+tempSuccessCheck = ImportCell("Blocked", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
 End If
 
+
+
+' Find total ticket revenue
+exportCell(1) = 42
+offset = Array(1, 5)
+tempSuccessCheck = ImportCell("Allocation Type", sheetName, dataSheetName, exportCell, offset)
+
+If tempSuccessCheck = False Then
+    succeeded = False
+End If
+
+' Find total Support the Kirkgate revenue
+exportCell(1) = 44
+offset = Array(0, 3)
+tempSuccessCheck = ImportCell("Support the Kirkgate", sheetName, dataSheetName, exportCell, offset)
+
+If tempSuccessCheck = False Then
+    succeeded = False
+End If
+
+' Must go at the bottom
 If succeeded = True Then
     MsgBox ("Import successful")
 End If
 
+' Determine actual capacity and write it to a cell
+Dim trueCapacity As Integer
+trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 15) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
+Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
 End Sub
