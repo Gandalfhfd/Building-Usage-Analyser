@@ -98,6 +98,24 @@ Private Sub ImportPreviousButton_Click()
 Call TransferInfo("Previous")
 End Sub
 
+Private Sub NameSearchButton_Click()
+Dim myAddress As Variant
+
+' Search for an Event ID. Display address if found.
+' Future improvement: a "goto" button which takes the user to the cell.
+' Future improvement: some way of knowing if multiple references are found.
+
+If NameSearchTextBox.value = "" Then
+    MsgBox ("Please enter the name of the event in the search box.")
+ElseIf funcs.search(NameSearchTextBox.Text, "Data")(0) = 0 Then
+    MsgBox ("Event Not Found")
+Else
+    myAddress = funcs.search(NameSearchTextBox.Text, "Data")
+    MsgBox ("Event found on row " & myAddress(0))
+End If
+
+End Sub
+
 Private Sub SearchButton_Click()
 
 Dim myAddress As Variant
@@ -198,8 +216,22 @@ Call CapacityListBoxDecider
 End Sub
 
 Private Sub EventIDListBox_Change()
+' Display Event ID in search box
 SearchBox.Text = EventIDListBox.value
 
+Dim nameLocation As Variant
+nameLocation = funcs.search(EventIDListBox.value, "Data")
+
+If nameLocation(0) = 0 Then
+    MsgBox ("Event ID could not be found. YOU SHOULD NOT SEE THIS. ERROR IN EventIDListBox_Change())")
+End If
+
+' Display the event name in search box.
+' It will always be found in the second column, so hard coding is ok.
+NameSearchTextBox.Text = Worksheets("Data").Cells(nameLocation(0), 2)
+
+' So the user always knows which event has been selected.
+' Might want to hide that if they're not in edit mode, idk.
 EventIDUpdaterLabel1.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel2.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel3.Caption = "Selected Event ID: " & EventIDListBox.value
@@ -360,6 +392,9 @@ Exit Function
 ElseIf MorningCheckBox.value = 0 And AfternoonCheckBox.value = 0 And EveningCheckBox.value = 0 Then
     MsgBox ("Please select a time")
     Exit Function
+ElseIf TicketedOptionButton.value = False And NonTicketedOptionButton.value = False Then
+    MsgBox ("Please select 'Ticketed' or 'Non-Ticketed'")
+    Exit Function
 ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
     MsgBox ("Please enter a layout for the Auditorium")
     MultiPage1.value = 2 ' Take the user to the layouts page
@@ -387,25 +422,38 @@ For i = 0 To 5
     Worksheets("Data").Cells(my_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
 Next
 
+Dim sheet As String
+sheet = "Data"
+
 ' Bar gross profit bit
-Worksheets("Data").Cells(my_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
-Worksheets("Data").Cells(my_row, 27) = "=RC[-2]*RC[-1]"
+Worksheets(sheet).Cells(my_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
+Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 
 ' Add data given by user into spreadsheet
-Worksheets("Data").Cells(my_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
-Worksheets("Data").Cells(my_row, "B") = NameTextBox.Text
-Worksheets("Data").Cells(my_row, "C") = EventDateTextBox.Text
-Worksheets("Data").Cells(my_row, "D") = LocationListBox.value
-Worksheets("Data").Cells(my_row, "X") = CategoryListBox.value
-Worksheets("Data").Cells(my_row, 28) = RoomListBox.value
-Worksheets("Data").Cells(my_row, 5) = MorningCheckBox.value
-Worksheets("Data").Cells(my_row, 6) = AfternoonCheckBox.value
-Worksheets("Data").Cells(my_row, 7) = EveningCheckBox.value
-Worksheets("Data").Cells(my_row, 29) = TypeListBox.value
-Worksheets("Data").Cells(my_row, 30) = AudienceListBox.value
-Worksheets("Data").Cells(my_row, 31) = EgremontLayoutListBox.value
-Worksheets("Data").Cells(my_row, 32) = AuditoriumLayoutListBox.value
-Worksheets("Data").Cells(my_row, 33) = TotalCapacityTextBox.Text
+Worksheets(sheet).Cells(my_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
+Worksheets(sheet).Cells(my_row, "B") = NameTextBox.Text
+Worksheets(sheet).Cells(my_row, "C") = EventDateTextBox.Text
+Worksheets(sheet).Cells(my_row, "D") = LocationListBox.value
+Worksheets(sheet).Cells(my_row, "X") = CategoryListBox.value
+Worksheets(sheet).Cells(my_row, 28) = RoomListBox.value
+Worksheets(sheet).Cells(my_row, 5) = MorningCheckBox.value
+Worksheets(sheet).Cells(my_row, 6) = AfternoonCheckBox.value
+Worksheets(sheet).Cells(my_row, 7) = EveningCheckBox.value
+Worksheets(sheet).Cells(my_row, 29) = TypeListBox.value
+Worksheets(sheet).Cells(my_row, 30) = AudienceListBox.value
+Worksheets(sheet).Cells(my_row, 31) = EgremontLayoutListBox.value
+Worksheets(sheet).Cells(my_row, 32) = AuditoriumLayoutListBox.value
+Worksheets(sheet).Cells(my_row, 33) = TotalCapacityTextBox.Text
+
+' If we're selling tickets ourselves or not
+If TicketedOptionButton.value = True Then
+    Worksheets(sheet).Cells(my_row, 46) = "True"
+Else
+    ' Since validation has already taken place, at least one of the options has been selected
+    Worksheets(sheet).Cells(my_row, 46) = "False"
+End If
+
+MsgBox ("Event Added")
 End Function
 
 Private Function AuditoriumUsed()
@@ -546,6 +594,8 @@ End If
 End Sub
 
 Private Sub TransferInfo(mode As String)
+' Highly non-general function/sub
+
 ' Store which row we're working on. Depends on what we're after.
 Dim my_row As Long
 
@@ -553,12 +603,21 @@ Dim my_row As Long
 Dim dataSheetName As String
 dataSheetName = "Data"
 
+' Decide which event to import info into
 If mode = "Selected" Then
     my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
 ElseIf mode = "Previous" Then
     my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).Row
 Else
     MsgBox ("Programmer error in Private Sub TransferInfo")
+    Exit Sub
+End If
+
+' Check if we were selling tickets. If not, prompt the user to update
+'   the event before importing
+If Worksheets(dataSheetName).Cells(my_row, 46) = "False" Then
+    MsgBox ("We are not selling tickets for this event. If you wish to import " _
+            & "data from Ticketsolve, please mark the event as 'Ticketed'.")
     Exit Sub
 End If
 
