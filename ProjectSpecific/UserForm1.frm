@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6765
+   ClientHeight    =   6768
    ClientLeft      =   120
-   ClientTop       =   465
-   ClientWidth     =   11175
+   ClientTop       =   468
+   ClientWidth     =   11172
    OleObjectBlob   =   "UserForm1.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -213,7 +213,7 @@ ElseIf funcs.search(SearchBox.Text, "Data")(0) = 0 Then
     MsgBox ("Event ID Not Found")
 Else
     myAddress = funcs.search(SearchBox.Text, "Data")
-    MsgBox ("Event ID found in cell R" & myAddress(0) & "C" & myAddress(1))
+    MsgBox ("Event ID found on row " & myAddress(0))
 End If
 
 End Sub
@@ -314,13 +314,11 @@ If counter <> 1 Then
     AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2:F1048576")
     EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2:H1048576")
     TypeListBox.RowSource = ("UserFormData!A2:A1048576")
+    EventIDListBox.RowSource = ("Data!A2:A32768")
 End If
-counter = 1
-
-' We want this to continually update
-EventIDListBox.RowSource = ("Data!A2:A32768")
 
 ' Sop this from happening again
+counter = 1
 
 End Sub
 
@@ -346,7 +344,7 @@ End Sub
 
 Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
 ' Generate uniqueish UUID. Not unique if the same event is added twice within a second
-UUIDGenerator = RmSpecialChars(category) & RmSpecialChars(name) _
+UUIDGenerator = RmSpecialChars(name) & RmSpecialChars(category) _
                 & RmSpecialChars(eventDate) & Format(Now, "ss")
 End Function
 
