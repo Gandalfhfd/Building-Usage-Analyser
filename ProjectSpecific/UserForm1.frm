@@ -75,9 +75,7 @@ Sheets("Data").Rows(location(0)).Delete
 End Sub
 
 Private Sub ImportSelectedButton_Click()
-' Import data into the event that has been selected
-
-' Find event row
+' Find the row of the selected event
 Dim event_row As Long
 event_row = funcs.search(SearchBox.Text, "Data")(0)
 
@@ -91,112 +89,13 @@ ElseIf event_row = "0" Then
     Exit Sub
 End If
 
-' Not strictly necessary. Used to avoid too much hard-coding.
-Dim sheetName As String
-sheetName = "Import"
-
-Dim csvImportSuccessCheck As Boolean
-' Import the csv selected by the user into sheet "sheetName"
-csvImportSuccessCheck = funcs.csv_Import(sheetName)
-If csvImportSuccessCheck = True Then
-    ' Continue with sub
-Else
-    ' Exit sub, since a file wasn't selected
-    Exit Sub
-End If
-
-' Store whether import is successful or not.
-Dim succeeded As Boolean
-succeeded = True
-
-'Find total sales
-Dim tempSuccessCheck As Boolean
-Dim exportCell() As Variant
-Dim offset() As Variant
-
-exportCell = Array(event_row, 14)
-offset = Array(0, 1)
-
-tempSuccessCheck = ImportCell("Sold", sheetName, "Data", exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find event capacity
-exportCell(1) = 15
-tempSuccessCheck = ImportCell("Capacity", sheetName, "Data", exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find number of blocked seats
-exportCell(1) = 34
-offset = Array(1, 0)
-tempSuccessCheck = ImportCell("Blocked", sheetName, "Data", exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-If succeeded = True Then
-    MsgBox ("Import successful")
-End If
-
+' Import data into the event that has been selected
+Call TransferInfo("Selected")
 End Sub
 
 Private Sub ImportPreviousButton_Click()
 ' Import data into the event which was most recently added
-
-' Find row of event just added
-Dim current_row As Long
-current_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
-
-Dim sheetName As String
-sheetName = "Import"
-
-' Import the csv selected by the user into sheet "sheetName"
-Call funcs.csv_Import(sheetName)
-
-' Store whether import is successful or not.
-Dim succeeded As Boolean
-succeeded = True
-
-'Find total sales
-Dim tempSuccessCheck As Boolean
-Dim exportCell() As Variant
-Dim offset() As Variant
-
-exportCell = Array(current_row, 14)
-offset = Array(0, 1)
-
-tempSuccessCheck = ImportCell("Sold", sheetName, "Data", exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find event capacity
-exportCell(1) = 15
-tempSuccessCheck = ImportCell("Capacity", sheetName, "Data", exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find number of blocked seats
-exportCell(1) = 34
-offset = Array(1, 0)
-tempSuccessCheck = ImportCell("Blocked", sheetName, "Data", exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-If succeeded = True Then
-    MsgBox ("Import successful")
-End If
+Call TransferInfo("Previous")
 End Sub
 
 Private Sub SearchButton_Click()
@@ -644,4 +543,72 @@ ElseIf state = False Then
     EditToggleCheckBox2.value = False
     EditToggleCheckBox3.value = False
 End If
+End Sub
+
+Private Sub TransferInfo(mode As String)
+' Store which row we're working on. Depends on what we're after.
+Dim my_row As Long
+
+If mode = "Selected" Then
+    my_row = funcs.search(SearchBox.Text, "Data")(0)
+ElseIf mode = "Previous" Then
+    my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
+Else
+    MsgBox ("Programmer error in Private Sub TransferInfo")
+    Exit Sub
+End If
+
+' Not strictly necessary. Used to avoid too much hard-coding.
+Dim sheetName As String
+sheetName = "Import"
+
+Dim csvImportSuccessCheck As Boolean
+' Import the csv selected by the user into sheet "sheetName"
+csvImportSuccessCheck = funcs.csv_Import(sheetName)
+If csvImportSuccessCheck = True Then
+    ' Continue with sub
+Else
+    ' Exit sub, since a file wasn't selected
+    Exit Sub
+End If
+
+' Store whether import is successful or not.
+Dim succeeded As Boolean
+succeeded = True
+
+'Find total sales
+Dim tempSuccessCheck As Boolean
+Dim exportCell() As Variant
+Dim offset() As Variant
+
+exportCell = Array(my_row, 14)
+offset = Array(0, 1)
+
+tempSuccessCheck = ImportCell("Sold", sheetName, "Data", exportCell, offset)
+
+If tempSuccessCheck = False Then
+    succeeded = False
+End If
+
+' Find event capacity
+exportCell(1) = 15
+tempSuccessCheck = ImportCell("Capacity", sheetName, "Data", exportCell, offset)
+
+If tempSuccessCheck = False Then
+    succeeded = False
+End If
+
+' Find number of blocked seats
+exportCell(1) = 34
+offset = Array(1, 0)
+tempSuccessCheck = ImportCell("Blocked", sheetName, "Data", exportCell, offset)
+
+If tempSuccessCheck = False Then
+    succeeded = False
+End If
+
+If succeeded = True Then
+    MsgBox ("Import successful")
+End If
+
 End Sub
