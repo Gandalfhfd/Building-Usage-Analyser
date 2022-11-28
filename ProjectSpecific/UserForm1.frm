@@ -32,6 +32,8 @@ Public ArtistFood As String
 Public Heating As String
 Public Lighting As String
 Public MiscCost As String
+Public BarRevenue As String
+Public BarMargin As String
 
 '' BUTTON CLICKING===============================================================
 
@@ -99,12 +101,12 @@ ElseIf event_row = "0" Then
 End If
 
 ' Import data into the event that has been selected
-Call TransferInfo("Selected")
+Call ImportFromTicketsolve("Selected")
 End Sub
 
 Private Sub ImportPreviousButton_Click()
 ' Import data into the event which was most recently added
-Call TransferInfo("Previous")
+Call ImportFromTicketsolve("Previous")
 End Sub
 
 Private Sub NameSearchButton_Click()
@@ -156,64 +158,119 @@ End Sub
 
 Private Sub AuditoriumCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
-Call funcs.SanitiseNonNegInt(AuditoriumCapacityTextBox, AuditoriumCapacity)
+Call InptValid.SanitiseNonNegInt(AuditoriumCapacityTextBox, AuditoriumCapacity)
 Call TotalCapDecider
 End Sub
 
 Private Sub EgremontCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
-Call funcs.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
+Call InptValid.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
-Call funcs.SanitiseNonNegInt(TotalCapacityTextBox, TotalCapacity)
+Call InptValid.SanitiseNonNegInt(TotalCapacityTextBox, TotalCapacity)
 End Sub
 
 Private Sub NumTicketsSoldTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
-Call funcs.SanitiseNonNegInt(NumTicketsSoldTextBox, NumTicketsSold)
+Call InptValid.SanitiseNonNegInt(NumTicketsSoldTextBox, NumTicketsSold)
 End Sub
 
 Private Sub BoxOfficeRevenueTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(BoxOfficeRevenueTextBox, BoxOfficeRevenue)
+Call InptValid.SanitiseReal(BoxOfficeRevenueTextBox, BoxOfficeRevenue)
+End Sub
+
+Private Sub BoxOfficeRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+BoxOfficeRevenueTextBox.Text = StrManip.Convert2Currency(BoxOfficeRevenueTextBox)
 End Sub
 
 Private Sub SupportRevenueTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(SupportRevenueTextBox, SupportRevenue)
+Call InptValid.SanitiseReal(SupportRevenueTextBox, SupportRevenue)
+End Sub
+
+Private Sub SupportRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+SupportRevenueTextBox.Text = StrManip.Convert2Currency(SupportRevenueTextBox)
 End Sub
 
 Private Sub FilmCostTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(FilmCostTextBox, FilmCost)
+Call InptValid.SanitiseReal(FilmCostTextBox, FilmCost)
+End Sub
+
+Private Sub FilmCostTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+FilmCostTextBox.Text = StrManip.Convert2Currency(FilmCostTextBox)
 End Sub
 
 Private Sub AccommodationTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(AccommodationTextBox, Accommodation)
+Call InptValid.SanitiseReal(AccommodationTextBox, Accommodation)
+End Sub
+
+Private Sub AccommodationTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+AccommodationTextBox.Text = StrManip.Convert2Currency(AccommodationTextBox)
 End Sub
 
 Private Sub ArtistFoodTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(ArtistFoodTextBox, ArtistFood)
+Call InptValid.SanitiseReal(ArtistFoodTextBox, ArtistFood)
+End Sub
+
+Private Sub ArtistFoodTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+ArtistFoodTextBox.Text = StrManip.Convert2Currency(ArtistFoodTextBox)
 End Sub
 
 Private Sub HeatingTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(HeatingTextBox, Heating)
+Call InptValid.SanitiseReal(HeatingTextBox, Heating)
+End Sub
+
+Private Sub HeatingTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+HeatingTextBox.Text = StrManip.Convert2Currency(HeatingTextBox)
 End Sub
 
 Private Sub LightingTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(LightingTextBox, Lighting)
+Call InptValid.SanitiseReal(LightingTextBox, Lighting)
+End Sub
+
+Private Sub LightingTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+LightingTextBox.Text = StrManip.Convert2Currency(LightingTextBox)
 End Sub
 
 Private Sub MiscCostTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call funcs.SanitiseReal(MiscCostTextBox, MiscCost)
+Call InptValid.SanitiseReal(MiscCostTextBox, MiscCost)
+End Sub
+
+Private Sub MiscCostTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+MiscCostTextBox.Text = StrManip.Convert2Currency(MiscCostTextBox)
+End Sub
+
+Private Sub BarRevenueTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitiseReal(BarRevenueTextBox, BarRevenue)
+End Sub
+
+Private Sub BarRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only real numbers are input
+BarRevenueTextBox.Text = StrManip.Convert2Currency(BarRevenueTextBox)
+End Sub
+
+Private Sub BarMarginTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitiseReal(BarMarginTextBox, BarMargin)
 End Sub
 
 '' LIST BOXES===============================================================
@@ -334,7 +391,7 @@ End Sub
 
 Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
 ' Generate uniqueish UUID. Not unique if the same event is added twice within a second
-UUIDGenerator = funcs.RmSpecialChars(name) & funcs.RmSpecialChars(category) _
+UUIDGenerator = InptValid.RmSpecialChars(name) & InptValid.RmSpecialChars(category) _
                 & funcsRmSpecialChars(eventDate) & Format(Now, "ss")
 End Function
 
@@ -429,7 +486,7 @@ Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 ' Basic Info
 Worksheets(sheet).Cells(my_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, "B") = NameTextBox.Text
-Worksheets(sheet).Cells(my_row, "C") = funcs.ConvertDate(EventDateTextBox.Text)
+Worksheets(sheet).Cells(my_row, "C") = StrManip.ConvertDate(EventDateTextBox.Text)
 Worksheets(sheet).Cells(my_row, "D") = LocationListBox.value
 Worksheets(sheet).Cells(my_row, "X") = CategoryListBox.value
 Worksheets(sheet).Cells(my_row, 28) = RoomListBox.value
@@ -594,7 +651,7 @@ ElseIf state = False Then
 End If
 End Sub
 
-Private Sub TransferInfo(mode As String)
+Private Sub ImportFromTicketsolve(mode As String)
 ' Highly non-general function/sub
 
 ' Store which row we're working on. Depends on what we're after.
@@ -671,8 +728,6 @@ If tempSuccessCheck = False Then
     succeeded = False
 End If
 
-
-
 ' Find total ticket revenue
 exportCell(1) = 42
 offset = Array(1, 5)
@@ -701,3 +756,7 @@ Dim trueCapacity As Integer
 trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 15) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
 Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
 End Sub
+
+Public Function Foo(Bar As String) As String
+
+End Function
