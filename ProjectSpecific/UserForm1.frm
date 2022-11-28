@@ -23,6 +23,15 @@ Public counter As Integer
 Public AuditoriumCapacity As String
 Public EgremontCapacity As String
 Public TotalCapacity As String
+Public NumTicketsSold As String
+Public BoxOfficeRevenue As String
+Public SupportRevenue As String
+Public FilmCost As String
+Public Accommodation As String
+Public ArtistFood As String
+Public Heating As String
+Public Lighting As String
+Public MiscCost As String
 
 '' BUTTON CLICKING===============================================================
 
@@ -116,10 +125,6 @@ End If
 
 End Sub
 
-Private Sub NumTicketsSoldTextBox_Change()
-
-End Sub
-
 Private Sub SearchButton_Click()
 
 Dim myAddress As Variant
@@ -150,37 +155,65 @@ Call GetCalendar ' Show Date Picker
 End Sub
 
 Private Sub AuditoriumCapacityTextBox_Change()
-' Input validation
-If funcs.CheckIfNonNegInt(AuditoriumCapacityTextBox.Text) = False Then
-    AuditoriumCapacityTextBox.Text = AuditoriumCapacity ' Revert text box to previous valid text
-Else
-    AuditoriumCapacityTextBox.Text = funcs.RmSpecialChars(AuditoriumCapacityTextBox.Text) ' Remove commas and full stops/decimal points
-    AuditoriumCapacity = AuditoriumCapacityTextBox.Text ' Update variable storing valid text
-End If
-
+' Sanitise input to ensure only non-negative integers are input
+Call funcs.SanitiseNonNegInt(AuditoriumCapacityTextBox, AuditoriumCapacity)
 Call TotalCapDecider
 End Sub
 
 Private Sub EgremontCapacityTextBox_Change()
-' Input validation
-If funcs.CheckIfNonNegInt(EgremontCapacityTextBox.Text) = False Then
-    EgremontCapacityTextBox.Text = EgremontCapacity ' Revert text box to previous valid text
-Else
-    EgremontCapacityTextBox.Text = funcs.RmSpecialChars(EgremontCapacityTextBox.Text) ' Remove commas and full stops/decimal points
-    EgremontCapacity = EgremontCapacityTextBox.Text ' Update variable storing valid text
-End If
-
+' Sanitise input to ensure only non-negative integers are input
+Call funcs.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
-' Input validation
-If funcs.CheckIfNonNegInt(TotalCapacityTextBox.Text) = False Then
-    TotalCapacityTextBox.Text = TotalCapacity ' Revert text box to previous valid text
-Else
-    TotalCapacityTextBox.Text = funcs.RmSpecialChars(TotalCapacityTextBox.Text) ' Remove commas and full stops/decimal points
-    TotalCapacity = TotalCapacityTextBox.Text ' Update variable storing valid text
-End If
+' Sanitise input to ensure only non-negative integers are input
+Call funcs.SanitiseNonNegInt(TotalCapacityTextBox, TotalCapacity)
+End Sub
+
+Private Sub NumTicketsSoldTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call funcs.SanitiseNonNegInt(NumTicketsSoldTextBox, NumTicketsSold)
+End Sub
+
+Private Sub BoxOfficeRevenueTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(BoxOfficeRevenueTextBox, BoxOfficeRevenue)
+End Sub
+
+Private Sub SupportRevenueTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(SupportRevenueTextBox, SupportRevenue)
+End Sub
+
+Private Sub FilmCostTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(FilmCostTextBox, FilmCost)
+End Sub
+
+Private Sub AccommodationTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(AccommodationTextBox, Accommodation)
+End Sub
+
+Private Sub ArtistFoodTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(ArtistFoodTextBox, ArtistFood)
+End Sub
+
+Private Sub HeatingTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(HeatingTextBox, Heating)
+End Sub
+
+Private Sub LightingTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(LightingTextBox, Lighting)
+End Sub
+
+Private Sub MiscCostTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call funcs.SanitiseReal(MiscCostTextBox, MiscCost)
 End Sub
 
 '' LIST BOXES===============================================================
@@ -327,7 +360,7 @@ Private Function AddEvent(mode As Boolean)
 ' mode = True = Add event
 ' mode = False = Edit event
 
-' Check whether all of the information has been completed or not
+' Check whether the required information has been completed or not
 If mode = True And EventIDListBox.ListIndex = -1 Then
     MsgBox ("You are in edit mode. Please select an event to edit on the Home page")
     Exit Function
@@ -393,6 +426,7 @@ Worksheets(sheet).Cells(my_row, 26) = Worksheets("NonSpecificDefaults").Cells(2,
 Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 
 ' Add data given by user into spreadsheet
+' Basic Info
 Worksheets(sheet).Cells(my_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, "B") = NameTextBox.Text
 Worksheets(sheet).Cells(my_row, "C") = funcs.ConvertDate(EventDateTextBox.Text)
@@ -404,10 +438,6 @@ Worksheets(sheet).Cells(my_row, 6) = AfternoonCheckBox.value
 Worksheets(sheet).Cells(my_row, 7) = EveningCheckBox.value
 Worksheets(sheet).Cells(my_row, 29) = TypeListBox.value
 Worksheets(sheet).Cells(my_row, 30) = AudienceListBox.value
-Worksheets(sheet).Cells(my_row, 31) = EgremontLayoutListBox.value
-Worksheets(sheet).Cells(my_row, 32) = AuditoriumLayoutListBox.value
-Worksheets(sheet).Cells(my_row, 33) = TotalCapacityTextBox.Text
-
 ' If we're selling tickets ourselves or not
 If TicketedOptionButton.value = True Then
     Worksheets(sheet).Cells(my_row, 46) = "True"
@@ -415,6 +445,14 @@ Else
     ' Since validation has already taken place, at least one of the options has been selected
     Worksheets(sheet).Cells(my_row, 46) = "False"
 End If
+
+' Layout & Capacity
+Worksheets(sheet).Cells(my_row, 31) = EgremontLayoutListBox.value
+Worksheets(sheet).Cells(my_row, 32) = AuditoriumLayoutListBox.value
+Worksheets(sheet).Cells(my_row, 33) = TotalCapacityTextBox.Text
+
+' Revenue & Costs
+
 
 MsgBox ("Event Added")
 End Function

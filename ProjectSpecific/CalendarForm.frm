@@ -815,8 +815,8 @@ Private Sub ClickControl(ctrl As MSForms.Control)
     SelectedYear = cmbYear.value
     
     'Get indices of date label from label name and selected day from caption
-    RowIndex = CLng(Left(right(ctrl.name, 2), 1))
-    ColumnIndex = CLng(right(ctrl.name, 1))
+    RowIndex = CLng(Left(Right(ctrl.name, 2), 1))
+    ColumnIndex = CLng(Right(ctrl.name, 1))
     SelectedDay = CLng(ctrl.Caption)
     
     'Selection is from previous month. The largest day that could exist in
