@@ -136,3 +136,59 @@ End Function
 Public Function ArrLen(arr As Variant) As Integer
 ArrLen = UBound(arr) - LBound(arr) + 1
 End Function
+
+Public Function RmSpecialChars(inputStr As String) As String
+' List of chars we want to remove
+Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',."
+Dim char As Variant
+
+RmSpecialChars = inputStr
+
+' Iterate over SpecialCharacters and remove everything that matches
+For Each char In Split(SpecialCharacters, ",")
+    RmSpecialChars = Replace(RmSpecialChars, char, "")
+Next
+
+' Remove commas
+RmSpecialChars = Replace(RmSpecialChars, ",", "")
+
+End Function
+
+Public Function CheckIfNonNegInt(inputStr As String) As Boolean
+If inputStr = "" Then ' If blank, ignore
+    CheckIfNonNegInt = True
+ElseIf IsNumeric(inputStr) = False Then ' Check it can be conveted to a number
+    CheckIfNonNegInt = False
+ElseIf Round(CDbl(inputStr)) <> CDbl(inputStr) Then ' Check it is an integer
+    CheckIfNonNegInt = False
+ElseIf CDbl(inputStr) < 0 Then ' Check it is >= 0. CDbl used to prevent overflow.
+    CheckIfNonNegInt = False
+Else ' Then it must be a non-negative integer
+    CheckIfNonNegInt = True
+End If
+End Function
+
+Public Function max(x, y As Variant) As Variant
+' Find max of two numbers
+  max = IIf(x > y, x, y)
+End Function
+
+Public Function min(x, y As Variant) As Variant
+' Find min of two numbers
+   min = IIf(x < y, x, y)
+End Function
+
+Private Function ConvertDate(myDate As String) As String
+' Designed to convert date stored as date into format Excel recognises
+
+Dim dateArr As Variant
+' Split date into arrays, using "/" as delimiter
+dateArr = Split(myDate, "/")
+
+' Reverse array
+dateArr = ReverseArray(dateArr)
+
+' Join it back together
+ConvertDate = Join(dateArr, "-")
+End Function
+

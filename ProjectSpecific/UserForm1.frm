@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6768
+   ClientHeight    =   6765
    ClientLeft      =   120
-   ClientTop       =   468
-   ClientWidth     =   11172
+   ClientTop       =   465
+   ClientWidth     =   11175
    OleObjectBlob   =   "UserForm1.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -116,6 +116,10 @@ End If
 
 End Sub
 
+Private Sub NumTicketsSoldTextBox_Change()
+
+End Sub
+
 Private Sub SearchButton_Click()
 
 Dim myAddress As Variant
@@ -147,10 +151,10 @@ End Sub
 
 Private Sub AuditoriumCapacityTextBox_Change()
 ' Input validation
-If CheckIfNonNegInt(AuditoriumCapacityTextBox.Text) = False Then
+If funcs.CheckIfNonNegInt(AuditoriumCapacityTextBox.Text) = False Then
     AuditoriumCapacityTextBox.Text = AuditoriumCapacity ' Revert text box to previous valid text
 Else
-    AuditoriumCapacityTextBox.Text = RmSpecialChars(AuditoriumCapacityTextBox.Text) ' Remove commas and full stops/decimal points
+    AuditoriumCapacityTextBox.Text = funcs.RmSpecialChars(AuditoriumCapacityTextBox.Text) ' Remove commas and full stops/decimal points
     AuditoriumCapacity = AuditoriumCapacityTextBox.Text ' Update variable storing valid text
 End If
 
@@ -159,10 +163,10 @@ End Sub
 
 Private Sub EgremontCapacityTextBox_Change()
 ' Input validation
-If CheckIfNonNegInt(EgremontCapacityTextBox.Text) = False Then
+If funcs.CheckIfNonNegInt(EgremontCapacityTextBox.Text) = False Then
     EgremontCapacityTextBox.Text = EgremontCapacity ' Revert text box to previous valid text
 Else
-    EgremontCapacityTextBox.Text = RmSpecialChars(EgremontCapacityTextBox.Text) ' Remove commas and full stops/decimal points
+    EgremontCapacityTextBox.Text = funcs.RmSpecialChars(EgremontCapacityTextBox.Text) ' Remove commas and full stops/decimal points
     EgremontCapacity = EgremontCapacityTextBox.Text ' Update variable storing valid text
 End If
 
@@ -171,10 +175,10 @@ End Sub
 
 Private Sub TotalCapacityTextBox_Change()
 ' Input validation
-If CheckIfNonNegInt(TotalCapacityTextBox.Text) = False Then
+If funcs.CheckIfNonNegInt(TotalCapacityTextBox.Text) = False Then
     TotalCapacityTextBox.Text = TotalCapacity ' Revert text box to previous valid text
 Else
-    TotalCapacityTextBox.Text = RmSpecialChars(TotalCapacityTextBox.Text) ' Remove commas and full stops/decimal points
+    TotalCapacityTextBox.Text = funcs.RmSpecialChars(TotalCapacityTextBox.Text) ' Remove commas and full stops/decimal points
     TotalCapacity = TotalCapacityTextBox.Text ' Update variable storing valid text
 End If
 End Sub
@@ -297,49 +301,8 @@ End Sub
 
 Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
 ' Generate uniqueish UUID. Not unique if the same event is added twice within a second
-UUIDGenerator = RmSpecialChars(name) & RmSpecialChars(category) _
-                & RmSpecialChars(eventDate) & Format(Now, "ss")
-End Function
-
-Public Function RmSpecialChars(inputStr As String) As String
-' List of chars we want to remove
-Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',."
-Dim char As Variant
-
-RmSpecialChars = inputStr
-
-' Iterate over SpecialCharacters and remove everything that matches
-For Each char In Split(SpecialCharacters, ",")
-    RmSpecialChars = Replace(RmSpecialChars, char, "")
-Next
-
-' Remove commas
-RmSpecialChars = Replace(RmSpecialChars, ",", "")
-
-End Function
-
-Public Function CheckIfNonNegInt(inputStr As String) As Boolean
-If inputStr = "" Then ' If blank, ignore
-    CheckIfNonNegInt = True
-ElseIf IsNumeric(inputStr) = False Then ' Check it can be conveted to a number
-    CheckIfNonNegInt = False
-ElseIf Round(CDbl(inputStr)) <> CDbl(inputStr) Then ' Check it is an integer
-    CheckIfNonNegInt = False
-ElseIf CDbl(inputStr) < 0 Then ' Check it is >= 0. CDbl used to prevent overflow.
-    CheckIfNonNegInt = False
-Else ' Then it must be a non-negative integer
-    CheckIfNonNegInt = True
-End If
-End Function
-
-Public Function max(x, y As Variant) As Variant
-' Find max of two numbers
-  max = IIf(x > y, x, y)
-End Function
-
-Public Function min(x, y As Variant) As Variant
-' Find min of two numbers
-   min = IIf(x < y, x, y)
+UUIDGenerator = funcs.RmSpecialChars(name) & funcs.RmSpecialChars(category) _
+                & funcsRmSpecialChars(eventDate) & Format(Now, "ss")
 End Function
 
 Public Function TotalCapDecider() As String ' Highly non-generic function. Sorry!
@@ -353,8 +316,8 @@ ElseIf AuditoriumCapacityTextBox.Text = "" Then ' Ignore Auditorium Capacity if 
     TotalCapacityTextBox.Text = EgremontCapacityTextBox.Text
 ElseIf EgremontCapacityTextBox.Text = "" Then ' Ignore Egremont Capacity if it is blank
     TotalCapacityTextBox.Text = AuditoriumCapacityTextBox.Text
-Else ' Find the max of the two
-    TotalCapacityTextBox.Text = min(CDbl(AuditoriumCapacityTextBox.Text), CDbl(EgremontCapacityTextBox.Text))
+Else ' Find the min of the two
+    TotalCapacityTextBox.Text = funcs.min(CDbl(AuditoriumCapacityTextBox.Text), CDbl(EgremontCapacityTextBox.Text))
 End If
 
 TotalCapacity = TotalCapacityTextBox.Text
@@ -432,7 +395,7 @@ Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 ' Add data given by user into spreadsheet
 Worksheets(sheet).Cells(my_row, "A") = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, "B") = NameTextBox.Text
-Worksheets(sheet).Cells(my_row, "C") = ConvertDate(EventDateTextBox.Text)
+Worksheets(sheet).Cells(my_row, "C") = funcs.ConvertDate(EventDateTextBox.Text)
 Worksheets(sheet).Cells(my_row, "D") = LocationListBox.value
 Worksheets(sheet).Cells(my_row, "X") = CategoryListBox.value
 Worksheets(sheet).Cells(my_row, 28) = RoomListBox.value
@@ -700,17 +663,3 @@ Dim trueCapacity As Integer
 trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 15) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
 Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
 End Sub
-
-Private Function ConvertDate(myDate As String) As String
-' Designed to convert date stored as date into format Excel recognises
-
-Dim dateArr As Variant
-' Split date into arrays, using "/" as delimiter
-dateArr = Split(myDate, "/")
-
-' Reverse array
-dateArr = funcs.ReverseArray(dateArr)
-
-' Join it back together
-ConvertDate = Join(dateArr, "-")
-End Function
