@@ -37,6 +37,8 @@ Public MiscCost As String
 Public BarRevenue As String
 Public BarMargin As String
 
+Public timeytime As String
+
 '' BUTTON CLICKING===============================================================
 
 Private Sub EventButton1_Click()
@@ -177,6 +179,14 @@ Private Sub EgremontCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
+End Sub
+
+Private Sub TimeTextBox_Change()
+
+End Sub
+
+Private Sub TimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Call InptValid.Sanitise24Hr(TimeTextBox, timeytime)
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -739,7 +749,7 @@ End If
 End Sub
 
 Private Sub ImportFromTicketsolve(mode As String)
-' Highly non-general function/sub
+' Highly non-general function/sub which imports from the "Events Summary" csv from Ticketsolve
 
 ' Store which row we're working on. Depends on what we're after.
 Dim my_row As Long
@@ -754,7 +764,7 @@ If mode = "Selected" Then
 ElseIf mode = "Previous" Then
     my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).Row
 Else
-    MsgBox ("Programmer error in Private Sub TransferInfo")
+    MsgBox ("Programmer error in Private Sub ImportFromTicketsolve")
     Exit Sub
 End If
 
@@ -844,6 +854,49 @@ trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 15) - Worksheets(d
 Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
 End Sub
 
-Public Function Foo(Bar As String) As String
+Private Sub ImportFromZettle(mode As String)
+' FUNCTION NOT COMPLETED YET
 
-End Function
+' Highly non-general function/sub which imports from the "Report Excel" file from Zettle
+
+' Store which row we're working on. Depends on what we're after.
+Dim my_row As Long
+
+' Not strictly necessary. Used to avoid too much hard-coding.
+Dim dataSheetName As String
+dataSheetName = "Data"
+
+' Decide which event to import info into
+If mode = "Selected" Then
+    my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
+ElseIf mode = "Previous" Then
+    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).Row
+Else
+    MsgBox ("Programmer error in Private Sub ImportFromZettle")
+    Exit Sub
+End If
+
+' Store whether import is successful or not.
+Dim succeeded As Boolean
+succeeded = True
+
+'Find total number of ticket sales
+Dim tempSuccessCheck As Boolean
+Dim exportCell() As Variant
+Dim offset() As Variant
+
+exportCell = Array(my_row, 14)
+offset = Array(0, 1)
+
+tempSuccessCheck = ImportCell("Sold", sheetName, dataSheetName, exportCell, offset)
+
+If tempSuccessCheck = False Then
+    succeeded = False
+End If
+    
+End Sub
+
+Private Sub ZettleImportButton_Click()
+' Function not written yet
+Call ImportFromZettle("Selected")
+End Sub

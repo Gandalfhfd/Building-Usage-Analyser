@@ -55,6 +55,11 @@ Else ' Then it must be a number
 End If
 End Function
 
+' select number
+' select <, <=, >, >= with string input
+' take in original text, modified text
+' sanitise percentage, but any greater or lesser than anything
+
 Public Function SanitiseNonNegInt(ByRef TextBoxName As Control, ByRef variableName As String) As Boolean
 ' Purpose: ensure the user can only enter non-negative integers into the desired text box.
 ' Input:
@@ -118,5 +123,47 @@ ElseIf TextBoxName.value > 100 Then ' Invalid, so revert
 Else ' So it's <= 100 and we're happy
     variableName = TextBoxName.value ' Update variable storing valid text
     SanitisePercentage = True ' Return value
+End If
+End Function
+
+Public Function Sanitise24Hr(ByRef TextBoxName As Control, ByRef variableName As String) As Boolean
+Dim arr As Variant
+arr = Split(TextBoxName.Text, ":")
+
+
+
+If ArrLen(arr) <> 2 Then
+    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
+    TextBoxName.value = variableName
+ElseIf Len(arr(0)) > 2 Then
+    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
+    TextBoxName.value = variableName
+ElseIf Len(arr(1)) > 2 Then
+    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
+    TextBoxName.value = variableName
+ElseIf CheckIfNonNegInt(CStr(arr(0))) = False Then
+    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
+    TextBoxName.value = variableName
+ElseIf CheckIfNonNegInt(CStr(arr(1))) = False Then
+    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
+    TextBoxName.value = variableName
+ElseIf CDbl(arr(0)) > 23 Then
+    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
+    TextBoxName.value = variableName
+ElseIf CDbl(arr(1)) > 59 Then
+    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
+    TextBoxName.value = variableName
+ElseIf Len(arr(0)) = 1 And Len(arr(1)) = 1 Then
+    arr(0) = "0" & arr(0)
+    arr(1) = "0" & arr(1)
+    TextBoxName.value = arr(0) & ":" & arr(1)
+ElseIf Len(arr(0)) = 1 Then
+    arr(0) = "0" & arr(0)
+    TextBoxName.value = arr(0) & ":" & arr(1)
+ElseIf Len(arr(1)) = 1 Then
+    arr(1) = "0" & arr(1)
+    TextBoxName.value = arr(0) & ":" & arr(1)
+Else
+    variableName = TextBoxName.value
 End If
 End Function
