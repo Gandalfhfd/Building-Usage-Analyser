@@ -349,62 +349,62 @@ EventIDUpdaterLabel4.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel5.Caption = "Selected Event ID: " & EventIDListBox.value
 End Sub
 
-'' MULTIPAGE===============================================================
+'' USERFORM/MULTIPAGE===============================================================
 
-Private Sub MultiPage1_Change()
+Private Sub UserForm_Initialize()
 
 ' Add items into listboxes based on cells in specified worksheets
-If counter <> 1 Then
-    Dim empty_row As Long ' Store number of items in list box
-    Dim DataRange As Range
-    Dim UserFormDataRange As Range
-    Dim NonSpecificDefaultsRange As Range
-    
-    ' empty_row = lst non-empty row for specific list(box)
-    
-    ' EVENT ID
-    empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
-    Set DataRange = Range(Worksheets("Data").Cells(2, 1), Worksheets("Data").Cells(empty_row, 1))
-    EventIDListBox.RowSource = DataRange.address(External:=True)
-    
-    '' CATEGORY
-    empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 4).End(xlUp).Row
-    Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 4), Worksheets("NonSpecificDefaults").Cells(empty_row, 4))
-    CategoryListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-    
-    '' TYPE
-    empty_row = Worksheets("UserFormData").Cells(Rows.Count, 1).End(xlUp).Row
-    Set UserFormDataRange = Range(Worksheets("UserFormData").Cells(2, 1), Worksheets("UserFormData").Cells(empty_row, 1))
-    TypeListBox.RowSource = UserFormDataRange.address(External:=True)
-    
-    '' LOCATION
-    empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 1).End(xlUp).Row
-    Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 1), Worksheets("NonSpecificDefaults").Cells(empty_row, 1))
-    LocationListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-    
-    '' ROOM
-    empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 2).End(xlUp).Row
-    Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 2), Worksheets("NonSpecificDefaults").Cells(empty_row, 2))
-    RoomListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-    
-    '' AUDIENCE
-    empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 5).End(xlUp).Row
-    Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 5), Worksheets("NonSpecificDefaults").Cells(empty_row, 5))
-    AudienceListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-       
-    '' AUDITORIUM LAYOUT
-    empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 6).End(xlUp).Row
-    Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 6), Worksheets("NonSpecificDefaults").Cells(empty_row, 6))
-    AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-    
-    '' EGREMONT LAYOUT
-    empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 8).End(xlUp).Row
-    Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 8), Worksheets("NonSpecificDefaults").Cells(empty_row, 8))
-    EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-End If
 
-' Sop this from happening again
-counter = 1
+Dim empty_row As Long ' Store number of items in list box
+Dim DataRange As Range
+Dim UserFormDataRange As Range
+Dim NonSpecificDefaultsRange As Range
+
+' empty_row = lst non-empty row for specific list(box)
+
+' EVENT ID
+empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
+Set DataRange = Range(Worksheets("Data").Cells(2, 1), Worksheets("Data").Cells(empty_row, 1))
+EventIDListBox.RowSource = DataRange.address(External:=True)
+
+'' CATEGORY
+empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 4).End(xlUp).Row
+Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 4), Worksheets("NonSpecificDefaults").Cells(empty_row, 4))
+CategoryListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+
+'' TYPE
+empty_row = Worksheets("UserFormData").Cells(Rows.Count, 1).End(xlUp).Row
+Set UserFormDataRange = Range(Worksheets("UserFormData").Cells(2, 1), Worksheets("UserFormData").Cells(empty_row, 1))
+TypeListBox.RowSource = UserFormDataRange.address(External:=True)
+
+'' LOCATION
+empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 1).End(xlUp).Row
+Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 1), Worksheets("NonSpecificDefaults").Cells(empty_row, 1))
+LocationListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+
+'' ROOM
+empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 2).End(xlUp).Row
+Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 2), Worksheets("NonSpecificDefaults").Cells(empty_row, 2))
+RoomListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+
+'' AUDIENCE
+empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 5).End(xlUp).Row
+Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 5), Worksheets("NonSpecificDefaults").Cells(empty_row, 5))
+AudienceListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+   
+'' AUDITORIUM LAYOUT
+empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 6).End(xlUp).Row
+Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 6), Worksheets("NonSpecificDefaults").Cells(empty_row, 6))
+AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+
+'' EGREMONT LAYOUT
+empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 8).End(xlUp).Row
+Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 8), Worksheets("NonSpecificDefaults").Cells(empty_row, 8))
+EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+
+End Sub
+
+Private Sub MultiPage1_Change()
 
 End Sub
 
