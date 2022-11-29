@@ -62,8 +62,8 @@ Public Function SanitiseNonNegInt(ByRef TextBoxName As Control, ByRef variableNa
 ' variableName = name of public variable which stores old value of text box
 '
 ' Output:
-' True if nothing was changed
-' False if something was changed
+' True if input was valid
+' False if input was invalid
 
 If CheckIfNonNegInt(TextBoxName.value) = False Then
     TextBoxName.value = variableName ' Revert text box to previous valid text
@@ -82,8 +82,8 @@ Public Function SanitiseReal(ByRef TextBoxName As Control, ByRef variableName As
 ' variableName = name of public variable which stores old value of text box
 '
 ' Output:
-' True if nothing was changed
-' False if something was changed
+' True if input was valid
+' False if input was invalid
 
 If CheckIfNum(TextBoxName.value) = False Then
     TextBoxName.value = variableName ' Revert text box to previous valid text
@@ -93,5 +93,30 @@ Else
     TextBoxName.value = RmPound(TextBoxName.value) ' Remove £ sign
     variableName = TextBoxName.value ' Update variable storing valid text
     SanitiseReal = True ' Return value
+End If
+End Function
+
+Public Function SanitisePercentage(ByRef TextBoxName As Control, ByRef variableName As String) As Boolean
+' Purpose: sanitise input so that not only is the input real, it's also <= 100
+' Input:
+' TextBoxName = name of text box whose input we want to sanitise.
+' variableName = name of public variable which stores old value of text box
+'
+' Output:
+' True if input was valid
+' False if input was invalid
+
+If TextBoxName.value = "" Then ' We don't mind this, but it will confuse the > 100 check
+    variableName = TextBoxName.value ' Update variable storing valid text
+    SanitisePercentage = True ' Return value
+ElseIf CheckIfNum(TextBoxName.value) = False Then
+    TextBoxName.value = variableName ' Revert text box to previous valid text
+    SanitisePercentage = False ' Return value
+ElseIf TextBoxName.value > 100 Then ' Invalid, so revert
+    TextBoxName.value = variableName ' Revert text box to previous valid text
+    SanitisePercentage = False ' Return value
+Else ' So it's <= 100 and we're happy
+    variableName = TextBoxName.value ' Update variable storing valid text
+    SanitisePercentage = True ' Return value
 End If
 End Function
