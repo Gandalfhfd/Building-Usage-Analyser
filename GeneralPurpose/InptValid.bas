@@ -131,8 +131,10 @@ Dim arr As Variant
 arr = Split(TextBoxName.Text, ":")
 
 
-
-If ArrLen(arr) <> 2 Then
+If TextBoxName.value = "" Then
+    ' This is ok
+    variableName = ""
+ElseIf ArrLen(arr) <> 2 Then
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
 ElseIf Len(arr(0)) > 2 Then
@@ -147,22 +149,21 @@ ElseIf CheckIfNonNegInt(CStr(arr(0))) = False Then
 ElseIf CheckIfNonNegInt(CStr(arr(1))) = False Then
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
+ElseIf Len(arr(0)) < 2 Or Len(arr(1)) < 2 Then
+    Dim i As Integer
+    Dim j As Integer
+    For j = 0 To 1
+        For i = 1 To 2 - Len(arr(j))
+            arr(j) = "0" & arr(j)
+        Next
+    Next
+    TextBoxName.value = arr(0) & ":" & arr(1)
 ElseIf CDbl(arr(0)) > 23 Then
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
 ElseIf CDbl(arr(1)) > 59 Then
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
-ElseIf Len(arr(0)) = 1 And Len(arr(1)) = 1 Then
-    arr(0) = "0" & arr(0)
-    arr(1) = "0" & arr(1)
-    TextBoxName.value = arr(0) & ":" & arr(1)
-ElseIf Len(arr(0)) = 1 Then
-    arr(0) = "0" & arr(0)
-    TextBoxName.value = arr(0) & ":" & arr(1)
-ElseIf Len(arr(1)) = 1 Then
-    arr(1) = "0" & arr(1)
-    TextBoxName.value = arr(0) & ":" & arr(1)
 Else
     variableName = TextBoxName.value
 End If

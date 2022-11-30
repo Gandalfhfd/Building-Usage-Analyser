@@ -20,13 +20,17 @@ Option Explicit
 Public counter As Integer
 
 ' Store user input so that it can be restored if they make a mistake
+' Capacity
 Public AuditoriumCapacity As String
 Public EgremontCapacity As String
 Public TotalCapacity As String
 Public BlockedSeats As String
+
+' Revenue & Costs
 Public NumTicketsSold As String
 Public BoxOfficeRevenue As String
-Public SupportRevenue As String
+Public SupportRevenue As String ' Revenue from Support the Kirkgate donations
+' Film
 Public FilmCost As String
 Public FilmTransport As String
 Public Accommodation As String
@@ -34,11 +38,46 @@ Public ArtistFood As String
 Public Heating As String
 Public Lighting As String
 Public MiscCost As String
+' Bar
 Public BarRevenue As String
 Public BarMargin As String
 
-Public timeytime As String
+' Time
+Public SetupStartTime As String
+Public DoorsTime As String
+Public EventStartTime As String
+Public EventEndTime As String
+Public TakedownEndTime As String
+Public EventDuration As String
+Public SetupAvailableDuration As String
 
+Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Call InptValid.Sanitise24Hr(SetupStartTimeTextBox, SetupStartTime)
+End Sub
+
+Private Sub DoorsTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Call InptValid.Sanitise24Hr(DoorsTimeTextBox, DoorsTime)
+End Sub
+
+Private Sub EventStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Call InptValid.Sanitise24Hr(EventStartTimeTextBox, EventStartTime)
+End Sub
+
+Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Call InptValid.Sanitise24Hr(EventEndTimeTextBox, EventEndTime)
+End Sub
+
+Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Call InptValid.Sanitise24Hr(TakedownEndTimeTextBox, TakedownEndTime)
+End Sub
+
+Private Sub EventDurationTextBox_Change()
+Call InptValid.SanitiseNonNegInt(EventDurationTextBox, EventDuration)
+End Sub
+
+Private Sub SetupAvailableDurationTextBox_Change()
+Call InptValid.SanitiseNonNegInt(SetupAvailableDurationTextBox, SetupAvailableDuration)
+End Sub
 '' BUTTON CLICKING===============================================================
 
 Private Sub EventButton1_Click()
@@ -122,6 +161,10 @@ Private Sub ImportPreviousButton_Click()
 Call ImportFromTicketsolve("Previous")
 End Sub
 
+Private Sub MultiPage1_Change()
+
+End Sub
+
 Private Sub NameSearchButton_Click()
 Dim myAddress As Variant
 
@@ -179,14 +222,6 @@ Private Sub EgremontCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
-End Sub
-
-Private Sub TimeTextBox_Change()
-
-End Sub
-
-Private Sub TimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-Call InptValid.Sanitise24Hr(TimeTextBox, timeytime)
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -411,10 +446,6 @@ AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=T
 empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 8).End(xlUp).Row
 Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 8), Worksheets("NonSpecificDefaults").Cells(empty_row, 8))
 EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-
-End Sub
-
-Private Sub MultiPage1_Change()
 
 End Sub
 
