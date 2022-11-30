@@ -431,42 +431,42 @@ Dim NonSpecificDefaultsRange As Range
 ' EVENT ID
 empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
 Set DataRange = Range(Worksheets("Data").Cells(2, 1), Worksheets("Data").Cells(empty_row, 1))
-EventIDListBox.RowSource = DataRange.address(External:=True)
+EventIDListBox.RowSource = DataRange.address(external:=True)
 
 '' CATEGORY
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 4).End(xlUp).Row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 4), Worksheets("Non-Specific Defaults").Cells(empty_row, 4))
-CategoryListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+CategoryListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' TYPE
 empty_row = Worksheets("Type-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).Row
 Set TypeSpecificDefaultsRange = Range(Worksheets("Type-Specific Defaults").Cells(2, 1), Worksheets("Type-Specific Defaults").Cells(empty_row, 1))
-TypeListBox.RowSource = TypeSpecificDefaultsRange.address(External:=True)
+TypeListBox.RowSource = TypeSpecificDefaultsRange.address(external:=True)
 
 '' LOCATION
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).Row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 1), Worksheets("Non-Specific Defaults").Cells(empty_row, 1))
-LocationListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+LocationListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' ROOM
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 2).End(xlUp).Row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 2), Worksheets("Non-Specific Defaults").Cells(empty_row, 2))
-RoomListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+RoomListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' AUDIENCE
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 5).End(xlUp).Row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 5), Worksheets("Non-Specific Defaults").Cells(empty_row, 5))
-AudienceListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+AudienceListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
    
 '' AUDITORIUM LAYOUT
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).Row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
-AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' EGREMONT LAYOUT
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).Row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
-EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 End Sub
 
@@ -484,6 +484,11 @@ End Sub
 Private Sub EditToggleCheckBox3_Click()
 ' Change some button captions and checkbox values
 Call ToggleEditMode(EditToggleCheckBox3.value)
+End Sub
+
+Private Sub EditToggleCheckBox4_Click()
+' Change some button captions and checkbox values
+Call ToggleEditMode(EditToggleCheckBox4.value)
 End Sub
 
 '' FUNCTIONS===============================================================
@@ -590,6 +595,27 @@ ElseIf DoorsTimeTextBox.Text = "" Then
     MsgBox ("Please enter the time the doors open")
     MultiPage1.value = 3
     Exit Function
+ElseIf EventStartTimeTextBox.Text = "" Then
+    MsgBox ("Please enter the time that the event starts")
+    MultiPage1.value = 3
+    Exit Function
+ElseIf EventEndTimeTextBox.Text = "" Then
+    MsgBox ("Please enter the time that the event ends")
+    MultiPage1.value = 3
+    Exit Function
+ElseIf TakedownEndTimeTextBox.Text = "" Then
+    MsgBox ("Please enter the time that the takedown for the event ends")
+    MultiPage1.value = 3
+    Exit Function
+ElseIf EventDurationTextBox.Text = "" Then
+    MsgBox ("Please enter the duration of the event in minutes")
+    MultiPage1.value = 3
+    Exit Function
+ElseIf SetupToTakedownEndDurationTextBox.Text = "" Then
+    MsgBox ("Please enter the duration of the event from the start " _
+            & "of setup to when takedown finishes in minutes")
+    MultiPage1.value = 3
+    Exit Function
 Else ' The user is allowed to create a new event
 End If
 
@@ -676,8 +702,9 @@ Dim ListBoxRange As Range
 ' Find last non-empty row for auditorium layout list
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).Row
 
-Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
-AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
+Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
+                    Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
+AuditoriumLayoutListBox.RowSource = ListBoxRange.address(external:=True)
 
 AuditoriumCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
@@ -692,8 +719,9 @@ Dim ListBoxRange As Range
 ' Find last non-empty row for auditorium layout list
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).Row
 
-Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
-EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
+Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
+                    Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
+EgremontLayoutListBox.RowSource = ListBoxRange.address(external:=True)
 
 EgremontCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
@@ -707,14 +735,24 @@ End Function
 
 Private Function AuditoriumNotUsed()
 ' To be called when Auditorium is not being used
-AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2")
+
+Dim ListBoxRange As Range
+Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
+                    Worksheets("Non-Specific Defaults").Cells(2, 6))
+AuditoriumLayoutListBox.RowSource = ListBoxRange.address(external:=True)
+
 AuditoriumCapacityTextBox.Locked = True
 AuditoriumCapacityTextBox.value = "0"
 End Function
 
 Private Function EgremontNotUsed()
 ' To be called when Egremont room is not being used
-EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2")
+
+Dim ListBoxRange As Range
+Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
+                    Worksheets("Non-Specific Defaults").Cells(2, 8))
+EgremontLayoutListBox.RowSource = ListBoxRange.address(external:=True)
+
 EgremontCapacityTextBox.Locked = True
 EgremontCapacityTextBox = "0"
 End Function
@@ -804,21 +842,25 @@ If state = True Then
     EventButton1.Caption = "Edit Selected Event"
     EventButton2.Caption = "Edit Selected Event"
     EventButton3.Caption = "Edit Selected Event"
+    EventButton4.Caption = "Edit Selected Event"
     
     ' Tick all of the other edit checkboxes
     EditToggleCheckBox1.value = True
     EditToggleCheckBox2.value = True
     EditToggleCheckBox3.value = True
+    EditToggleCheckBox4.value = True
 ElseIf state = False Then
     ' Update captions
     EventButton1.Caption = "Add New Event"
     EventButton2.Caption = "Add New Event"
     EventButton3.Caption = "Add New Event"
+    EventButton4.Caption = "Add New Event"
     
     ' Untick all of the other edit checkboxes
     EditToggleCheckBox1.value = False
     EditToggleCheckBox2.value = False
     EditToggleCheckBox3.value = False
+    EditToggleCheckBox4.value = False
 End If
 End Sub
 
