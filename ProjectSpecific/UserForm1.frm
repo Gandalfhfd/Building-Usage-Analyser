@@ -51,33 +51,6 @@ Public TakedownEndTime As String
 Public EventDuration As String
 Public SetupAvailableDuration As String
 
-Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-Call InptValid.Sanitise24Hr(SetupStartTimeTextBox, SetupStartTime)
-End Sub
-
-Private Sub DoorsTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-Call InptValid.Sanitise24Hr(DoorsTimeTextBox, DoorsTime)
-End Sub
-
-Private Sub EventStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-Call InptValid.Sanitise24Hr(EventStartTimeTextBox, EventStartTime)
-End Sub
-
-Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-Call InptValid.Sanitise24Hr(EventEndTimeTextBox, EventEndTime)
-End Sub
-
-Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-Call InptValid.Sanitise24Hr(TakedownEndTimeTextBox, TakedownEndTime)
-End Sub
-
-Private Sub EventDurationTextBox_Change()
-Call InptValid.SanitiseNonNegInt(EventDurationTextBox, EventDuration)
-End Sub
-
-Private Sub SetupAvailableDurationTextBox_Change()
-Call InptValid.SanitiseNonNegInt(SetupAvailableDurationTextBox, SetupAvailableDuration)
-End Sub
 '' BUTTON CLICKING===============================================================
 
 Private Sub EventButton1_Click()
@@ -103,6 +76,15 @@ Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
 Private Sub EventButton3_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+' Needed because a double click is counted differently to a single click
+Call AddEvent(EditToggleCheckBox1.value)
+End Sub
+
+Private Sub EventButton4_Click()
+Call AddEvent(EditToggleCheckBox1.value)
+End Sub
+
+Private Sub EventButton4_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
@@ -234,6 +216,41 @@ Private Sub BlockedSeatsTextBox_Change()
 Call InptValid.SanitiseNonNegInt(BlockedSeatsTextBox, BlockedSeats)
 End Sub
 
+Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(SetupStartTimeTextBox, SetupStartTime)
+End Sub
+
+Private Sub DoorsTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(DoorsTimeTextBox, DoorsTime)
+End Sub
+
+Private Sub EventStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(EventStartTimeTextBox, EventStartTime)
+End Sub
+
+Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(EventEndTimeTextBox, EventEndTime)
+End Sub
+
+Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(TakedownEndTimeTextBox, TakedownEndTime)
+End Sub
+
+Private Sub EventDurationTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(EventDurationTextBox, EventDuration)
+End Sub
+
+Private Sub SetupAvailableDurationTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(SetupAvailableDurationTextBox, SetupAvailableDuration)
+End Sub
+
 Private Sub NumTicketsSoldTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(NumTicketsSoldTextBox, NumTicketsSold)
@@ -358,11 +375,11 @@ CapacityListBoxDecider
 End Sub
 
 Private Sub AuditoriumLayoutListBox_Change()
-AuditoriumCapacityTextBox.Text = Worksheets("NonSpecificDefaults").Cells(AuditoriumLayoutListBox.ListIndex + 2, 7)
+AuditoriumCapacityTextBox.Text = Worksheets("Non-Specific Defaults").Cells(AuditoriumLayoutListBox.ListIndex + 2, 7)
 End Sub
 
 Private Sub EgremontLayoutListBox_Change()
-EgremontCapacityTextBox.Text = Worksheets("NonSpecificDefaults").Cells(EgremontLayoutListBox.ListIndex + 2, 9)
+EgremontCapacityTextBox.Text = Worksheets("Non-Specific Defaults").Cells(EgremontLayoutListBox.ListIndex + 2, 9)
 End Sub
 
 Private Sub AudienceListBox_Change()
@@ -402,8 +419,8 @@ Private Sub UserForm_Initialize()
 
 Dim empty_row As Long ' Store number of items in list box
 Dim DataRange As Range
-Dim UserFormDataRange As Range
-Dim NonSpecificDefaultsRange As Range
+Dim Type-Specific DefaultsRange As Range
+Dim Non-Specific DefaultsRange As Range
 
 ' empty_row = lst non-empty row for specific list(box)
 
@@ -413,39 +430,39 @@ Set DataRange = Range(Worksheets("Data").Cells(2, 1), Worksheets("Data").Cells(e
 EventIDListBox.RowSource = DataRange.address(External:=True)
 
 '' CATEGORY
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 4).End(xlUp).Row
-Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 4), Worksheets("NonSpecificDefaults").Cells(empty_row, 4))
-CategoryListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 4).End(xlUp).Row
+Set Non-Specific DefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 4), Worksheets("Non-Specific Defaults").Cells(empty_row, 4))
+CategoryListBox.RowSource = Non-Specific DefaultsRange.address(External:=True)
 
 '' TYPE
-empty_row = Worksheets("UserFormData").Cells(Rows.Count, 1).End(xlUp).Row
-Set UserFormDataRange = Range(Worksheets("UserFormData").Cells(2, 1), Worksheets("UserFormData").Cells(empty_row, 1))
-TypeListBox.RowSource = UserFormDataRange.address(External:=True)
+empty_row = Worksheets("Type-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).Row
+Set Type-Specific DefaultsRange = Range(Worksheets("Type-Specific Defaults").Cells(2, 1), Worksheets("Type-Specific Defaults").Cells(empty_row, 1))
+TypeListBox.RowSource = Type-Specific DefaultsRange.address(External:=True)
 
 '' LOCATION
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 1).End(xlUp).Row
-Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 1), Worksheets("NonSpecificDefaults").Cells(empty_row, 1))
-LocationListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).Row
+Set Non-Specific DefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 1), Worksheets("Non-Specific Defaults").Cells(empty_row, 1))
+LocationListBox.RowSource = Non-Specific DefaultsRange.address(External:=True)
 
 '' ROOM
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 2).End(xlUp).Row
-Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 2), Worksheets("NonSpecificDefaults").Cells(empty_row, 2))
-RoomListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 2).End(xlUp).Row
+Set Non-Specific DefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 2), Worksheets("Non-Specific Defaults").Cells(empty_row, 2))
+RoomListBox.RowSource = Non-Specific DefaultsRange.address(External:=True)
 
 '' AUDIENCE
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 5).End(xlUp).Row
-Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 5), Worksheets("NonSpecificDefaults").Cells(empty_row, 5))
-AudienceListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 5).End(xlUp).Row
+Set Non-Specific DefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 5), Worksheets("Non-Specific Defaults").Cells(empty_row, 5))
+AudienceListBox.RowSource = Non-Specific DefaultsRange.address(External:=True)
    
 '' AUDITORIUM LAYOUT
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 6).End(xlUp).Row
-Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 6), Worksheets("NonSpecificDefaults").Cells(empty_row, 6))
-AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).Row
+Set Non-Specific DefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
+AuditoriumLayoutListBox.RowSource = Non-Specific DefaultsRange.address(External:=True)
 
 '' EGREMONT LAYOUT
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 8).End(xlUp).Row
-Set NonSpecificDefaultsRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 8), Worksheets("NonSpecificDefaults").Cells(empty_row, 8))
-EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).Row
+Set Non-Specific DefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
+EgremontLayoutListBox.RowSource = Non-Specific DefaultsRange.address(External:=True)
 
 End Sub
 
@@ -568,14 +585,14 @@ End If
 Dim i As Integer
 For i = 0 To 5
     ' Add default minutes worked by each volunteer category, depending on event category selected
-    Worksheets("Data").Cells(my_row, i + 18) = Worksheets("UserFormData").Cells(CategoryListBox.ListIndex + 2, i + 3)
+    Worksheets("Data").Cells(my_row, i + 18) = Worksheets("Type-Specific Defaults").Cells(CategoryListBox.ListIndex + 2, i + 3)
 Next
 
 Dim sheet As String
 sheet = "Data"
 
 ' Bar gross profit bit
-Worksheets(sheet).Cells(my_row, 26) = Worksheets("NonSpecificDefaults").Cells(2, 3)
+Worksheets(sheet).Cells(my_row, 26) = Worksheets("Non-Specific Defaults").Cells(2, 3)
 Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 
 ' Add data given by user into spreadsheet
@@ -605,7 +622,12 @@ Worksheets(sheet).Cells(my_row, 32) = AuditoriumLayoutListBox.value
 Worksheets(sheet).Cells(my_row, 33) = TotalCapacityTextBox.Text
 Worksheets(sheet).Cells(my_row, 34) = BlockedSeatsTextBox.Text
 
-' Revenue & Costs
+' Time
+If SetupStartTimeTextBox.Text <> "" Then
+    Worksheets(sheet).Cells(my_row, 8) = TimeValue(SetupStartTimeTextBox)
+End If
+
+' Costs & Income
 Worksheets(sheet).Cells(my_row, 14) = NumTicketsSoldTextBox.Text
 Worksheets(sheet).Cells(my_row, 42) = BoxOfficeRevenueTextBox.Text
 Worksheets(sheet).Cells(my_row, 44) = SupportRevenueTextBox.Text
@@ -631,9 +653,9 @@ Dim empty_row As Long
 Dim ListBoxRange As Range
 
 ' Find last non-empty row for auditorium layout list
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 6).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).Row
 
-Set ListBoxRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 6), Worksheets("NonSpecificDefaults").Cells(empty_row, 6))
+Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
 AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
 AuditoriumCapacityTextBox.Locked = False
@@ -647,9 +669,9 @@ Dim empty_row As Long
 Dim ListBoxRange As Range
 
 ' Find last non-empty row for auditorium layout list
-empty_row = Worksheets("NonSpecificDefaults").Cells(Rows.Count, 8).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).Row
 
-Set ListBoxRange = Range(Worksheets("NonSpecificDefaults").Cells(2, 8), Worksheets("NonSpecificDefaults").Cells(empty_row, 8))
+Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
 EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
 EgremontCapacityTextBox.Locked = False
@@ -664,14 +686,14 @@ End Function
 
 Private Function AuditoriumNotUsed()
 ' To be called when Auditorium is not being used
-AuditoriumLayoutListBox.RowSource = ("NonSpecificDefaults!F2")
+AuditoriumLayoutListBox.RowSource = ("Non-Specific Defaults!F2")
 AuditoriumCapacityTextBox.Locked = True
 AuditoriumCapacityTextBox.value = "0"
 End Function
 
 Private Function EgremontNotUsed()
 ' To be called when Egremont room is not being used
-EgremontLayoutListBox.RowSource = ("NonSpecificDefaults!H2")
+EgremontLayoutListBox.RowSource = ("Non-Specific Defaults!H2")
 EgremontCapacityTextBox.Locked = True
 EgremontCapacityTextBox = "0"
 End Function

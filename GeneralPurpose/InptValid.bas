@@ -134,22 +134,20 @@ arr = Split(TextBoxName.Text, ":")
 If TextBoxName.value = "" Then
     ' This is ok
     variableName = ""
-ElseIf ArrLen(arr) <> 2 Then
+    Exit Function
+ElseIf ArrLen(arr) <> 2 Then ' The user has not put in exactly one ":"
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
-ElseIf Len(arr(0)) > 2 Then
+ElseIf Len(arr(0)) > 2 Or Len(arr(1)) > 2 Then ' More than 2 chars before or after the :
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
-ElseIf Len(arr(1)) > 2 Then
+ElseIf CheckIfNonNegInt(CStr(arr(0))) = False Then ' not a non negative integer before the :
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
-ElseIf CheckIfNonNegInt(CStr(arr(0))) = False Then
+ElseIf CheckIfNonNegInt(CStr(arr(1))) = False Then ' not a non negative integer after the :
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
-ElseIf CheckIfNonNegInt(CStr(arr(1))) = False Then
-    MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
-    TextBoxName.value = variableName
-ElseIf Len(arr(0)) < 2 Or Len(arr(1)) < 2 Then
+ElseIf Len(arr(0)) < 2 Or Len(arr(1)) < 2 Then ' less than 2 chars before or after the :
     Dim i As Integer
     Dim j As Integer
     For j = 0 To 1
@@ -158,10 +156,13 @@ ElseIf Len(arr(0)) < 2 Or Len(arr(1)) < 2 Then
         Next
     Next
     TextBoxName.value = arr(0) & ":" & arr(1)
-ElseIf CDbl(arr(0)) > 23 Then
+End If
+
+' Has to be separate in order to be called if Len(arr(0)) < 2 Or Len(arr(1)) < 2.
+If CDbl(arr(0)) > 23 Then ' number is bigger than 23 before the :
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
-ElseIf CDbl(arr(1)) > 59 Then
+ElseIf CDbl(arr(1)) > 59 Then ' number is bigger than 59 after the :
     MsgBox ("Please enter time in standard 24hr 'hh:mm' format. For example 02:08 for 8 minutes past 2 in the morning")
     TextBoxName.value = variableName
 Else
