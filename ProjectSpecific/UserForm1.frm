@@ -579,13 +579,26 @@ End Sub
 '' LIST BOXES===============================================================
 
 Private Sub TypeListBox_Change()
+' What row we're looking at
 Dim row As Integer
 row = TypeListBox.ListIndex + 2
 
+' Show the time page
 Me.MultiPage1.Pages("Page5").Visible = True
 
+' Change some timing boxes
 EventDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 10)
 SetupToTakedownEndDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 13)
+
+' Show the genres if applicable
+If TypeListBox.value = "Live Music" Then
+    GenreListBox.Visible = True
+    GenreLabel.Visible = True
+Else
+    GenreListBox.Visible = False
+    GenreLabel.Visible = False
+End If
+
 End Sub
 
 Private Sub LocationListBox_Change()
@@ -606,7 +619,6 @@ End If
 
 ' Decide what to show regarding capacity options
 CapacityListBoxDecider
-
 End Sub
 
 Private Sub AuditoriumLayoutListBox_Change()
@@ -683,6 +695,11 @@ LocationListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 2).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 2), Worksheets("Non-Specific Defaults").Cells(empty_row, 2))
 RoomListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+
+'' GENRE
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 13).End(xlUp).row
+Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 13), Worksheets("Non-Specific Defaults").Cells(empty_row, 13))
+GenreListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' AUDIENCE
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 5).End(xlUp).row
@@ -810,6 +827,10 @@ ElseIf TicketedOptionButton.value = False And NonTicketedOptionButton.value = Fa
     MsgBox ("Please select 'Ticketed' or 'Non-Ticketed'")
     MultiPage1.value = 1
     Exit Function
+ElseIf GenreListBox.Visible = True And GenreListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a genre")
+    MultiPage1.value = 1
+    Exit Function
 ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
     MsgBox ("Please enter a layout for the Auditorium")
     MultiPage1.value = 2 ' Take the user to the layouts page
@@ -893,6 +914,7 @@ Else
     ' Since validation has already taken place, at least one of the options has been selected
     Worksheets(sheet).Cells(my_row, 46) = "False"
 End If
+Worksheets(sheet).Cells(my_row, 48) = GenreListBox.value
 
 ' Layout & Capacity
 Worksheets(sheet).Cells(my_row, 31) = EgremontLayoutListBox.value
