@@ -184,6 +184,17 @@ End If
 
 End Sub
 
+Private Sub ClearTimeButton_Click()
+' Clear all input from Time tab
+SetupStartTimeTextBox.Text = ""
+DoorsTimeTextBox.Text = ""
+EventStartTimeTextBox.Text = ""
+EventEndTimeTextBox.Text = ""
+TakedownEndTimeTextBox.Text = ""
+EventDurationTextBox.Text = ""
+SetupToTakedownEndDurationTextBox.Text = ""
+End Sub
+
 '' TEXT BOXES===============================================================
 
 ' Basic Info============================================================================
@@ -219,24 +230,142 @@ Call InptValid.SanitiseNonNegInt(BlockedSeatsTextBox, BlockedSeats)
 End Sub
 
 ' Time============================================================================
+Private Sub SetupStartTimeTextBox_Change()
+
+End Sub
 Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(SetupStartTimeTextBox, SetupStartTime)
+
+' Make rest of sub easier to read
+Dim sheet As String
+sheet = "Type-Specific Defaults"
+
+' Find out which row we are getting our defaults from
+Dim row As Integer
+row = TypeListBox.ListIndex + 2
+
+' Prevent crashes
+If row = 1 Or SetupStartTimeTextBox.Text = "" Or TypeListBox.ListIndex = -1 Then
+    Exit Sub
+End If
+
+' Change doors open time
+If DoorsTimeTextBox.Text = "" Then
+    DoorsTimeTextBox.Text = Format(DateAdd("n", (Worksheets(sheet).Cells(row, 9) - _
+        Worksheets(sheet).Cells(row, 11)), SetupStartTimeTextBox.value), "hh:mm")
+End If
+
+' Change event start time
+If EventStartTimeTextBox.Text = "" Then
+    EventStartTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 9), _
+        SetupStartTimeTextBox.value), "hh:mm")
+End If
+
+' Change event end time
+If EventEndTimeTextBox.Text = "" Then
+    EventEndTimeTextBox.Text = Format(DateAdd("n", (Worksheets(sheet).Cells(row, 9) + _
+        Worksheets(sheet).Cells(row, 10)), SetupStartTimeTextBox.value), "hh:mm")
+End If
+
+' Change takedown end time
+If TakedownEndTimeTextBox.Text = "" Then
+    TakedownEndTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 13), _
+        SetupStartTimeTextBox.value), "hh:mm")
+End If
+
+' Change setup to takedown complete duration
+If TakedownEndTimeTextBox.Text = "" Then
+ElseIf CDate(TakedownEndTimeTextBox.Text) - _
+        CDate(SetupStartTimeTextBox.Text) < 0 Then
+    MsgBox ("The setup cannot begin after the takedown.")
+    SetupStartTimeTextBox.Text = ""
+Else
+    SetupToTakedownEndDurationTextBox.Text = (CDate(TakedownEndTimeTextBox.Text) - _
+        CDate(SetupStartTimeTextBox.Text)) * 24 * 60
+End If
 End Sub
 
 Private Sub DoorsTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(DoorsTimeTextBox, DoorsTime)
+
+If DoorsTimeTextBox.Text = "" Or EventStartTimeTextBox.Text = "" Then
+    Exit Sub
+' Sanity check doors time
+ElseIf TimeValue(EventStartTimeTextBox.Text) < TimeValue(DoorsTimeTextBox.Text) Then
+    MsgBox ("Doors cannot open after event starts")
+    DoorsTimeTextBox.Text = ""
+End If
+
 End Sub
 
 Private Sub EventStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(EventStartTimeTextBox, EventStartTime)
+
+' Make rest of sub easier to read
+Dim sheet As String
+sheet = "Type-Specific Defaults"
+
+' Find out which row we are getting our defaults from
+Dim row As Integer
+row = TypeListBox.ListIndex + 2
+
+' Prevent crashes
+If row = 1 Or EventStartTimeTextBox.Text = "" Or TypeListBox.ListIndex = -1 Then
+    Exit Sub
+End If
+
+' Change setup start time
+SetupStartTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 9), _
+    EventStartTimeTextBox.value), "hh:mm")
+
+' Change doors open time
+DoorsTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 11), _
+    EventStartTimeTextBox.Text), "hh:mm")
+
+' Change event end time
+EventEndTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 10), _
+    EventStartTimeTextBox.Text), "hh:mm")
+
+' Change takedown time
+TakedownEndTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 10) + _
+    Worksheets(sheet).Cells(row, 12), EventStartTimeTextBox.Text), "hh:mm")
 End Sub
 
 Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(EventEndTimeTextBox, EventEndTime)
+
+' Make rest of sub easier to read
+Dim sheet As String
+sheet = "Type-Specific Defaults"
+
+' Find out which row we are getting our defaults from
+Dim row As Integer
+row = TypeListBox.ListIndex + 2
+
+' Prevent crashes
+If row = 1 Or EventEndTimeTextBox.Text = "" Or TypeListBox.ListIndex = -1 Then
+    Exit Sub
+End If
+
+' Change takedown time
+TakedownEndTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 12), _
+    EventEndTimeTextBox.value), "hh:mm")
+
+' Change event duration
+If EventStartTimeTextBox.Text <> "" Then
+    EventDurationTextBox.Text = (CDate(EventEndTimeTextBox.Text) - _
+        CDate(EventStartTimeTextBox.Text)) * 24 * 60
+End If
+
+' Change setup to takedown complete duration
+If SetupStartTimeTextBox.Text <> "" And TakedownEndTimeTextBox.Text <> "" Then
+    SetupToTakedownEndDurationTextBox.Text = (CDate(TakedownEndTimeTextBox.Text) - _
+        CDate(SetupStartTimeTextBox.Text)) * 24 * 60
+End If
 End Sub
 
 Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
@@ -247,6 +376,50 @@ End Sub
 Private Sub EventDurationTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(EventDurationTextBox, EventDuration)
+
+' Make rest of sub easier to read
+Dim sheet As String
+sheet = "Type-Specific Defaults"
+
+' Find out which row we are getting our defaults from
+Dim row As Integer
+row = TypeListBox.ListIndex + 2
+
+If EventStartTimeTextBox.Text = "" And EventEndTimeTextBox.Text = "" Then
+    Exit Sub
+ElseIf EventDurationTextBox.Text = "" Then
+    Exit Sub
+ElseIf EventStartTimeTextBox.Text = "" Then
+    ' Set start time according to end time
+    EventStartTimeTextBox.Text = Format(DateAdd("n", -EventDurationTextBox.Text, _
+        EventEndTimeTextBox.Text), "hh:mm")
+Else
+    Dim TakedownTime As Integer
+    
+    ' Work out takedown duration
+    If EventEndTimeTextBox.Text = "" Then
+        TakedownTime = Worksheets(sheet).Cells(row, 12)
+    Else
+        TakedownTime = (CDate(TakedownEndTimeTextBox.Text) - _
+            CDate(EventEndTimeTextBox.Text)) * 24 * 60
+            
+        TakedownEndTimeTextBox.Text = Format(DateAdd("n", TakedownTime, _
+            EventEndTimeTextBox.Text), "hh:mm")
+    End If
+    
+    ' Set end time according to start time
+    EventEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text, _
+        EventStartTimeTextBox.Text), "hh:mm")
+        
+    ' Set takedown end time according to start time
+    TakedownEndTimeTextBox.Text = Format(DateAdd("n", TakedownTime, _
+        EventEndTimeTextBox.Text), "hh:mm")
+End If
+
+If SetupStartTimeTextBox.Text <> "" Then
+    SetupToTakedownEndDurationTextBox.Text = (CDate(TakedownEndTimeTextBox.Text) - _
+            CDate(SetupStartTimeTextBox.Text)) * 24 * 60
+End If
 End Sub
 
 Private Sub SetupAvailableDurationTextBox_Change()
@@ -357,6 +530,14 @@ End Sub
 
 '' LIST BOXES===============================================================
 
+Private Sub TypeListBox_Change()
+Dim row As Integer
+row = TypeListBox.ListIndex + 2
+
+EventDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 10)
+SetupToTakedownEndDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 13)
+End Sub
+
 Private Sub LocationListBox_Change()
 ' Throw an error if the location doesn't match the room selected (external should be selected for anything not in Kirkgate)
 If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
@@ -429,42 +610,42 @@ Dim NonSpecificDefaultsRange As Range
 ' empty_row = lst non-empty row for specific list(box)
 
 ' EVENT ID
-empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row
+empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
 Set DataRange = Range(Worksheets("Data").Cells(2, 1), Worksheets("Data").Cells(empty_row, 1))
 EventIDListBox.RowSource = DataRange.address(external:=True)
 
 '' CATEGORY
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 4).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 4).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 4), Worksheets("Non-Specific Defaults").Cells(empty_row, 4))
 CategoryListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' TYPE
-empty_row = Worksheets("Type-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).Row
+empty_row = Worksheets("Type-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).row
 Set TypeSpecificDefaultsRange = Range(Worksheets("Type-Specific Defaults").Cells(2, 1), Worksheets("Type-Specific Defaults").Cells(empty_row, 1))
 TypeListBox.RowSource = TypeSpecificDefaultsRange.address(external:=True)
 
 '' LOCATION
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 1), Worksheets("Non-Specific Defaults").Cells(empty_row, 1))
 LocationListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' ROOM
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 2).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 2).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 2), Worksheets("Non-Specific Defaults").Cells(empty_row, 2))
 RoomListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' AUDIENCE
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 5).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 5).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 5), Worksheets("Non-Specific Defaults").Cells(empty_row, 5))
 AudienceListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
    
 '' AUDITORIUM LAYOUT
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
 AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
 '' EGREMONT LAYOUT
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
 EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
 
@@ -622,7 +803,7 @@ End If
 Dim my_row As Long
 If mode = False Then
     ' Next available row
-    my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).Row + 1
+    my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row + 1
 ElseIf mode = True Then
     ' Row corresponds to the row of the event selected by the user
     my_row = funcs.search(SearchBox.Text, "Data")(0)
@@ -670,9 +851,13 @@ Worksheets(sheet).Cells(my_row, 33) = TotalCapacityTextBox.Text
 Worksheets(sheet).Cells(my_row, 34) = BlockedSeatsTextBox.Text
 
 ' Time
-If SetupStartTimeTextBox.Text <> "" Then
-    Worksheets(sheet).Cells(my_row, 8) = TimeValue(SetupStartTimeTextBox)
-End If
+Worksheets(sheet).Cells(my_row, 8) = TimeValue(SetupStartTimeTextBox)
+Worksheets(sheet).Cells(my_row, 47) = TimeValue(DoorsTimeTextBox)
+Worksheets(sheet).Cells(my_row, 9) = TimeValue(EventStartTimeTextBox)
+Worksheets(sheet).Cells(my_row, 10) = TimeValue(EventEndTimeTextBox)
+Worksheets(sheet).Cells(my_row, 11) = TimeValue(TakedownEndTimeTextBox)
+Worksheets(sheet).Cells(my_row, 13) = EventDurationTextBox
+Worksheets(sheet).Cells(my_row, 12) = SetupToTakedownEndDurationTextBox
 
 ' Costs & Income
 Worksheets(sheet).Cells(my_row, 14) = NumTicketsSoldTextBox.Text
@@ -700,7 +885,7 @@ Dim empty_row As Long
 Dim ListBoxRange As Range
 
 ' Find last non-empty row for auditorium layout list
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).row
 
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
@@ -717,7 +902,7 @@ Dim empty_row As Long
 Dim ListBoxRange As Range
 
 ' Find last non-empty row for auditorium layout list
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).Row
+empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).row
 
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
@@ -878,7 +1063,7 @@ dataSheetName = "Data"
 If mode = "Selected" Then
     my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
 ElseIf mode = "Previous" Then
-    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).Row
+    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).row
 Else
     MsgBox ("Programmer error in Private Sub ImportFromTicketsolve")
     Exit Sub
@@ -986,7 +1171,7 @@ dataSheetName = "Data"
 If mode = "Selected" Then
     my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
 ElseIf mode = "Previous" Then
-    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).Row
+    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).row
 Else
     MsgBox ("Programmer error in Private Sub ImportFromZettle")
     Exit Sub
