@@ -229,10 +229,15 @@ Private Sub BlockedSeatsTextBox_Change()
 Call InptValid.SanitiseNonNegInt(BlockedSeatsTextBox, BlockedSeats)
 End Sub
 
-' Time============================================================================
-Private Sub SetupStartTimeTextBox_Change()
-
+Private Sub BlockedSeatsTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Stop it from being left blank
+If BlockedSeatsTextBox.Text = "" Then
+    BlockedSeatsTextBox.Text = 0
+End If
 End Sub
+
+' Time============================================================================
+
 Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(SetupStartTimeTextBox, SetupStartTime)
@@ -326,11 +331,11 @@ DoorsTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 11), _
     EventStartTimeTextBox.Text), "hh:mm")
 
 ' Change event end time
-EventEndTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 10), _
+EventEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text, _
     EventStartTimeTextBox.Text), "hh:mm")
 
 ' Change takedown time
-TakedownEndTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 10) + _
+TakedownEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text + _
     Worksheets(sheet).Cells(row, 12), EventStartTimeTextBox.Text), "hh:mm")
 End Sub
 
@@ -371,6 +376,17 @@ End Sub
 Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(TakedownEndTimeTextBox, TakedownEndTime)
+
+' No end time
+If TakedownEndTimeTextBox.Text = "" Then
+    Exit Sub
+' Both start and end time
+ElseIf TakedownEndTimeTextBox.Text <> "" And SetupStartTimeTextBox.Text <> "" Then
+    SetupToTakedownEndDurationTextBox.Text = (CDate(TakedownEndTimeTextBox.Text) - _
+        CDate(SetupStartTimeTextBox.Text)) * 24 * 60
+Else ' End time only
+    
+End If
 End Sub
 
 Private Sub EventDurationTextBox_Change()
@@ -385,41 +401,73 @@ sheet = "Type-Specific Defaults"
 Dim row As Integer
 row = TypeListBox.ListIndex + 2
 
-If EventStartTimeTextBox.Text = "" And EventEndTimeTextBox.Text = "" Then
+Dim takedownDuration As Integer
+
+' Event duration is blank, so exit sub
+If EventDurationTextBox.Text = "" Then
     Exit Sub
-ElseIf EventDurationTextBox.Text = "" Then
-    Exit Sub
+' No start or end time
+ElseIf EventStartTimeTextBox.Text = "" And EventEndTimeTextBox.Text = "" Then
+    ' Don't complete this if statement
+    
+' No start time, but there is an end time
 ElseIf EventStartTimeTextBox.Text = "" Then
     ' Set start time according to end time
     EventStartTimeTextBox.Text = Format(DateAdd("n", -EventDurationTextBox.Text, _
         EventEndTimeTextBox.Text), "hh:mm")
-Else
-    Dim TakedownTime As Integer
+Else ' Is a start time, may or may not be an end time. Will be by the end
     
-    ' Work out takedown duration
-    If EventEndTimeTextBox.Text = "" Then
-        TakedownTime = Worksheets(sheet).Cells(row, 12)
+    ' Find takedown duration
+    If EventEndTimeTextBox.Text = "" Then ' No end time, so use default
+        takedownDuration = Worksheets(sheet).Cells(row, 12)
     Else
-        TakedownTime = (CDate(TakedownEndTimeTextBox.Text) - _
+        ' Use start and end time to find takedown duration
+        takedownDuration = (CDate(TakedownEndTimeTextBox.Text) - _
             CDate(EventEndTimeTextBox.Text)) * 24 * 60
-            
-        TakedownEndTimeTextBox.Text = Format(DateAdd("n", TakedownTime, _
-            EventEndTimeTextBox.Text), "hh:mm")
     End If
     
     ' Set end time according to start time
     EventEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text, _
         EventStartTimeTextBox.Text), "hh:mm")
         
-    ' Set takedown end time according to start time
-    TakedownEndTimeTextBox.Text = Format(DateAdd("n", TakedownTime, _
+    ' Set takedown end time according to end time and takedown duration
+    TakedownEndTimeTextBox.Text = Format(DateAdd("n", takedownDuration, _
         EventEndTimeTextBox.Text), "hh:mm")
 End If
 
-If SetupStartTimeTextBox.Text <> "" Then
+' Can get here without a start or end time
+
+' Now we want to know the setup to takedown complete duration
+
+Dim setupDuration As Integer
+
+' Change setup to takedown end duration
+If SetupStartTimeTextBox.Text <> "" And TakedownEndTimeTextBox.Text <> "" Then
     SetupToTakedownEndDurationTextBox.Text = (CDate(TakedownEndTimeTextBox.Text) - _
             CDate(SetupStartTimeTextBox.Text)) * 24 * 60
+    ' We've found ideal setup to takedown end duration, so no need to continue
+    Exit Sub
 End If
+
+' Find setup duration
+If SetupStartTimeTextBox.Text <> "" And EventStartTimeTextBox.Text <> "" Then
+    setupDuration = (CDate(EventStartTimeTextBox.Text) - _
+        CDate(SetupStartTimeTextBox.Text)) * 24 * 60
+Else
+    setupDuration = Worksheets(sheet).Cells(row, 9)
+End If
+
+' Find takedown duration
+If EventEndTimeTextBox.Text <> "" And TakedownEndTimeTextBox.Text <> "" Then
+    takedownDuration = (CDate(TakedownEndTimeTextBox.Text) - _
+            CDate(EventEndTimeTextBox.Text)) * 24 * 60
+Else
+    takedownDuration = Worksheets(sheet).Cells(row, 12)
+End If
+
+SetupToTakedownEndDurationTextBox.Text = setupDuration + _
+    EventDurationTextBox.Text + takedownDuration
+
 End Sub
 
 Private Sub SetupAvailableDurationTextBox_Change()
@@ -533,6 +581,8 @@ End Sub
 Private Sub TypeListBox_Change()
 Dim row As Integer
 row = TypeListBox.ListIndex + 2
+
+Me.MultiPage1.Pages("Page5").Visible = True
 
 EventDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 10)
 SetupToTakedownEndDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 13)
@@ -856,8 +906,8 @@ Worksheets(sheet).Cells(my_row, 47) = TimeValue(DoorsTimeTextBox)
 Worksheets(sheet).Cells(my_row, 9) = TimeValue(EventStartTimeTextBox)
 Worksheets(sheet).Cells(my_row, 10) = TimeValue(EventEndTimeTextBox)
 Worksheets(sheet).Cells(my_row, 11) = TimeValue(TakedownEndTimeTextBox)
-Worksheets(sheet).Cells(my_row, 13) = EventDurationTextBox
-Worksheets(sheet).Cells(my_row, 12) = SetupToTakedownEndDurationTextBox
+Worksheets(sheet).Cells(my_row, 13) = EventDurationTextBox.Text
+Worksheets(sheet).Cells(my_row, 12) = SetupToTakedownEndDurationTextBox.Text
 
 ' Costs & Income
 Worksheets(sheet).Cells(my_row, 14) = NumTicketsSoldTextBox.Text
