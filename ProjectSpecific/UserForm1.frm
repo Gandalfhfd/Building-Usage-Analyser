@@ -50,6 +50,15 @@ Public TakedownEndTime As String
 Public EventDuration As String
 Public SetupAvailableDuration As String
 
+' Volunteer minutes
+Public FoH As String
+Public DM As String
+Public Proj As String
+Public BoxOffice As String
+Public Bar As String
+Public AoWVol As String
+Public MiscVol As String
+
 '' BUTTON CLICKING===============================================================
 
 Private Sub EventButton1_Click()
@@ -88,6 +97,15 @@ Private Sub EventButton4_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
+Private Sub EventButton5_Click()
+Call AddEvent(EditToggleCheckBox1.value)
+End Sub
+
+Private Sub EventButton5_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+' Needed because a double click is counted differently to a single click
+Call AddEvent(EditToggleCheckBox1.value)
+End Sub
+
 Private Sub DeleteButton_Click()
 ' This breaks if EventID is not unique
 
@@ -116,6 +134,9 @@ End If
 
 ' Delete entire row corresponding to selected event
 Sheets("Data").Rows(location(0)).Delete
+
+' Update pivot table(s)
+Call ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
 
 Private Sub ImportSelectedButton_Click()
@@ -216,6 +237,10 @@ Private Sub EgremontCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
+End Sub
+
+Private Sub TextBox1_Change()
+
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -575,19 +600,57 @@ Private Sub BarMarginTextBox_Change()
 Call InptValid.SanitisePercentage(BarMarginTextBox, BarMargin)
 End Sub
 
+' Volunteer Minutes==================================================================
+Private Sub FoHTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(FoHTextBox, FoH)
+End Sub
+
+Private Sub DMTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(DMTextBox, DM)
+End Sub
+
+Private Sub ProjTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(ProjTextBox, Proj)
+End Sub
+
+Private Sub BoxOfficeTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(BoxOfficeTextBox, BoxOffice)
+End Sub
+
+Private Sub BarTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(BarTextBox, Bar)
+End Sub
+
+Private Sub AoWVolTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(AoWVolTextBox, AoWVol)
+End Sub
+
+Private Sub MiscVolTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(MiscVolTextBox, MiscVol)
+End Sub
 '' LIST BOXES===============================================================
 
 Private Sub TypeListBox_Change()
+Dim TypeDefaultsSheet As String
+TypeDefaultsSheet = "Type-Specific Defaults"
+
 ' What row we're looking at
 Dim row As Integer
 row = TypeListBox.ListIndex + 2
 
 ' Show the time page
-Me.MultiPage1.Pages("Page5").Visible = True
+Me.MultiPage1.Pages("Page4").Visible = True
 
 ' Change some timing boxes
-EventDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 10)
-SetupToTakedownEndDurationTextBox.Text = Worksheets("Type-Specific Defaults").Cells(row, 13)
+EventDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 10)
+SetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 13)
 
 ' Show the genres if applicable
 If TypeListBox.value = "Live Music" Then
@@ -598,6 +661,14 @@ Else
     GenreLabel.Visible = False
 End If
 
+' Set volunteer minutes to defaults found in Type-Specific Defaults
+FoHTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 3)
+DMTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 4)
+ProjTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 5)
+BoxOfficeTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 6)
+BarTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 7)
+AoWVolTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 8)
+MiscVolTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 14)
 End Sub
 
 Private Sub LocationListBox_Change()
@@ -736,6 +807,11 @@ End Sub
 Private Sub EditToggleCheckBox4_Click()
 ' Change some button captions and checkbox values
 Call ToggleEditMode(EditToggleCheckBox4.value)
+End Sub
+
+Private Sub EditToggleCheckBox5_Click()
+' Change some button captions and checkbox values
+Call ToggleEditMode(EditToggleCheckBox5.value)
 End Sub
 
 '' FUNCTIONS===============================================================
@@ -946,6 +1022,19 @@ If BarMarginTextBox.Text <> "" Then
     Worksheets(sheet).Cells(my_row, 26) = CDbl(BarMarginTextBox.Text) * 0.01 ' convert percentage into decimal
 End If
 
+' Volunteer Minutes
+Worksheets(sheet).Cells(my_row, 18) = FoHTextBox.Text
+Worksheets(sheet).Cells(my_row, 19) = DMTextBox.Text
+Worksheets(sheet).Cells(my_row, 20) = ProjTextBox.Text
+Worksheets(sheet).Cells(my_row, 21) = BoxOfficeTextBox.Text
+Worksheets(sheet).Cells(my_row, 22) = BarTextBox.Text
+Worksheets(sheet).Cells(my_row, 23) = AoWVolTextBox.Text
+Worksheets(sheet).Cells(my_row, 49) = MiscVolTextBox.Text
+
+
+' Update pivot table(s)
+Call ChangeSource(sheet, "Analysis", "PivotTable1")
+
 MsgBox ("Event Added")
 End Function
 
@@ -1099,24 +1188,28 @@ If state = True Then
     EventButton2.Caption = "Edit Selected Event"
     EventButton3.Caption = "Edit Selected Event"
     EventButton4.Caption = "Edit Selected Event"
+    EventButton5.Caption = "Edit Selected Event"
     
     ' Tick all of the other edit checkboxes
     EditToggleCheckBox1.value = True
     EditToggleCheckBox2.value = True
     EditToggleCheckBox3.value = True
     EditToggleCheckBox4.value = True
+    EditToggleCheckBox5.value = True
 ElseIf state = False Then
     ' Update captions
     EventButton1.Caption = "Add New Event"
     EventButton2.Caption = "Add New Event"
     EventButton3.Caption = "Add New Event"
     EventButton4.Caption = "Add New Event"
-    
+    EventButton5.Caption = "Add New Event"
+
     ' Untick all of the other edit checkboxes
     EditToggleCheckBox1.value = False
     EditToggleCheckBox2.value = False
     EditToggleCheckBox3.value = False
     EditToggleCheckBox4.value = False
+    EditToggleCheckBox5.value = False
 End If
 End Sub
 
@@ -1224,6 +1317,9 @@ End If
 Dim trueCapacity As Integer
 trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 15) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
 Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
+
+' Update pivot table(s)
+Call ChangeSource(dataSheetName, "Analysis", "PivotTable1")
 End Sub
 
 Private Sub ImportFromZettle(mode As String)
@@ -1272,6 +1368,7 @@ Private Sub ZettleImportButton_Click()
 '' Function not written yet
 'Call ImportFromZettle("Selected")
 
+' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
 
