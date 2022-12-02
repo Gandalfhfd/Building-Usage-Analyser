@@ -1011,6 +1011,7 @@ Worksheets(sheet).Cells(my_row, 14) = NumTicketsSoldTextBox.Text
 Worksheets(sheet).Cells(my_row, 42) = BoxOfficeRevenueTextBox.Text
 Worksheets(sheet).Cells(my_row, 44) = SupportRevenueTextBox.Text
 Worksheets(sheet).Cells(my_row, 35) = FilmCostTextBox.Text
+Worksheets(sheet).Cells(my_row, 36) = FilmTransportTextBox.Text
 Worksheets(sheet).Cells(my_row, 37) = AccommodationTextBox.Text
 Worksheets(sheet).Cells(my_row, 38) = ArtistFoodTextBox.Text
 Worksheets(sheet).Cells(my_row, 39) = HeatingTextBox.Text
@@ -1274,7 +1275,7 @@ If tempSuccessCheck = False Then
 End If
 
 ' Find event capacity
-exportCell(1) = 15
+exportCell(1) = 33
 tempSuccessCheck = ImportCell("Capacity", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
@@ -1315,7 +1316,7 @@ End If
 
 ' Determine actual capacity and write it to a cell
 Dim trueCapacity As Integer
-trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 15) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
+trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 33) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
 Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
 
 ' Update pivot table(s)
