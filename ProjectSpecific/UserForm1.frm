@@ -13,7 +13,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Option Explicit
 
 ' Used to prevent unecessary refreshing of ListBoxes
@@ -674,47 +673,47 @@ Dim NonSpecificDefaultsRange As Range
 ' EVENT ID
 empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
 Set DataRange = Range(Worksheets("Data").Cells(2, 1), Worksheets("Data").Cells(empty_row, 1))
-EventIDListBox.RowSource = DataRange.address(external:=True)
+EventIDListBox.RowSource = DataRange.address(External:=True)
 
 '' CATEGORY
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 4).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 4), Worksheets("Non-Specific Defaults").Cells(empty_row, 4))
-CategoryListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+CategoryListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
 
 '' TYPE
 empty_row = Worksheets("Type-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).row
 Set TypeSpecificDefaultsRange = Range(Worksheets("Type-Specific Defaults").Cells(2, 1), Worksheets("Type-Specific Defaults").Cells(empty_row, 1))
-TypeListBox.RowSource = TypeSpecificDefaultsRange.address(external:=True)
+TypeListBox.RowSource = TypeSpecificDefaultsRange.address(External:=True)
 
 '' LOCATION
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 1), Worksheets("Non-Specific Defaults").Cells(empty_row, 1))
-LocationListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+LocationListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
 
 '' ROOM
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 2).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 2), Worksheets("Non-Specific Defaults").Cells(empty_row, 2))
-RoomListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+RoomListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
 
 '' GENRE
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 13).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 13), Worksheets("Non-Specific Defaults").Cells(empty_row, 13))
-GenreListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+GenreListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
 
 '' AUDIENCE
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 5).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 5), Worksheets("Non-Specific Defaults").Cells(empty_row, 5))
-AudienceListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+AudienceListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
    
 '' AUDITORIUM LAYOUT
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
-AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
 
 '' EGREMONT LAYOUT
 empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).row
 Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
-EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(external:=True)
+EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
 
 End Sub
 
@@ -961,7 +960,7 @@ empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).r
 
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
-AuditoriumLayoutListBox.RowSource = ListBoxRange.address(external:=True)
+AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
 AuditoriumCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
@@ -978,7 +977,7 @@ empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).r
 
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
-EgremontLayoutListBox.RowSource = ListBoxRange.address(external:=True)
+EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
 EgremontCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
@@ -996,7 +995,7 @@ Private Function AuditoriumNotUsed()
 Dim ListBoxRange As Range
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
                     Worksheets("Non-Specific Defaults").Cells(2, 6))
-AuditoriumLayoutListBox.RowSource = ListBoxRange.address(external:=True)
+AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
 AuditoriumCapacityTextBox.Locked = True
 AuditoriumCapacityTextBox.value = "0"
@@ -1008,7 +1007,7 @@ Private Function EgremontNotUsed()
 Dim ListBoxRange As Range
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
                     Worksheets("Non-Specific Defaults").Cells(2, 8))
-EgremontLayoutListBox.RowSource = ListBoxRange.address(external:=True)
+EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
 EgremontCapacityTextBox.Locked = True
 EgremontCapacityTextBox = "0"
@@ -1270,6 +1269,45 @@ End If
 End Sub
 
 Private Sub ZettleImportButton_Click()
-' Function not written yet
-Call ImportFromZettle("Selected")
+'' Function not written yet
+'Call ImportFromZettle("Selected")
+
+Call ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
+
+Private Function ChangeSource(dataSheetName As String, pivotSheetName As String, pivotName As String) As Boolean
+'PURPOSE: Automatically readjust a Pivot Table's data source range
+'SOURCE: www.TheSpreadsheetGuru.com/The-Code-Vault
+' NOTE: do NOT select "Add this data to the data model" when creating the pivot table.
+
+Dim Data_Sheet As Worksheet
+Dim Pivot_Sheet As Worksheet
+Dim StartPoint As Range
+Dim DataRange As Range
+Dim NewRange As String
+Dim LastCol As Long
+Dim lastRow As Long
+Dim DownCell As Long
+
+'Set Pivot Table & Source Worksheet
+Set Data_Sheet = ThisWorkbook.Worksheets(dataSheetName)
+Set Pivot_Sheet = ThisWorkbook.Worksheets(pivotSheetName)
+
+'Dynamically Retrieve Range Address of Data
+Set StartPoint = Data_Sheet.Range("A1")
+LastCol = StartPoint.End(xlToRight).Column
+DownCell = StartPoint.End(xlDown).row
+Set DataRange = Data_Sheet.Range(StartPoint, Data_Sheet.Cells(DownCell, LastCol))
+'Set DataRange = Data_Sheet.Range(StartPoint, Cells(42, 46))
+
+NewRange = Data_Sheet.name & "!" & DataRange.address(ReferenceStyle:=xlR1C1)
+
+'Change Pivot Table Data Source Range Address
+Pivot_Sheet.PivotTables(pivotName). _
+ChangePivotCache ActiveWorkbook. _
+PivotCaches.Create(SourceType:=xlDatabase, SourceData:=NewRange)
+
+ 'Ensure Pivot Table is Refreshed
+Pivot_Sheet.PivotTables(pivotName).RefreshTable
+
+End Function
