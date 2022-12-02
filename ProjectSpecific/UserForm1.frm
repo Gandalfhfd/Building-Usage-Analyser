@@ -1019,6 +1019,18 @@ Worksheets(sheet).Cells(my_row, 40) = LightingTextBox.Text
 Worksheets(sheet).Cells(my_row, 41) = MiscCostTextBox.Text
 Worksheets(sheet).Cells(my_row, 25) = BarRevenueTextBox.Text
 
+' We need to be selling tickets ourselves and have positive box office revenue
+'   and know how many tickets we've sold
+If TicketedOptionButton.value = True And BoxOfficeRevenueTextBox.Text > 0 _
+    And NumTicketsSoldTextBox.Text <> "" Then
+    
+    ' Calculate Ticketsolve fee estimate
+    ' 80p per ticket sold
+    Worksheets(sheet).Cells(my_row, 51) = 0.8 * NumTicketsSoldTextBox.Text
+    Worksheets(sheet).Cells(my_row, 50) = BoxOfficeRevenueTextBox.Text - _
+        0.8 * NumTicketsSoldTextBox.Text
+End If
+
 If BarMarginTextBox.Text <> "" Then
     Worksheets(sheet).Cells(my_row, 26) = CDbl(BarMarginTextBox.Text) * 0.01 ' convert percentage into decimal
 End If
@@ -1260,11 +1272,12 @@ End If
 Dim succeeded As Boolean
 succeeded = True
 
-'Find total number of ticket sales
+
 Dim tempSuccessCheck As Boolean
-Dim exportCell() As Variant
+Dim exportCell() As Variant ' stores the cell we're working on
 Dim offset() As Variant
 
+'Find total number of ticket sales
 exportCell = Array(my_row, 14)
 offset = Array(0, 1)
 
@@ -1317,7 +1330,22 @@ End If
 ' Determine actual capacity and write it to a cell
 Dim trueCapacity As Integer
 trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 33) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
-Worksheets(dataSheetName).Cells(exportCell(0), 45) = trueCapacity
+Worksheets(dataSheetName).Cells(my_row, 45) = trueCapacity
+
+' Find Ticketsolve fees and revenue after fees
+
+' We need to be selling tickets ourselves and have positive box office revenue
+'   and know how many tickets we've sold
+If Worksheets(dataSheetName).Cells(my_row, 46) = True And _
+    Worksheets(dataSheetName).Cells(my_row, 42) > 0 And _
+    Worksheets(dataSheetName).Cells(my_row, 14) <> "" Then
+    
+    ' Calculate Ticketsolve fee estimate
+    ' 80p per ticket sold
+    Worksheets(dataSheetName).Cells(my_row, 51) = 0.8 * Worksheets(dataSheetName).Cells(my_row, 14)
+    Worksheets(dataSheetName).Cells(my_row, 50) = Worksheets(dataSheetName).Cells(my_row, 42) - _
+        0.8 * Worksheets(dataSheetName).Cells(my_row, 14)
+End If
 
 ' Update pivot table(s)
 Call ChangeSource(dataSheetName, "Analysis", "PivotTable1")
