@@ -42,6 +42,7 @@ Public BarRevenue As String
 Public BarMargin As String
 
 ' Time
+' Event Time
 Public SetupStartTime As String
 Public DoorsTime As String
 Public EventStartTime As String
@@ -50,6 +51,13 @@ Public TakedownEndTime As String
 Public EventDuration As String
 Public SetupAvailableDuration As String
 Public SetupTakedown As String
+'Bar Time
+Public BarSetupTime As String
+Public BarOpenTime As String
+Public BarCloseTime As String
+Public BarOpenDuration As String
+Public BarSetupToTakedownEndDuration As String
+Public BarSetupTakedown As String
 
 ' Volunteer minutes
 Public FoH As String
@@ -359,6 +367,15 @@ EventEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text, _
 ' Change takedown time
 TakedownEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text + _
     Worksheets(sheet).Cells(row, 12), EventStartTimeTextBox.Text), "hh:mm")
+    
+' BAR
+' Change bar setup start time
+BarSetupTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15) - _
+    Worksheets(sheet).Cells(row, 16), EventStartTimeTextBox.Text), "hh:mm")
+
+' Change bar open time
+BarOpenTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15), _
+    EventStartTimeTextBox.Text), "hh:mm")
 End Sub
 
 Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
@@ -503,6 +520,36 @@ Private Sub SetupTakedownTextBox_Change()
 
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(SetupTakedownTextBox, SetupTakedown)
+End Sub
+
+Private Sub BarSetupTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(BarSetupTimeTextBox, BarSetupTime)
+End Sub
+
+Private Sub BarOpenTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(BarOpenTimeTextBox, BarOpenTime)
+End Sub
+
+Private Sub BarCloseTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
+Call InptValid.Sanitise24Hr(BarCloseTimeTextBox, BarCloseTime)
+End Sub
+
+Private Sub BarOpenDurationTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(BarOpenDurationTextBox, BarOpenDuration)
+End Sub
+
+Private Sub BarSetupToTakedownEndDurationTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(BarSetupToTakedownEndDurationTextBox, BarSetupToTakedownEndDuration)
+End Sub
+
+Private Sub BarSetupTakedownTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(BarSetupTakedownTextBox, BarSetupTakedown)
 End Sub
 
 ' Costs & Income============================================================================
@@ -655,10 +702,17 @@ row = TypeListBox.ListIndex + 2
 Me.MultiPage1.Pages("Page4").Visible = True
 
 ' Change some timing boxes
+' Event
 EventDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 10)
 SetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 13)
 SetupTakedownTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 9) + _
                             Worksheets(TypeDefaultsSheet).Cells(row, 12)
+' Bar
+BarOpenDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 15)
+BarSetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 15) + _
+    Worksheets(TypeDefaultsSheet).Cells(row, 16) + Worksheets(TypeDefaultsSheet).Cells(row, 17)
+BarSetupTakedownTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 16) + _
+                                Worksheets(TypeDefaultsSheet).Cells(row, 17)
 
 ' Show the genres if applicable
 If TypeListBox.value = "Live Music" Then
