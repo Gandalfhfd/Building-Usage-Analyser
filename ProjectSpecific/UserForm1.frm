@@ -68,6 +68,15 @@ Public Bar As String
 Public AoWVol As String
 Public MiscVol As String
 
+Private Sub BarOpenOptionButton_Change()
+' Hide the bar stuff if it isn't needed.
+If BarOpenOptionButton = True Then
+    BarTimeFrame.Visible = True
+Else
+    BarTimeFrame.Visible = False
+End If
+End Sub
+
 '' BUTTON CLICKING===============================================================
 
 Private Sub EventButton1_Click()
@@ -215,6 +224,7 @@ End Sub
 
 Private Sub ClearTimeButton_Click()
 ' Clear all input from Time tab
+' Event
 SetupStartTimeTextBox.Text = ""
 DoorsTimeTextBox.Text = ""
 EventStartTimeTextBox.Text = ""
@@ -223,6 +233,13 @@ TakedownEndTimeTextBox.Text = ""
 EventDurationTextBox.Text = ""
 SetupToTakedownEndDurationTextBox.Text = ""
 SetupTakedownTextBox.Text = ""
+' Bar
+BarSetupTimeTextBox.Text = ""
+BarOpenTimeTextBox.Text = ""
+BarCloseTimeTextBox.Text = ""
+BarOpenDurationTextBox.Text = ""
+BarSetupToTakedownEndDurationTextBox.Text = ""
+BarSetupTakedownTextBox.Text = ""
 End Sub
 
 '' TEXT BOXES===============================================================
@@ -376,6 +393,9 @@ BarSetupTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15)
 ' Change bar open time
 BarOpenTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15), _
     EventStartTimeTextBox.Text), "hh:mm")
+    
+' Change bar close time
+BarCloseTimeTextBox.Text = EventStartTimeTextBox.Text
 End Sub
 
 Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
@@ -925,6 +945,7 @@ Private Function AddEvent(mode As Boolean)
 ' mode = False = Edit event
 
 ' Check whether the required information has been completed or not
+' Basic Info
 If mode = True And EventIDListBox.ListIndex = -1 Then
     MsgBox ("You are in edit mode. Please select an event to edit on the Home page")
     Exit Function
@@ -968,6 +989,7 @@ ElseIf GenreListBox.Visible = True And GenreListBox.ListIndex = -1 Then
     MsgBox ("Please enter a genre")
     MultiPage1.value = 1
     Exit Function
+' Layout & Capacity
 ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
     MsgBox ("Please enter a layout for the Auditorium")
     MultiPage1.value = 2 ' Take the user to the layouts page
@@ -976,6 +998,7 @@ ElseIf EgremontLayoutListBox.ListIndex = -1 Then
     MsgBox ("Please enter a layout for the Egremont Room")
     MultiPage1.value = 2 ' Take the user to the layouts page
     Exit Function
+' Event Time
 ElseIf SetupStartTimeTextBox.Text = "" Then
     MsgBox ("Please enter a setup start time")
     MultiPage1.value = 3
@@ -1004,6 +1027,10 @@ ElseIf SetupToTakedownEndDurationTextBox.Text = "" Then
     MsgBox ("Please enter the duration of the event from the start " _
             & "of setup to when takedown finishes in minutes")
     MultiPage1.value = 3
+    Exit Function
+ElseIf BarOpenOptionButton = True And BarOpenDurationTextBox.Text = "" Then
+    MsgBox ("You have selected that the bar is/was open. " & _
+            "Please enter the number of minutes it is/was open for.")
     Exit Function
 Else ' The user is allowed to create a new event
 End If
@@ -1061,6 +1088,7 @@ Worksheets(sheet).Cells(my_row, 34) = BlockedSeatsTextBox.Text
 Worksheets(sheet).Cells(my_row, 45) = TotalCapacityTextBox.Text - BlockedSeatsTextBox.Text
 
 ' Time
+' Event
 Worksheets(sheet).Cells(my_row, 8) = TimeValue(SetupStartTimeTextBox)
 Worksheets(sheet).Cells(my_row, 47) = TimeValue(DoorsTimeTextBox)
 Worksheets(sheet).Cells(my_row, 9) = TimeValue(EventStartTimeTextBox)
@@ -1069,6 +1097,30 @@ Worksheets(sheet).Cells(my_row, 11) = TimeValue(TakedownEndTimeTextBox)
 Worksheets(sheet).Cells(my_row, 13) = EventDurationTextBox.Text
 Worksheets(sheet).Cells(my_row, 12) = SetupToTakedownEndDurationTextBox.Text
 Worksheets(sheet).Cells(my_row, 15) = SetupTakedownTextBox.Text
+' Bar
+If BarOpenOptionButton = True Then
+    ' TimeValue throws an error if text box is empty
+    If BarSetupTimeTextBox.Text <> "" Then
+        Worksheets(sheet).Cells(my_row, 54) = TimeValue(BarSetupTimeTextBox.Text)
+    End If
+    If BarOpenTimeTextBox.Text <> "" Then
+        Worksheets(sheet).Cells(my_row, 55) = TimeValue(BarOpenTimeTextBox.Text)
+    End If
+    If BarCloseTimeTextBox.Text <> "" Then
+        Worksheets(sheet).Cells(my_row, 56) = TimeValue(BarCloseTimeTextBox.Text)
+    End If
+        
+    Worksheets(sheet).Cells(my_row, 57) = BarOpenDurationTextBox.Text
+    Worksheets(sheet).Cells(my_row, 58) = BarSetupToTakedownEndDurationTextBox.Text
+    Worksheets(sheet).Cells(my_row, 59) = BarSetupTakedownTextBox.Text
+    
+    ' Bar profit per hour
+    If Worksheets(sheet).Cells(my_row, 55) > 0 Then
+        Worksheets(sheet).Cells(my_row, 60) = "=RC[-33]*60/RC[-3]"
+    End If
+Else
+    ' the bar isn't/wasn't open, so enter nothing
+End If
 
 ' Costs & Income
 Worksheets(sheet).Cells(my_row, 14) = NumTicketsSoldTextBox.Text
