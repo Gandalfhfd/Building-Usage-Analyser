@@ -49,6 +49,7 @@ Public EventEndTime As String
 Public TakedownEndTime As String
 Public EventDuration As String
 Public SetupAvailableDuration As String
+Public SetupTakedown As String
 
 ' Volunteer minutes
 Public FoH As String
@@ -213,6 +214,7 @@ EventEndTimeTextBox.Text = ""
 TakedownEndTimeTextBox.Text = ""
 EventDurationTextBox.Text = ""
 SetupToTakedownEndDurationTextBox.Text = ""
+SetupTakedownTextBox.Text = ""
 End Sub
 
 '' TEXT BOXES===============================================================
@@ -237,10 +239,6 @@ Private Sub EgremontCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
-End Sub
-
-Private Sub TextBox1_Change()
-
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -499,6 +497,14 @@ Private Sub SetupAvailableDurationTextBox_Change()
 Call InptValid.SanitiseNonNegInt(SetupAvailableDurationTextBox, SetupAvailableDuration)
 End Sub
 
+Private Sub SetupTakedownTextBox_Change()
+' This box shouldn't affect anything else, but should be affected
+'   by other timings in a minor way.
+
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(SetupTakedownTextBox, SetupTakedown)
+End Sub
+
 ' Costs & Income============================================================================
 Private Sub NumTicketsSoldTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
@@ -651,6 +657,8 @@ Me.MultiPage1.Pages("Page4").Visible = True
 ' Change some timing boxes
 EventDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 10)
 SetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 13)
+SetupTakedownTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 9) + _
+                            Worksheets(TypeDefaultsSheet).Cells(row, 12)
 
 ' Show the genres if applicable
 If TypeListBox.value = "Live Music" Then
@@ -996,6 +1004,7 @@ Worksheets(sheet).Cells(my_row, 31) = EgremontLayoutListBox.value
 Worksheets(sheet).Cells(my_row, 32) = AuditoriumLayoutListBox.value
 Worksheets(sheet).Cells(my_row, 33) = TotalCapacityTextBox.Text
 Worksheets(sheet).Cells(my_row, 34) = BlockedSeatsTextBox.Text
+Worksheets(sheet).Cells(my_row, 45) = TotalCapacityTextBox.Text - BlockedSeatsTextBox.Text
 
 ' Time
 Worksheets(sheet).Cells(my_row, 8) = TimeValue(SetupStartTimeTextBox)
@@ -1005,6 +1014,7 @@ Worksheets(sheet).Cells(my_row, 10) = TimeValue(EventEndTimeTextBox)
 Worksheets(sheet).Cells(my_row, 11) = TimeValue(TakedownEndTimeTextBox)
 Worksheets(sheet).Cells(my_row, 13) = EventDurationTextBox.Text
 Worksheets(sheet).Cells(my_row, 12) = SetupToTakedownEndDurationTextBox.Text
+Worksheets(sheet).Cells(my_row, 15) = SetupTakedownTextBox.Text
 
 ' Costs & Income
 Worksheets(sheet).Cells(my_row, 14) = NumTicketsSoldTextBox.Text
@@ -1019,6 +1029,11 @@ Worksheets(sheet).Cells(my_row, 40) = LightingTextBox.Text
 Worksheets(sheet).Cells(my_row, 41) = MiscCostTextBox.Text
 Worksheets(sheet).Cells(my_row, 25) = BarRevenueTextBox.Text
 
+Dim TotalCosts As Double ' Total costs
+Dim TotalRevenueExcBar As Double ' Total revenue minus bar
+Dim TotalRevenueIncBar As Double ' Total revenue including bar
+
+TotalCosts = BoxOfficeRevenueTextBox.Text + 0
 ' We need to be selling tickets ourselves and have positive box office revenue
 '   and know how many tickets we've sold
 If TicketedOptionButton.value = True And BoxOfficeRevenueTextBox.Text > 0 _
@@ -1034,6 +1049,11 @@ End If
 If BarMarginTextBox.Text <> "" Then
     Worksheets(sheet).Cells(my_row, 26) = CDbl(BarMarginTextBox.Text) * 0.01 ' convert percentage into decimal
 End If
+
+' Calculate contribution to overheads with and without bar
+Worksheets(sheet).Cells(my_row, 52) = _
+        "=RC[-8]+RC[-10]-RC[-1]-RC[-11]-RC[-12]-RC[-13]-RC[-14]-RC[-15]-RC[-16]-RC[-17]"
+Worksheets(sheet).Cells(my_row, 53) = "=RC[-1]+RC[-26]"
 
 ' Volunteer Minutes
 Worksheets(sheet).Cells(my_row, 18) = FoHTextBox.Text
