@@ -29,17 +29,19 @@ Public BlockedSeats As String
 Public NumTicketsSold As String
 Public BoxOfficeRevenue As String
 Public SupportRevenue As String ' Revenue from Support the Kirkgate donations
-' Film
-Public FilmCost As String
-Public FilmTransport As String
-Public Accommodation As String
-Public ArtistFood As String
-Public Heating As String
-Public Lighting As String
-Public MiscCost As String
 ' Bar
 Public BarRevenue As String
 Public BarMargin As String
+' Film
+Public FilmCost As String
+Public FilmTransport As String
+' Other
+Public Accommodation As String
+Public ArtistFood As String
+Public HiredPersonnel As String
+Public Heating As String
+Public Lighting As String
+Public MiscCost As String
 
 ' Time
 ' Event Time
@@ -62,7 +64,7 @@ Public BarSetupTakedown As String
 ' Volunteer minutes
 Public FoH As String
 Public DM As String
-Public Proj As String
+Public Tech As String
 Public BoxOffice As String
 Public Bar As String
 Public AoWVol As String
@@ -596,6 +598,20 @@ Private Sub SupportRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 SupportRevenueTextBox.Text = StrManip.Convert2Currency(SupportRevenueTextBox)
 End Sub
 
+Private Sub BarRevenueTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitiseReal(BarRevenueTextBox, BarRevenue)
+End Sub
+
+Private Sub BarRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+BarRevenueTextBox.Text = StrManip.Convert2Currency(BarRevenueTextBox)
+End Sub
+
+Private Sub BarMarginTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitisePercentage(BarMarginTextBox, BarMargin)
+End Sub
+
 Private Sub FilmCostTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
 Call InptValid.SanitiseReal(FilmCostTextBox, FilmCost)
@@ -659,18 +675,13 @@ Private Sub MiscCostTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 MiscCostTextBox.Text = StrManip.Convert2Currency(MiscCostTextBox)
 End Sub
 
-Private Sub BarRevenueTextBox_Change()
+Private Sub HiredPersonnelTextBox_Change()
 ' Sanitise input to ensure only real numbers are input
-Call InptValid.SanitiseReal(BarRevenueTextBox, BarRevenue)
+Call InptValid.SanitiseReal(HiredPersonnelTextBox, HiredPersonnel)
 End Sub
 
-Private Sub BarRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-BarRevenueTextBox.Text = StrManip.Convert2Currency(BarRevenueTextBox)
-End Sub
-
-Private Sub BarMarginTextBox_Change()
-' Sanitise input to ensure only real numbers are input
-Call InptValid.SanitisePercentage(BarMarginTextBox, BarMargin)
+Private Sub HiredPersonnelTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+HiredPersonnelTextBox.Text = StrManip.Convert2Currency(HiredPersonnelTextBox)
 End Sub
 
 ' Volunteer Minutes==================================================================
@@ -684,9 +695,9 @@ Private Sub DMTextBox_Change()
 Call InptValid.SanitiseNonNegInt(DMTextBox, DM)
 End Sub
 
-Private Sub ProjTextBox_Change()
+Private Sub TechTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
-Call InptValid.SanitiseNonNegInt(ProjTextBox, Proj)
+Call InptValid.SanitiseNonNegInt(TechTextBox, Tech)
 End Sub
 
 Private Sub BoxOfficeTextBox_Change()
@@ -746,7 +757,7 @@ End If
 ' Set volunteer minutes to defaults found in Type-Specific Defaults
 FoHTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 3)
 DMTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 4)
-ProjTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 5)
+TechTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 5)
 BoxOfficeTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 6)
 BarTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 7)
 AoWVolTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 8)
@@ -1157,6 +1168,7 @@ If BarMarginTextBox.Text <> "" Then
 End If
 
 ' Calculate contribution to overheads with and without bar
+' Uneccessary because of pivot table formulae
 Worksheets(sheet).Cells(my_row, 52) = _
         "=RC[-8]+RC[-10]-RC[-1]-RC[-11]-RC[-12]-RC[-13]-RC[-14]-RC[-15]-RC[-16]-RC[-17]"
 Worksheets(sheet).Cells(my_row, 53) = "=RC[-1]+RC[-26]"
@@ -1164,7 +1176,7 @@ Worksheets(sheet).Cells(my_row, 53) = "=RC[-1]+RC[-26]"
 ' Volunteer Minutes
 Worksheets(sheet).Cells(my_row, 18) = FoHTextBox.Text
 Worksheets(sheet).Cells(my_row, 19) = DMTextBox.Text
-Worksheets(sheet).Cells(my_row, 20) = ProjTextBox.Text
+Worksheets(sheet).Cells(my_row, 20) = TechTextBox.Text
 Worksheets(sheet).Cells(my_row, 21) = BoxOfficeTextBox.Text
 Worksheets(sheet).Cells(my_row, 22) = BarTextBox.Text
 Worksheets(sheet).Cells(my_row, 23) = AoWVolTextBox.Text
@@ -1190,6 +1202,9 @@ Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
 AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
+' Set default value
+AuditoriumLayoutListBox.ListIndex = 1
+
 AuditoriumCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
 End Function
@@ -1206,6 +1221,9 @@ empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).r
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
 EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
+
+' Set default value
+EgremontLayoutListBox.ListIndex = 2
 
 EgremontCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
@@ -1225,6 +1243,9 @@ Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
                     Worksheets("Non-Specific Defaults").Cells(2, 6))
 AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
+' Set default value
+AuditoriumLayoutListBox.ListIndex = 0
+
 AuditoriumCapacityTextBox.Locked = True
 AuditoriumCapacityTextBox.value = "0"
 End Function
@@ -1236,6 +1257,9 @@ Dim ListBoxRange As Range
 Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
                     Worksheets("Non-Specific Defaults").Cells(2, 8))
 EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
+
+' Set default value
+EgremontLayoutListBox.ListIndex = 0
 
 EgremontCapacityTextBox.Locked = True
 EgremontCapacityTextBox = "0"

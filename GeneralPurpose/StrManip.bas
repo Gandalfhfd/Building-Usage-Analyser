@@ -14,7 +14,8 @@ ConvertDate = Join(dateArr, "-")
 End Function
 
 Public Function Convert2Currency(ByVal inputTextBox As Control) As String
-' Convert inputTextBox.value into currency format. Doesn't add "£" on.
+' Convert inputTextBox.value into currency format. Adds "£" on,
+'   but if SanitiseReal is called when inputTextBox gets changed, it will appear to not add "£"/.
 
 If inputTextBox.value = "-" Then
     Convert2Currency = ""
