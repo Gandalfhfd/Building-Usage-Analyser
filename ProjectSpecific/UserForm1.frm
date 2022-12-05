@@ -70,6 +70,25 @@ Public Bar As String
 Public AoWVol As String
 Public MiscVol As String
 
+Private Sub AutofillCheckBox_Click()
+If EventIDListBox.ListIndex = -1 Then
+    ' No event has been selected, so do nothing
+    Exit Sub
+End If
+
+Dim nameLocation As Variant
+nameLocation = funcs.search(EventIDListBox.value, "Data")
+
+If nameLocation(0) = 0 Then
+    MsgBox ("Event ID could not be found. Error in AutofillCheckBox_Click(). Contact support.")
+    Exit Sub
+End If
+
+If AutofillCheckBox.value = True Then
+    Call AutofillFromSelected(nameLocation(0))
+End If
+End Sub
+
 Private Sub BarOpenOptionButton_Change()
 ' Hide the bar stuff if it isn't needed.
 If BarOpenOptionButton = True Then
@@ -145,6 +164,7 @@ End If
 
 ' Store location of row to be deleted
 Dim location As Variant
+MsgBox ("Delete button seach start")
 location = funcs.search(EventIDListBox.value, "Data")
 
 ' Unlikely, but possible that the search fails.
@@ -152,8 +172,26 @@ If location(0) = 0 Then
     MsgBox ("EventID Not found. ")
 End If
 
-' Delete entire row corresponding to selected event
-Sheets("Data").Rows(location(0)).Delete
+Dim my_index As Long
+my_index = EventIDListBox.ListIndex
+
+' Mess with listindex to prevent breakage
+If EventIDListBox.ListCount < 1 Then
+    ' There are no more items, so select nothing
+    EventIDListBox.ListIndex = -1
+    ' Delete entire row corresponding to selected event
+    Sheets("Data").Rows(location(0)).Delete
+ElseIf EventIDListBox.ListCount = my_index + 1 Then
+    EventIDListBox.ListIndex = my_index - 1
+    ' Delete entire row corresponding to selected event
+    Sheets("Data").Rows(location(0)).Delete
+Else
+    EventIDListBox.ListIndex = 0
+    ' Delete entire row corresponding to selected event
+    Sheets("Data").Rows(location(0)).Delete
+    MsgBox ("this is called")
+    EventIDListBox.ListIndex = my_index
+End If
 
 ' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")
@@ -798,19 +836,28 @@ Call CapacityListBoxDecider
 End Sub
 
 Private Sub EventIDListBox_Change()
+' Store name of data sheet
+Dim sheet As String
+sheet = "Data"
 ' Display Event ID in search box
 SearchBox.Text = EventIDListBox.value
 
 Dim nameLocation As Variant
-nameLocation = funcs.search(EventIDListBox.value, "Data")
+nameLocation = funcs.search(EventIDListBox.value, sheet)
+MsgBox ("Search worked")
 
 If nameLocation(0) = 0 Then
-    MsgBox ("Event ID could not be found. YOU SHOULD NOT SEE THIS. ERROR IN EventIDListBox_Change())")
+    MsgBox ("Event ID could not be found. Error in EventIDListBox_Change(). Contact support.")
+    Exit Sub
 End If
 
 ' Display the event name in search box.
 ' It will always be found in the second column, so hard coding is ok.
-NameSearchTextBox.Text = Worksheets("Data").Cells(nameLocation(0), 2)
+NameSearchTextBox.Text = Worksheets(sheet).Cells(nameLocation(0), 2)
+
+' Store row of selected event. Makes things easier to read.
+Dim row As Long
+row = nameLocation(0)
 
 ' So the user always knows which event has been selected.
 ' Might want to hide that if they're not in edit mode, idk.
@@ -819,6 +866,11 @@ EventIDUpdaterLabel2.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel3.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel4.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel5.Caption = "Selected Event ID: " & EventIDListBox.value
+
+If AutofillCheckBox.value = True Then
+    ' Fill in everything with values taken from this event.
+    Call AutofillFromSelected(row)
+End If
 End Sub
 
 '' USERFORM/MULTIPAGE===============================================================
@@ -1090,7 +1142,7 @@ Else
     Worksheets(sheet).Cells(my_row, 46) = "False"
 End If
 Worksheets(sheet).Cells(my_row, 48) = GenreListBox.value
-
+Worksheets(sheet).Cells(my_row, 61) = BarOpenOptionButton.value
 ' Layout & Capacity
 Worksheets(sheet).Cells(my_row, 31) = EgremontLayoutListBox.value
 Worksheets(sheet).Cells(my_row, 32) = AuditoriumLayoutListBox.value
@@ -1186,7 +1238,14 @@ Worksheets(sheet).Cells(my_row, 49) = MiscVolTextBox.Text
 ' Update pivot table(s)
 Call ChangeSource(sheet, "Analysis", "PivotTable1")
 
-MsgBox ("Event Added")
+' Change message depending on mode
+If mode = True Then
+    MsgBox ("Event Added")
+ElseIf mode = False Then
+    MsgBox ("Event edited")
+Else
+    MsgBox ("mode = Null when adding event. Contact support")
+End If
 End Function
 
 Private Function AuditoriumUsed()
@@ -1587,3 +1646,89 @@ PivotCaches.Create(SourceType:=xlDatabase, SourceData:=NewRange)
 Pivot_Sheet.PivotTables(pivotName).RefreshTable
 
 End Function
+
+Private Sub AutofillFromSelected(row As Variant)
+' Fill in everything with values taken from this event.
+
+' Sheet data is stored on. Makes things easier to read.
+Dim sheet As String
+sheet = "Data"
+
+' Basic Info
+NameTextBox.Text = Worksheets(sheet).Cells(row, 2)
+EventDateTextBox.Text = Worksheets(sheet).Cells(row, 3)
+If Worksheets(sheet).Cells(row, 24) <> "" Then
+    CategoryListBox.value = Worksheets(sheet).Cells(row, 24)
+End If
+If Worksheets(sheet).Cells(row, 29) <> "" Then
+    TypeListBox.value = Worksheets(sheet).Cells(row, 29)
+End If
+If Worksheets(sheet).Cells(row, 4) <> "" Then
+    LocationListBox.value = Worksheets(sheet).Cells(row, 4)
+End If
+If Worksheets(sheet).Cells(row, 28) <> "" Then
+    RoomListBox.value = Worksheets(sheet).Cells(row, 28)
+End If
+If Worksheets(sheet).Cells(row, 30) <> "" Then
+    AudienceListBox.value = Worksheets(sheet).Cells(row, 30)
+End If
+MorningCheckBox.value = Worksheets(sheet).Cells(row, 5)
+AfternoonCheckBox.value = Worksheets(sheet).Cells(row, 6)
+EveningCheckBox.value = Worksheets(sheet).Cells(row, 7)
+
+If Worksheets(sheet).Cells(row, 46) = True Then
+    TicketedOptionButton.value = True
+    NonTicketedOptionButton.value = False
+Else
+    TicketedOptionButton.value = False
+    NonTicketedOptionButton.value = True
+End If
+
+If Worksheets(sheet).Cells(row, 61) = True Then
+    BarOpenOptionButton.value = True
+    BarNotOpenOptionButton.value = False
+Else
+    BarOpenOptionButton.value = False
+    BarNotOpenOptionButton.value = True
+End If
+
+If Worksheets(sheet).Cells(row, 48) <> "" Then
+    GenreListBox.value = Worksheets(sheet).Cells(row, 48)
+End If
+' Layout & Capacity
+If Worksheets(sheet).Cells(row, 31) <> "" Then
+    AuditoriumLayoutListBox.value = Worksheets(sheet).Cells(row, 31)
+End If
+
+If Worksheets(sheet).Cells(row, 32) <> "" Then
+    EgremontLayoutListBox.value = Worksheets(sheet).Cells(row, 32)
+End If
+
+TotalCapacityTextBox.Text = Worksheets(sheet).Cells(row, 33)
+BlockedSeatsTextBox.Text = Worksheets(sheet).Cells(row, 34)
+' Event Time
+SetupStartTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 8), "hh:mm")
+DoorsTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 47), "hh:mm")
+EventStartTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 9), "hh:mm")
+EventEndTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 10), "hh:mm")
+TakedownEndTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 11), "hh:mm")
+EventDurationTextBox.Text = Worksheets(sheet).Cells(row, 13)
+SetupToTakedownEndDurationTextBox.Text = Worksheets(sheet).Cells(row, 12)
+SetupTakedownTextBox.Text = Worksheets(sheet).Cells(row, 15)
+' Bar Time
+' Show the bar if needed
+If BarOpenOptionButton = True Then
+    BarTimeFrame.Visible = True
+End If
+BarSetupTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 54), "hh:mm")
+BarOpenTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 55), "hh:mm")
+BarCloseTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 56), "hh:mm")
+BarOpenDurationTextBox.Text = Worksheets(sheet).Cells(row, 57)
+BarSetupToTakedownEndDurationTextBox.Text = Worksheets(sheet).Cells(row, 58)
+BarSetupTakedownTextBox.Text = Worksheets(sheet).Cells(row, 59)
+' Costs
+
+' Income
+
+' Volunteer minutes
+End Sub

@@ -50,8 +50,7 @@ If word = "" Then
     Exit Function
 End If
 
-' MUST LOOK IN ENTIRE WORKSHEET
-With ActiveWorkbook.Worksheets(sheetName).Range("A:Z") ' Look in worksheet
+With ActiveWorkbook.Worksheets(sheetName).Cells ' Look in worksheet
     Set c = .Find(word, LookIn:=xlValues, LookAt:=xlWhole)
     If Not c Is Nothing Then ' If anything is found, then...
         ' Give address in R1C1 form
