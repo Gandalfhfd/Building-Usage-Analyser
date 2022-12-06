@@ -2,19 +2,19 @@ Attribute VB_Name = "funcs"
 Option Explicit
 
 Public Function csv_Import(sheetName As String) As Boolean
-
 ' Declare stuff
 Dim wsheet As Worksheet, file_mrf As String
 Set wsheet = ActiveWorkbook.Sheets(sheetName)
 
 ' Open file explorer and let the user select a csv
-file_mrf = Application.GetOpenFilename("Text Files (*.csv),*.csv", , "Provide Text or CSV File:")
+file_mrf = Application.GetOpenFilename("CSV (*.csv),*.csv", , "Provide Text or CSV File:")
 
 ' Prevent it from crashing if the user doesn't select a file
 If file_mrf <> "False" Then
-    ' Clear "Import" sheet
-    Sheets("Import").Cells.Clear
-    With wsheet.QueryTables.Add(Connection:="TEXT;" & file_mrf, Destination:=wsheet.Range("B2"))
+    ' Clear sheet
+    Sheets(sheetName).Cells.Clear
+    ' Import file into sheet
+    With wsheet.QueryTables.Add(Connection:="TEXT;" & file_mrf, Destination:=wsheet.Cells)
         .TextFileParseType = xlDelimited
         .TextFileCommaDelimiter = True
         .Refresh
@@ -23,6 +23,52 @@ If file_mrf <> "False" Then
     csv_Import = True
 Else
     csv_Import = False
+End If
+End Function
+
+Public Function xlsx_Import(sheetName As String) As Boolean
+' Can actually import any Excel workbook
+' Only imports the first sheet into a workbook called "Fantasy Spreadsheet"
+
+' Declare stuff
+Dim wsheet As Worksheet, file_mrf As String
+Set wsheet = ActiveWorkbook.Sheets(sheetName)
+
+' Open file explorer and let the user select an xlsx. This just gets the file name & path.
+file_mrf = Application.GetOpenFilename("Excel Workbooks (*.xl??),*.xl??", , "Provide xlsx File:")
+
+' Find file name (not path)
+Dim file_name As String
+Dim pathArr As Variant
+' Split file_mrf into sections delimited by "\"
+pathArr = Split(file_mrf, "\")
+' Find file name including extension
+file_name = pathArr(UBound(pathArr))
+
+' Detect if the workbook is open
+' Not very reliable.
+Dim workbook_open As Boolean
+workbook_open = IsWorkBookOpen(file_mrf)
+
+If file_mrf <> "False" Then
+    ' Clear sheet
+    Sheets(sheetName).Cells.Clear
+    If workbook_open = False Then
+        ' Open workbook
+        Workbooks.Open (file_mrf)
+    End If
+    
+    ' Import data from worksheet 1
+    Workbooks(file_name).Worksheets(1).Cells.Copy _
+        Destination:=Workbooks("Fantasy Spreadsheet").Worksheets(sheetName).Cells
+    
+    ' If it wasn't open to start with, we should close it
+    If workbook_open = False Then
+        Workbooks(file_name).Close
+    End If
+    xlsx_Import = True
+Else
+    xlsx_Import = False
 End If
 
 End Function
@@ -111,3 +157,21 @@ Public Function min(x, y As Variant) As Variant
    min = IIf(x < y, x, y)
 End Function
 
+Function IsWorkBookOpen(FileName As String)
+    ' I don't know what most of this does. I got it from
+    ' https://stackoverflow.com/questions/9373082/detect-whether-excel-workbook-is-already-open
+    Dim ff As Long, ErrNo As Long
+
+    On Error Resume Next
+    ff = FreeFile()
+    Open FileName For Input Lock Read As #ff
+    Close ff
+    ErrNo = Err
+    On Error GoTo 0
+
+    Select Case ErrNo
+    Case 0:    IsWorkBookOpen = False
+    Case 70:   IsWorkBookOpen = True
+    Case Else: Error ErrNo
+    End Select
+End Function

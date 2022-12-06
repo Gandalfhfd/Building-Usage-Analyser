@@ -17,6 +17,9 @@ Option Explicit
 ' Dumb, but why not
 Public DeleteIndicator As Integer
 
+' Store whether editing is happening
+Public EditingCheck As Boolean
+
 ' Used to prevent unecessary refreshing of ListBoxes
 Public counter As Integer
 
@@ -196,7 +199,7 @@ End If
 ' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
-`
+
 Private Sub ImportSelectedButton_Click()
 ' Find the row of the selected event
 Dim event_row As Long
@@ -895,7 +898,9 @@ End If
 Dim sheet As String
 sheet = "Data"
 ' Display Event ID in search box
-SearchBox.Text = EventIDListBox.value
+If EventIDListBox.ListIndex <> -1 Then
+    SearchBox.Text = EventIDListBox.value
+End If
 
 Dim nameLocation As Variant
 nameLocation = funcs.search(EventIDListBox.value, sheet)
@@ -1058,8 +1063,15 @@ TotalCapacity = TotalCapacityTextBox.Text
 End Function
 
 Private Function AddEvent(mode As Boolean)
-' mode = True = Add event
-' mode = False = Edit event
+' mode = False = Add event
+' mode = True = Edit event
+
+' Store which mode we're in publically
+If mode = True Then
+    EditingCheck = True
+Else
+    EditingCheck = False
+End If
 
 ' Check whether the required information has been completed or not
 ' Basic Info
@@ -1293,13 +1305,16 @@ Worksheets(sheet).Cells(my_row, 49) = MiscVolTextBox.Text
 Call ChangeSource(sheet, "Analysis", "PivotTable1")
 
 ' Change message depending on mode
-If mode = True Then
+If mode = False Then
     MsgBox ("Event Added")
-ElseIf mode = False Then
-    MsgBox ("Event edited")
+ElseIf mode = True Then
+    MsgBox ("Event Edited")
 Else
     MsgBox ("mode = Null when adding event. Contact support")
 End If
+
+EditingCheck = False
+
 End Function
 
 Private Function AuditoriumUsed()
@@ -1440,7 +1455,6 @@ Dim myAddress As Variant
 Dim succeeded As Boolean
 succeeded = True
 
-'Find total sales
 Dim value As String ' Store target cell's value
 myAddress = funcs.search(keyword, importSheet)
 If myAddress(0) = "0" Then
@@ -1448,6 +1462,7 @@ If myAddress(0) = "0" Then
     MsgBox (errorMsg)
     succeeded = False
 Else
+    ' Store value of cell we're interested in importing
     value = Worksheets(importSheet).Cells(CInt(myAddress(0) + offset(0)), CInt(myAddress(1) + offset(1)))
 End If
 
@@ -1519,7 +1534,7 @@ End If
 
 ' Not strictly necessary. Used to avoid too much hard-coding.
 Dim sheetName As String
-sheetName = "Import"
+sheetName = "TicketsolveImport"
 
 Dim csvImportSuccessCheck As Boolean
 ' Import the csv selected by the user into sheet "sheetName"
@@ -1567,19 +1582,24 @@ If tempSuccessCheck = False Then
     succeeded = False
 End If
 
-' Find total ticket revenue
-exportCell(1) = 42
-offset = Array(1, 5)
-tempSuccessCheck = ImportCell("Allocation Type", sheetName, dataSheetName, exportCell, offset)
+' Find total Support the Kirkgate revenue
+exportCell(1) = 44
+offset = Array(0, 3)
+tempSuccessCheck = ImportCell("Support the Kirkgate", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
 End If
 
-' Find total Support the Kirkgate revenue
-exportCell(1) = 44
-offset = Array(0, 3)
-tempSuccessCheck = ImportCell("Support the Kirkgate", sheetName, dataSheetName, exportCell, offset)
+' Find total ticket revenue
+exportCell(1) = 42
+offset = Array(1, 1)
+' Find net sales
+tempSuccessCheck = ImportCell("Tax", sheetName, dataSheetName, exportCell, offset)
+
+' Find ticket sale revenue by getting net and subtracting Support the Kirkgate revenue
+Worksheets(dataSheetName).Cells(my_row, 42) = Worksheets(dataSheetName).Cells(my_row, 42) _
+                                            - Worksheets(dataSheetName).Cells(my_row, 44)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -1592,7 +1612,8 @@ End If
 
 ' Determine actual capacity and write it to a cell
 Dim trueCapacity As Integer
-trueCapacity = Worksheets(dataSheetName).Cells(exportCell(0), 33) - Worksheets(dataSheetName).Cells(exportCell(0), 34)
+trueCapacity = Worksheets(dataSheetName).Cells(my_row, 33) _
+                - Worksheets(dataSheetName).Cells(exportCell(0), 34)
 Worksheets(dataSheetName).Cells(my_row, 45) = trueCapacity
 
 ' Find Ticketsolve fees and revenue after fees
@@ -1617,7 +1638,7 @@ End Sub
 Private Sub ImportFromZettle(mode As String)
 ' FUNCTION NOT COMPLETED YET
 
-' Highly non-general function/sub which imports from the "Report Excel" file from Zettle
+' Highly non-general function/sub which imports from the "Raw data Excel" file from Zettle
 
 ' Store which row we're working on. Depends on what we're after.
 Dim my_row As Long
@@ -1632,7 +1653,7 @@ If mode = "Selected" Then
 ElseIf mode = "Previous" Then
     my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).row
 Else
-    MsgBox ("Programmer error in Private Sub ImportFromZettle")
+    MsgBox ("Programm   er error in Private Sub ImportFromZettle")
     Exit Sub
 End If
 
@@ -1640,28 +1661,129 @@ End If
 Dim succeeded As Boolean
 succeeded = True
 
-'Find total number of ticket sales
-Dim tempSuccessCheck As Boolean
-Dim exportCell() As Variant
-Dim offset() As Variant
-
-exportCell = Array(my_row, 14)
-offset = Array(0, 1)
-
-tempSuccessCheck = ImportCell("Sold", sheetName, dataSheetName, exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
+' Check if the bar is/was open selling tickets. If not, prompt the user to update
+'   the event before importing
+If Worksheets(dataSheetName).Cells(my_row, 46) = False Then
+    MsgBox ("We are not selling tickets for this event. If you wish to import " _
+            & "data from Zettle, please mark the event as 'Bar Open'.")
+    Exit Sub
 End If
-    
-End Sub
 
-Private Sub ZettleImportButton_Click()
-'' Function not written yet
-'Call ImportFromZettle("Selected")
+' Not strictly necessary. Used to avoid too much hard-coding.
+Dim sheetName As String
+sheetName = "ZettleImport"
+
+Dim xlsxImportSuccessCheck As Boolean
+' Import the xlsx selected by the user into sheet "sheetName"
+xlsxImportSuccessCheck = funcs.xlsx_Import(sheetName)
+If xlsxImportSuccessCheck = True Then
+    ' Continue with sub
+Else
+    ' Exit sub, since a file wasn't selected
+    Exit Sub
+End If
+
+' Find the first row of data
+' First row = dateAddress(0) + 1
+' Store address of various things
+Dim dateAddress As Variant
+
+' Find address of "Date" in "ZettleImport" sheet.
+dateAddress = funcs.search("Date", sheetName)
+If dateAddress(0) = "0" Then
+    MsgBox ("Import failed. Did you select the correct file?")
+    succeeded = False
+    Exit Sub
+End If
+
+' Find the last row of data
+Dim FinalRow As Integer
+FinalRow = Worksheets(sheetName).Cells(Rows.Count, 1).End(xlUp).row - 3
+
+' Find the bar open time
+Dim barOpen As String
+barOpen = Worksheets(dataSheetName).Cells(my_row, 55)
+If barOpen = "" Then
+    MsgBox ("Import failed. Enter the bar opening time " _
+            & "before attempting to import from Zettle")
+    succeeded = False
+    Exit Sub
+Else
+    ' Convert into a format VBA finds acceptable
+    barOpen = Format(barOpen, "hh:mm:ss")
+End If
+
+' Find the bar close time
+Dim barClosed As String
+barClosed = Worksheets(dataSheetName).Cells(my_row, 56)
+If barClosed = "" Then
+    MsgBox ("Import failed. Enter the bar close time " _
+            & "before attempting to import from Zettle")
+    succeeded = False
+    Exit Sub
+Else
+    ' Convert into a format VBA finds acceptable
+    ' And add 10 minutes as a fudge-factor
+    barClosed = DateAdd("n", 10, Format(barClosed, "hh:mm:ss"))
+End If
+
+' Find column with final price in
+Dim priceAddress As Variant
+priceAddress = funcs.search("Net amount", sheetName)
+If priceAddress(0) = "0" Then
+    MsgBox ("Import failed. Did you select the correct file?")
+    succeeded = False
+    Exit Sub
+End If
+
+' Store revenue
+Dim revenue As Double
+revenue = 0
+
+' Run down the date column to find the first and last row which
+'   are within the time range
+Dim i As Integer ' index
+Dim iTime As String ' time we're currently inspecting
+
+For i = dateAddress(0) + 1 To FinalRow
+    ' The value from the worksheet comes in as a date followed by a space, then a time
+    ' First split the value using a space as a delimiter.
+    ' Then take the second item in the array generated.
+    ' Now format the resulting time to something acceptable to be turned into a TimeValue
+    iTime = Format(Split(Worksheets(sheetName).Cells(i, 1), " ")(1), "hh:mm:ss")
+
+    If TimeValue(iTime) >= TimeValue(barOpen) _
+        And TimeValue(iTime) <= TimeValue(barClosed) Then
+        revenue = revenue + CDbl(Worksheets(sheetName).Cells(i, CInt(priceAddress(1))))
+    Else
+    End If
+Next
+
+' Put revenue into data sheet
+Worksheets(dataSheetName).Cells(my_row, 25) = revenue
 
 ' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")
+End Sub
+
+Private Sub ZettleImportButton_Click()
+'' Find the row of the selected event
+'Dim event_row As Long
+'event_row = funcs.search(SearchBox.Text, "Data")(0)
+'
+'' Input validation. If tests fail, sub must be exited.
+'If SearchBox.Text = "" Then
+'    MsgBox ("Please enter the Event ID into the search box so that " & _
+'            "we know which event to import the data into")
+'    Exit Sub
+'ElseIf event_row = "0" Then
+'    MsgBox ("Event ID could not be found")
+'    Exit Sub
+'End If
+
+'' Function not written yet
+Call ImportFromZettle("Previous")
+
 End Sub
 
 Private Function ChangeSource(dataSheetName As String, pivotSheetName As String, pivotName As String) As Boolean
@@ -1702,6 +1824,11 @@ Pivot_Sheet.PivotTables(pivotName).RefreshTable
 End Function
 
 Private Sub AutofillFromSelected(row As Variant)
+' Don't autofill if user is trying to edit
+If EditingCheck = True Then
+    Exit Sub
+End If
+
 ' Fill in everything with values taken from this event.
 
 ' Sheet data is stored on. Makes things easier to read.
