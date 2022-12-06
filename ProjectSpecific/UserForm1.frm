@@ -1744,6 +1744,7 @@ revenue = 0
 '   are within the time range
 Dim i As Integer ' index
 Dim iTime As String ' time we're currently inspecting
+Dim iDate As String ' date we're currently inspecting
 
 For i = dateAddress(0) + 1 To FinalRow
     ' The value from the worksheet comes in as a date followed by a space, then a time
@@ -1751,9 +1752,12 @@ For i = dateAddress(0) + 1 To FinalRow
     ' Then take the second item in the array generated.
     ' Now format the resulting time to something acceptable to be turned into a TimeValue
     iTime = Format(Split(Worksheets(sheetName).Cells(i, 1), " ")(1), "hh:mm:ss")
-
+    iDate = Split(Worksheets(sheetName).Cells(i, 1), " ")(0)
+    
+    ' Check if the transaction is within the time range and on the right date.
     If TimeValue(iTime) >= TimeValue(barOpen) _
-        And TimeValue(iTime) <= TimeValue(barClosed) Then
+        And TimeValue(iTime) <= TimeValue(barClosed) And _
+        Worksheets(dataSheetName).Cells(my_row, 3) = iDate Then
         revenue = revenue + CDbl(Worksheets(sheetName).Cells(i, CInt(priceAddress(1))))
     Else
     End If
