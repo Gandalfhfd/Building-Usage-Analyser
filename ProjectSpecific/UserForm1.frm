@@ -14,6 +14,8 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+' Dumb, but why not
+Public DeleteIndicator As Integer
 
 ' Used to prevent unecessary refreshing of ListBoxes
 Public counter As Integer
@@ -164,7 +166,6 @@ End If
 
 ' Store location of row to be deleted
 Dim location As Variant
-MsgBox ("Delete button seach start")
 location = funcs.search(EventIDListBox.value, "Data")
 
 ' Unlikely, but possible that the search fails.
@@ -186,11 +187,9 @@ ElseIf EventIDListBox.ListCount = my_index + 1 Then
     ' Delete entire row corresponding to selected event
     Sheets("Data").Rows(location(0)).Delete
 Else
-    EventIDListBox.ListIndex = 0
     ' Delete entire row corresponding to selected event
+    DeleteIndicator = 1
     Sheets("Data").Rows(location(0)).Delete
-    MsgBox ("this is called")
-    EventIDListBox.ListIndex = my_index
 End If
 
 ' Update pivot table(s)
@@ -836,6 +835,26 @@ Call CapacityListBoxDecider
 End Sub
 
 Private Sub EventIDListBox_Change()
+
+' Stop it freaking out when an item is deleted
+If DeleteIndicator = 1 Then
+    DeleteIndicator = 2
+    Exit Sub
+ElseIf DeleteIndicator = 2 Then
+    ' Reset DeleteIndicator on second time of asking
+    DeleteIndicator = 0
+    Exit Sub
+Else
+    ' Carry on with the sub
+End If
+
+' start at 0
+' increase by 1 when deletion called
+' now 1
+' increase by 1 one first change
+' now 2
+' reset to 0, then exit sub
+
 ' Store name of data sheet
 Dim sheet As String
 sheet = "Data"
@@ -844,7 +863,6 @@ SearchBox.Text = EventIDListBox.value
 
 Dim nameLocation As Variant
 nameLocation = funcs.search(EventIDListBox.value, sheet)
-MsgBox ("Search worked")
 
 If nameLocation(0) = 0 Then
     MsgBox ("Event ID could not be found. Error in EventIDListBox_Change(). Contact support.")

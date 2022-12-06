@@ -51,7 +51,12 @@ If word = "" Then
 End If
 
 With ActiveWorkbook.Worksheets(sheetName).Cells ' Look in worksheet
-    Set c = .Find(word, LookIn:=xlValues, LookAt:=xlWhole)
+    ' This does the searching.
+    '   xlValues says we're looking at the values of the cells, as opposed to comments, say.
+    '   xlWhole means exact match,
+    '   so a search of "e", for example, wouldn't turn up everything'
+    '   in the sheet which contains an "e"
+    Set c = .Find(What:=word, LookIn:=xlValues, LookAt:=xlWhole)
     If Not c Is Nothing Then ' If anything is found, then...
         ' Give address in R1C1 form
         R1C1Address = c.address(ReferenceStyle:=xlR1C1)
