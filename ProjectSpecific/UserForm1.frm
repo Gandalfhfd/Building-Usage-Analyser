@@ -20,6 +20,9 @@ Public DeleteIndicator As Integer
 ' Store whether editing is happening
 Public EditingCheck As Boolean
 
+' Store whether autofilling is happening
+Public AutofillCheck As Boolean
+
 ' Used to prevent unecessary refreshing of ListBoxes
 Public counter As Integer
 
@@ -841,8 +844,10 @@ MiscVolTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 14)
 End Sub
 
 Private Sub LocationListBox_Change()
+' Don't do this validation if user is editing
+If AutofillCheck = True Then
 ' Throw an error if the location doesn't match the room selected (external should be selected for anything not in Kirkgate)
-If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
+ElseIf LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
     MsgBox ("'External' should refer to an Arts out West venue.")
 ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
     MsgBox ("'External' should refer to an Arts out West venue.")
@@ -850,7 +855,9 @@ End If
 End Sub
 
 Private Sub RoomListBox_Change()
-If LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And LocationListBox.ListIndex <> -1 Then
+' Don't do this validation if user is editing
+If AutofillCheck = True Then
+ElseIf LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And LocationListBox.ListIndex <> -1 Then
     MsgBox ("'External' should refer to an Arts out West venue.")
 ElseIf LocationListBox.value = "Kirkgate" And RoomListBox.value = "External" Then
     MsgBox ("'External' should refer to an Arts out West venue.")
@@ -1833,6 +1840,8 @@ If EditingCheck = True Then
     Exit Sub
 End If
 
+' Tell programme if autofill is happening
+AutofillCheck = True
 ' Fill in everything with values taken from this event.
 
 ' Sheet data is stored on. Makes things easier to read.
@@ -1934,4 +1943,7 @@ BoxOfficeTextBox.Text = Worksheets(sheet).Cells(row, 21)
 BarTextBox.Text = Worksheets(sheet).Cells(row, 22)
 AoWVolTextBox.Text = Worksheets(sheet).Cells(row, 23)
 MiscVolTextBox.Text = Worksheets(sheet).Cells(row, 49)
+
+' Tell the programme we're done autofilling
+AutofillCheck = False
 End Sub
