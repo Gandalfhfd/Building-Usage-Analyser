@@ -70,7 +70,8 @@ Public BarOpenDuration As String
 Public BarSetupToTakedownEndDuration As String
 Public BarSetupTakedown As String
 
-' Volunteer minutes
+' Volunteers
+' Volunteer Minutes Worked
 Public FoH As String
 Public DM As String
 Public Tech As String
@@ -78,6 +79,14 @@ Public BoxOffice As String
 Public Bar As String
 Public AoWVol As String
 Public MiscVol As String
+' Volunteer Nominal Pay
+Public FoHPay As String
+Public DMPay As String
+Public TechPay As String
+Public BoxOfficePay As String
+Public BarPay As String
+Public AoWVolPay As String
+Public MiscVolPay As String
 
 Private Sub AutofillCheckBox_Click()
 If EventIDListBox.ListIndex = -1 Then
@@ -763,41 +772,142 @@ Private Sub HiredPersonnelTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 HiredPersonnelTextBox.Text = StrManip.Convert2Currency(HiredPersonnelTextBox)
 End Sub
 
-' Volunteer Minutes==================================================================
+' Volunteers==================================================================
+' Volunteer Minutes Worked
 Private Sub FoHTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(FoHTextBox, FoH)
+
+' Set nominal pay based on this
+If FoHTextBox.Text <> "" Then
+    FoHPayTextBox.Text = Format( _
+            FoHTextBox.Text * Worksheets("Non-Specific Defaults").Cells(2, 14) / 60, _
+            "Currency")
+Else
+    FoHPayTextBox.Text = "0.00"
+End If
 End Sub
 
 Private Sub DMTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(DMTextBox, DM)
+
+' Set nominal pay based on this
+If DMTextBox.Text <> "" Then
+    DMPayTextBox.Text = Format( _
+            DMTextBox.Text * Worksheets("Non-Specific Defaults").Cells(2, 15) / 60, _
+            "Currency")
+Else
+    DMPayTextBox.Text = "0.00"
+End If
 End Sub
 
 Private Sub TechTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(TechTextBox, Tech)
+
+' Set nominal pay based on this
+If TechTextBox.Text <> "" Then
+    TechPayTextBox.Text = Format( _
+            TechTextBox.Text * Worksheets("Non-Specific Defaults").Cells(2, 16) / 60, _
+            "Currency")
+Else
+    TechPayTextBox.Text = "0.00"
+End If
 End Sub
 
 Private Sub BoxOfficeTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(BoxOfficeTextBox, BoxOffice)
+
+' Set nominal pay based on this
+If BoxOfficeTextBox.Text <> "" Then
+    BoxOfficePayTextBox.Text = Format( _
+            BoxOfficeTextBox.Text * Worksheets("Non-Specific Defaults").Cells(2, 14) / 60, _
+            "Currency")
+Else
+    BoxOfficePayTextBox.Text = "0.00"
+End If
 End Sub
 
 Private Sub BarTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(BarTextBox, Bar)
+
+' Set nominal pay based on this
+If BarTextBox.Text <> "" Then
+    BarPayTextBox.Text = Format( _
+            BarTextBox.Text * Worksheets("Non-Specific Defaults").Cells(2, 14) / 60, _
+            "Currency")
+Else
+    BarPayTextBox.Text = "0.00"
+End If
 End Sub
 
 Private Sub AoWVolTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(AoWVolTextBox, AoWVol)
+
+' Set nominal pay based on this
+If AoWVolTextBox.Text <> "" Then
+    AoWVolPayTextBox.Text = Format( _
+            AoWVolTextBox.Text * Worksheets("Non-Specific Defaults").Cells(2, 14) / 60, _
+            "Currency")
+Else
+    AoWVolPayTextBox.Text = "0.00"
+End If
 End Sub
 
 Private Sub MiscVolTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(MiscVolTextBox, MiscVol)
+
+' Set nominal pay based on this
+If MiscVolTextBox.Text <> "" Then
+    MiscVolPayTextBox.Text = Format( _
+            MiscVolTextBox.Text * Worksheets("Non-Specific Defaults").Cells(2, 14) / 60, _
+            "Currency")
+Else
+    MiscVolPayTextBox.Text = "0.00"
+End If
 End Sub
+
+'Volunteer Nominal Pay
+Private Sub FoHPayTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseReal(FoHPayTextBox, FoHPay)
+End Sub
+
+Private Sub DMPayTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseReal(DMPayTextBox, DMPay)
+End Sub
+
+Private Sub TechPayTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseReal(TechPayTextBox, TechPay)
+End Sub
+
+Private Sub BoxOfficePayTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseReal(BoxOfficePayTextBox, BoxOfficePay)
+End Sub
+
+Private Sub BarPayTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseReal(BarPayTextBox, BarPay)
+End Sub
+
+Private Sub AoWVolPayTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseReal(AoWVolPayTextBox, AoWVolPay)
+End Sub
+
+Private Sub MiscVolPayTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseReal(MiscVolPayTextBox, MiscVolPay)
+End Sub
+
 '' LIST BOXES===============================================================
 
 Private Sub TypeListBox_Change()
