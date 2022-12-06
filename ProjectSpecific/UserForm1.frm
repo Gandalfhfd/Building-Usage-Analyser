@@ -195,7 +195,7 @@ End If
 ' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
-
+`
 Private Sub ImportSelectedButton_Click()
 ' Find the row of the selected event
 Dim event_row As Long
@@ -218,10 +218,6 @@ End Sub
 Private Sub ImportPreviousButton_Click()
 ' Import data into the event which was most recently added
 Call ImportFromTicketsolve("Previous")
-End Sub
-
-Private Sub MultiPage1_Change()
-
 End Sub
 
 Private Sub NameSearchButton_Click()
@@ -1715,11 +1711,11 @@ If Worksheets(sheet).Cells(row, 48) <> "" Then
 End If
 ' Layout & Capacity
 If Worksheets(sheet).Cells(row, 31) <> "" Then
-    AuditoriumLayoutListBox.value = Worksheets(sheet).Cells(row, 31)
+    AuditoriumLayoutListBox.value = Worksheets(sheet).Cells(row, 32)
 End If
 
 If Worksheets(sheet).Cells(row, 32) <> "" Then
-    EgremontLayoutListBox.value = Worksheets(sheet).Cells(row, 32)
+    EgremontLayoutListBox.value = Worksheets(sheet).Cells(row, 31)
 End If
 
 TotalCapacityTextBox.Text = Worksheets(sheet).Cells(row, 33)
@@ -1744,9 +1740,27 @@ BarCloseTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 56), "hh:mm")
 BarOpenDurationTextBox.Text = Worksheets(sheet).Cells(row, 57)
 BarSetupToTakedownEndDurationTextBox.Text = Worksheets(sheet).Cells(row, 58)
 BarSetupTakedownTextBox.Text = Worksheets(sheet).Cells(row, 59)
-' Costs
-
 ' Income
-
+NumTicketsSoldTextBox.Text = Worksheets(sheet).Cells(row, 14)
+BoxOfficeRevenueTextBox.Text = Worksheets(sheet).Cells(row, 42)
+SupportRevenueTextBox.Text = Worksheets(sheet).Cells(row, 44)
+BarRevenueTextBox.Text = Worksheets(sheet).Cells(row, 25)
+BarMarginTextBox.Text = Worksheets(sheet).Cells(row, 26) * 100
+' Costs
+FilmCostTextBox.Text = Worksheets(sheet).Cells(row, 35)
+FilmTransportTextBox.Text = Worksheets(sheet).Cells(row, 36)
+AccommodationTextBox.Text = Worksheets(sheet).Cells(row, 37)
+ArtistFoodTextBox.Text = Worksheets(sheet).Cells(row, 38)
+HiredPersonnelTextBox.Text = Worksheets(sheet).Cells(row, 43)
+HeatingTextBox.Text = Worksheets(sheet).Cells(row, 39)
+LightingTextBox.Text = Worksheets(sheet).Cells(row, 40)
+MiscCostTextBox.Text = Worksheets(sheet).Cells(row, 41)
 ' Volunteer minutes
+FoHTextBox.Text = Worksheets(sheet).Cells(row, 18)
+DMTextBox.Text = Worksheets(sheet).Cells(row, 19)
+TechTextBox.Text = Worksheets(sheet).Cells(row, 19)
+BoxOfficeTextBox.Text = Worksheets(sheet).Cells(row, 21)
+BarTextBox.Text = Worksheets(sheet).Cells(row, 22)
+AoWVolTextBox.Text = Worksheets(sheet).Cells(row, 23)
+MiscVolTextBox.Text = Worksheets(sheet).Cells(row, 49)
 End Sub
