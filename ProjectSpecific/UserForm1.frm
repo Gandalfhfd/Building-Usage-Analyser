@@ -53,6 +53,7 @@ Public EventStartTime As String
 Public EventEndTime As String
 Public TakedownEndTime As String
 Public EventDuration As String
+Public SetupToTakedownEndDuration As String
 Public SetupAvailableDuration As String
 Public SetupTakedown As String
 'Bar Time
@@ -324,6 +325,11 @@ Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(SetupStartTimeTextBox, SetupStartTime)
 
+' Don't automatically adjust unless wanted
+If AutoTimeCheckBox = False Then
+    Exit Sub
+End If
+
 ' Make rest of sub easier to read
 Dim sheet As String
 sheet = "Type-Specific Defaults"
@@ -377,6 +383,11 @@ Private Sub DoorsTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(DoorsTimeTextBox, DoorsTime)
 
+' Don't automatically adjust unless wanted
+If AutoTimeCheckBox = False Then
+    Exit Sub
+End If
+
 If DoorsTimeTextBox.Text = "" Or EventStartTimeTextBox.Text = "" Then
     Exit Sub
 ' Sanity check doors time
@@ -390,6 +401,11 @@ End Sub
 Private Sub EventStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(EventStartTimeTextBox, EventStartTime)
+
+' Don't automatically adjust unless wanted
+If AutoTimeCheckBox = False Then
+    Exit Sub
+End If
 
 ' Make rest of sub easier to read
 Dim sheet As String
@@ -413,13 +429,17 @@ DoorsTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 11), _
     EventStartTimeTextBox.Text), "hh:mm")
 
 ' Change event end time
-EventEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text, _
-    EventStartTimeTextBox.Text), "hh:mm")
+If EventDurationTextBox.Text <> "" Then
+    EventEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text, _
+        EventStartTimeTextBox.Text), "hh:mm")
+End If
 
 ' Change takedown time
-TakedownEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text + _
-    Worksheets(sheet).Cells(row, 12), EventStartTimeTextBox.Text), "hh:mm")
-    
+If EventDurationTextBox.Text <> "" Then
+    TakedownEndTimeTextBox.Text = Format(DateAdd("n", EventDurationTextBox.Text + _
+        Worksheets(sheet).Cells(row, 12), EventStartTimeTextBox.Text), "hh:mm")
+End If
+
 ' BAR
 ' Change bar setup start time
 BarSetupTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15) - _
@@ -436,6 +456,11 @@ End Sub
 Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(EventEndTimeTextBox, EventEndTime)
+
+' Don't automatically adjust unless wanted
+If AutoTimeCheckBox = False Then
+    Exit Sub
+End If
 
 ' Make rest of sub easier to read
 Dim sheet As String
@@ -471,6 +496,11 @@ Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(TakedownEndTimeTextBox, TakedownEndTime)
 
+' Don't automatically adjust unless wanted
+If AutoTimeCheckBox = False Then
+    Exit Sub
+End If
+
 ' No end time
 If TakedownEndTimeTextBox.Text = "" Then
     Exit Sub
@@ -486,6 +516,11 @@ End Sub
 Private Sub EventDurationTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(EventDurationTextBox, EventDuration)
+
+' Don't automatically adjust unless wanted
+If AutoTimeCheckBox = False Then
+    Exit Sub
+End If
 
 ' Make rest of sub easier to read
 Dim sheet As String
@@ -562,6 +597,11 @@ End If
 SetupToTakedownEndDurationTextBox.Text = setupDuration + _
     EventDurationTextBox.Text + takedownDuration
 
+End Sub
+
+Private Sub SetupToTakedownEndDurationTextBox_Change()
+' Sanitise input to ensure only non-negative integers are input
+Call InptValid.SanitiseNonNegInt(SetupToTakedownEndDurationTextBox, SetupToTakedownEndDuration)
 End Sub
 
 Private Sub SetupAvailableDurationTextBox_Change()
