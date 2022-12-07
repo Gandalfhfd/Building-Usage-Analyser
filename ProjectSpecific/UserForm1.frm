@@ -196,10 +196,13 @@ my_index = EventIDListBox.ListIndex
 If EventIDListBox.ListCount < 1 Then
     ' There are no more items, so select nothing
     EventIDListBox.ListIndex = -1
+    DeleteIndicator = 1
     ' Delete entire row corresponding to selected event
     Sheets("Data").Rows(location(0)).Delete
 ElseIf EventIDListBox.ListCount = my_index + 1 Then
+    ' We are at end of list, so go up one
     EventIDListBox.ListIndex = my_index - 1
+    DeleteIndicator = 1
     ' Delete entire row corresponding to selected event
     Sheets("Data").Rows(location(0)).Delete
 Else
@@ -207,6 +210,9 @@ Else
     DeleteIndicator = 1
     Sheets("Data").Rows(location(0)).Delete
 End If
+
+' Update EventIDListBox
+Call RefreshListBox("Data", 1, EventIDListBox)
 
 ' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")
@@ -878,9 +884,19 @@ Private Sub FoHPayTextBox_Change()
 Call InptValid.SanitiseReal(FoHPayTextBox, FoHPay)
 End Sub
 
+Private Sub FoHPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only non-negative integers are input
+FoHPayTextBox.Text = StrManip.Convert2Currency(FoHPayTextBox)
+End Sub
+
 Private Sub DMPayTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseReal(DMPayTextBox, DMPay)
+End Sub
+
+Private Sub DMPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only non-negative integers are input
+DMPayTextBox.Text = StrManip.Convert2Currency(DMPayTextBox)
 End Sub
 
 Private Sub TechPayTextBox_Change()
@@ -888,9 +904,19 @@ Private Sub TechPayTextBox_Change()
 Call InptValid.SanitiseReal(TechPayTextBox, TechPay)
 End Sub
 
+Private Sub TechPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only non-negative integers are input
+TechPayTextBox.Text = StrManip.Convert2Currency(TechPayTextBox)
+End Sub
+
 Private Sub BoxOfficePayTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseReal(BoxOfficePayTextBox, BoxOfficePay)
+End Sub
+
+Private Sub BoxOfficePayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only non-negative integers are input
+BoxOfficePayTextBox.Text = StrManip.Convert2Currency(BoxOfficePayTextBox)
 End Sub
 
 Private Sub BarPayTextBox_Change()
@@ -898,14 +924,29 @@ Private Sub BarPayTextBox_Change()
 Call InptValid.SanitiseReal(BarPayTextBox, BarPay)
 End Sub
 
+Private Sub BarPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only non-negative integers are input
+BarPayTextBox.Text = StrManip.Convert2Currency(BarPayTextBox)
+End Sub
+
 Private Sub AoWVolPayTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseReal(AoWVolPayTextBox, AoWVolPay)
 End Sub
 
+Private Sub AoWVolPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only non-negative integers are input
+AoWVolPayTextBox.Text = StrManip.Convert2Currency(AoWVolPayTextBox)
+End Sub
+
 Private Sub MiscVolPayTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseReal(MiscVolPayTextBox, MiscVolPay)
+End Sub
+
+Private Sub MiscVolPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+' Sanitise input to ensure only non-negative integers are input
+MiscVolPayTextBox.Text = StrManip.Convert2Currency(MiscVolPayTextBox)
 End Sub
 
 '' LIST BOXES===============================================================
@@ -956,6 +997,7 @@ End Sub
 Private Sub LocationListBox_Change()
 ' Don't do this validation if user is editing
 If AutofillCheck = True Then
+    ' Do nothing
 ' Throw an error if the location doesn't match the room selected (external should be selected for anything not in Kirkgate)
 ElseIf LocationListBox.value <> "Kirkgate" And RoomListBox.value <> "External" And RoomListBox.ListIndex <> -1 Then
     MsgBox ("'External' should refer to an Arts out West venue.")
@@ -991,6 +1033,7 @@ Call CapacityListBoxDecider
 End Sub
 
 Private Sub EventIDListBox_Change()
+'MsgBox ("EventIDListBox_Change was called")
 
 ' Stop it freaking out when an item is deleted
 If DeleteIndicator = 1 Then
@@ -1052,61 +1095,33 @@ End Sub
 '' USERFORM/MULTIPAGE===============================================================
 
 Private Sub UserForm_Initialize()
-
 ' Add items into listboxes based on cells in specified worksheets
 
-Dim empty_row As Long ' Store number of items in list box
-Dim DataRange As Range
-Dim TypeSpecificDefaultsRange As Range
-Dim NonSpecificDefaultsRange As Range
-
-' empty_row = lst non-empty row for specific list(box)
+' Name of non-specific defaults sheet
+Dim non As String
+non = "Non-Specific Defaults"
+' Name of type-specific defaults string
+Dim spec As String
+spec = "Type-Specific Defaults"
 
 ' EVENT ID
-empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
-Set DataRange = Range(Worksheets("Data").Cells(2, 1), Worksheets("Data").Cells(empty_row, 1))
-EventIDListBox.RowSource = DataRange.address(External:=True)
-
-'' CATEGORY
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 4).End(xlUp).row
-Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 4), Worksheets("Non-Specific Defaults").Cells(empty_row, 4))
-CategoryListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-
-'' TYPE
-empty_row = Worksheets("Type-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).row
-Set TypeSpecificDefaultsRange = Range(Worksheets("Type-Specific Defaults").Cells(2, 1), Worksheets("Type-Specific Defaults").Cells(empty_row, 1))
-TypeListBox.RowSource = TypeSpecificDefaultsRange.address(External:=True)
-
-'' LOCATION
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 1).End(xlUp).row
-Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 1), Worksheets("Non-Specific Defaults").Cells(empty_row, 1))
-LocationListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-
-'' ROOM
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 2).End(xlUp).row
-Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 2), Worksheets("Non-Specific Defaults").Cells(empty_row, 2))
-RoomListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-
-'' GENRE
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 13).End(xlUp).row
-Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 13), Worksheets("Non-Specific Defaults").Cells(empty_row, 13))
-GenreListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-
-'' AUDIENCE
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 5).End(xlUp).row
-Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 5), Worksheets("Non-Specific Defaults").Cells(empty_row, 5))
-AudienceListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-   
-'' AUDITORIUM LAYOUT
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 6).End(xlUp).row
-Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
-AuditoriumLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-
-'' EGREMONT LAYOUT
-empty_row = Worksheets("Non-Specific Defaults").Cells(Rows.Count, 8).End(xlUp).row
-Set NonSpecificDefaultsRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
-EgremontLayoutListBox.RowSource = NonSpecificDefaultsRange.address(External:=True)
-
+Call RefreshListBox("Data", 1, EventIDListBox)
+' CATEGORY
+Call RefreshListBox(non, 4, CategoryListBox)
+' TYPE
+Call RefreshListBox(spec, 1, TypeListBox)
+' LOCATION
+Call RefreshListBox(non, 1, LocationListBox)
+' ROOM
+Call RefreshListBox(non, 2, RoomListBox)
+' GENRE
+Call RefreshListBox(non, 13, GenreListBox)
+' AUDIENCE
+Call RefreshListBox(non, 5, AudienceListBox)
+' AUDITORIUM LAYOUT
+Call RefreshListBox(non, 6, AuditoriumLayoutListBox)
+' EGREMONT LAYOUT
+Call RefreshListBox(non, 8, EgremontLayoutListBox)
 End Sub
 
 '' CHECKBOXES==============================================================
@@ -1376,6 +1391,7 @@ Worksheets(sheet).Cells(my_row, 35) = FilmCostTextBox.Text
 Worksheets(sheet).Cells(my_row, 36) = FilmTransportTextBox.Text
 Worksheets(sheet).Cells(my_row, 37) = AccommodationTextBox.Text
 Worksheets(sheet).Cells(my_row, 38) = ArtistFoodTextBox.Text
+Worksheets(sheet).Cells(my_row, 43) = HiredPersonnelTextBox.Text
 Worksheets(sheet).Cells(my_row, 39) = HeatingTextBox.Text
 Worksheets(sheet).Cells(my_row, 40) = LightingTextBox.Text
 Worksheets(sheet).Cells(my_row, 41) = MiscCostTextBox.Text
@@ -1416,7 +1432,14 @@ Worksheets(sheet).Cells(my_row, 21) = BoxOfficeTextBox.Text
 Worksheets(sheet).Cells(my_row, 22) = BarTextBox.Text
 Worksheets(sheet).Cells(my_row, 23) = AoWVolTextBox.Text
 Worksheets(sheet).Cells(my_row, 49) = MiscVolTextBox.Text
-
+' Volunteer Nominal Pay
+Worksheets(sheet).Cells(my_row, 62) = FoHPayTextBox.Text
+Worksheets(sheet).Cells(my_row, 63) = DMPayTextBox.Text
+Worksheets(sheet).Cells(my_row, 64) = TechPayTextBox.Text
+Worksheets(sheet).Cells(my_row, 65) = BoxOfficePayTextBox.Text
+Worksheets(sheet).Cells(my_row, 66) = BarPayTextBox.Text
+Worksheets(sheet).Cells(my_row, 67) = AoWVolPayTextBox.Text
+Worksheets(sheet).Cells(my_row, 68) = MiscVolPayTextBox.Text
 
 ' Update pivot table(s)
 Call ChangeSource(sheet, "Analysis", "PivotTable1")
@@ -1431,6 +1454,7 @@ Else
 End If
 
 EditingCheck = False
+Call RefreshListBox("Data", 1, EventIDListBox)
 
 End Function
 
@@ -1963,19 +1987,42 @@ NameTextBox.Text = Worksheets(sheet).Cells(row, 2)
 EventDateTextBox.Text = Worksheets(sheet).Cells(row, 3)
 If Worksheets(sheet).Cells(row, 24) <> "" Then
     CategoryListBox.value = Worksheets(sheet).Cells(row, 24)
+    CategoryListBox.Selected(CategoryListBox.ListIndex) = True
+Else
+    ' Unselect item if no info provided
+    CategoryListBox.ListIndex = -1
 End If
+
 If Worksheets(sheet).Cells(row, 29) <> "" Then
     TypeListBox.value = Worksheets(sheet).Cells(row, 29)
+    TypeListBox.Selected(TypeListBox.ListIndex) = True
+Else
+    ' Unselect item if no info provided
+    TypeListBox.ListIndex = -1
 End If
+
 If Worksheets(sheet).Cells(row, 4) <> "" Then
     LocationListBox.value = Worksheets(sheet).Cells(row, 4)
+    LocationListBox.Selected(LocationListBox.ListIndex) = True
+Else
+    ' Unselect item if no info provided
+    LocationListBox.ListIndex = -1
 End If
+
 If Worksheets(sheet).Cells(row, 28) <> "" Then
     RoomListBox.value = Worksheets(sheet).Cells(row, 28)
+    RoomListBox.Selected(RoomListBox.ListIndex) = True
+Else
+    RoomListBox.ListIndex = -1
 End If
+
 If Worksheets(sheet).Cells(row, 30) <> "" Then
     AudienceListBox.value = Worksheets(sheet).Cells(row, 30)
+    AudienceListBox.Selected(AudienceListBox.ListIndex) = True
+Else
+    AudienceListBox.ListIndex = -1
 End If
+
 MorningCheckBox.value = Worksheets(sheet).Cells(row, 5)
 AfternoonCheckBox.value = Worksheets(sheet).Cells(row, 6)
 EveningCheckBox.value = Worksheets(sheet).Cells(row, 7)
@@ -1998,14 +2045,23 @@ End If
 
 If Worksheets(sheet).Cells(row, 48) <> "" Then
     GenreListBox.value = Worksheets(sheet).Cells(row, 48)
+    GenreListBox.Selected(GenreListBox.ListIndex) = True
+Else
+    GenreListBox.ListIndex = -1
 End If
 ' Layout & Capacity
 If Worksheets(sheet).Cells(row, 31) <> "" Then
     AuditoriumLayoutListBox.value = Worksheets(sheet).Cells(row, 32)
+    AuditoriumLayoutListBox.Selected(AuditoriumLayoutListBox.ListIndex) = True
+Else
+    AuditoriumLayoutListBox.ListIndex = -1
 End If
 
 If Worksheets(sheet).Cells(row, 32) <> "" Then
     EgremontLayoutListBox.value = Worksheets(sheet).Cells(row, 31)
+    EgremontLayoutListBox.Selected(EgremontLayoutListBox.ListIndex) = True
+Else
+    EgremontLayoutListBox.ListIndex = -1
 End If
 
 TotalCapacityTextBox.Text = Worksheets(sheet).Cells(row, 33)
@@ -2056,4 +2112,15 @@ MiscVolTextBox.Text = Worksheets(sheet).Cells(row, 49)
 
 ' Tell the programme we're done autofilling
 AutofillCheck = False
+End Sub
+
+Private Sub RefreshListBox(sourceSheet As String, sourceColumn As Integer, list As Control)
+Dim empty_row As Long ' Store number of items in list box
+Dim DataRange As Range
+
+' empty_row = lst non-empty row for specific list(box)
+empty_row = Worksheets(sourceSheet).Cells(Rows.Count, 1).End(xlUp).row
+Set DataRange = Range(Worksheets(sourceSheet).Cells(2, sourceColumn), _
+                Worksheets(sourceSheet).Cells(empty_row, sourceColumn))
+list.RowSource = DataRange.address(External:=True)
 End Sub

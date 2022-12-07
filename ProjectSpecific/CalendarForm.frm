@@ -1075,7 +1075,7 @@ Private Sub SetMonthCombobox(YearIn As Long, MonthIn As Long)
     
     'No minimum or maximum date in selected year. Add all months to combobox
     Else
-        cmbMonth.List = Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+        cmbMonth.list = Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
         cmbMonth.ListIndex = MonthIn - 1
     End If
 
