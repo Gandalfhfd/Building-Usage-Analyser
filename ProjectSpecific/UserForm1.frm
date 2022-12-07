@@ -195,6 +195,7 @@ ElseIf EventIDListBox.ListCount = my_index + 1 Then
     ' We are at end of list, so go up one
     EventIDListBox.ListIndex = my_index - 1
     DeleteIndicator = 1
+    MsgBox ("Going up")
     ' Delete entire row corresponding to selected event
     Sheets("Data").Rows(row).Delete
 Else
@@ -1054,21 +1055,13 @@ If EventIDListBox.ListIndex <> -1 Then
     SearchBox.Text = EventIDListBox.value
 End If
 
-Dim nameLocation As Variant
-nameLocation = funcs.search(EventIDListBox.value, sheet)
-
-If nameLocation(0) = 0 Then
-    MsgBox ("Event ID could not be found. Error in EventIDListBox_Change(). Contact support.")
-    Exit Sub
-End If
+' Store row of selected event.
+Dim row As Long
+row = EventIDListBox.ListIndex + 2
 
 ' Display the event name in search box.
 ' It will always be found in the second column, so hard coding is ok.
-NameSearchTextBox.Text = Worksheets(sheet).Cells(nameLocation(0), 2)
-
-' Store row of selected event. Makes things easier to read.
-Dim row As Long
-row = nameLocation(0)
+NameSearchTextBox.Text = Worksheets(sheet).Cells(row, 2)
 
 ' So the user always knows which event has been selected.
 ' Might want to hide that if they're not in edit mode, idk.
@@ -1210,23 +1203,23 @@ ElseIf EventDateTextBox.Text = "" Then
     MsgBox ("Please select a date using the calendar. Double click on the text box to show the calendar.")
     MultiPage1.value = 1
     Exit Function
-ElseIf CategoryListBox.ListIndex = -1 Then ' .ListIndex = -1 means nothing has been selected yet
+ElseIf IsNull(CategoryListBox.value) Then 'CategoryListBox.ListIndex = -1 Then
     MsgBox ("Please select a category")
     MultiPage1.value = 1
     Exit Function
-ElseIf TypeListBox.ListIndex = -1 Then
+ElseIf IsNull(TypeListBox.value) Then
     MsgBox ("Please enter a type")
     MultiPage1.value = 1
     Exit Function
-ElseIf LocationListBox.ListIndex = -1 Then
+ElseIf IsNull(LocationListBox.value) Then
     MsgBox ("Please select a location")
     MultiPage1.value = 1
     Exit Function
-ElseIf RoomListBox.ListIndex = -1 Then
+ElseIf IsNull(RoomListBox.value) Then
     MsgBox ("Please select a room")
     MultiPage1.value = 1
     Exit Function
-ElseIf AudienceListBox.ListIndex = -1 Then
+ElseIf IsNull(AudienceListBox.value) Then
     MsgBox ("Please enter an audience type")
     MultiPage1.value = 1
     Exit Function
@@ -1238,16 +1231,16 @@ ElseIf TicketedOptionButton.value = False And NonTicketedOptionButton.value = Fa
     MsgBox ("Please select 'Ticketed' or 'Non-Ticketed'")
     MultiPage1.value = 1
     Exit Function
-ElseIf GenreListBox.Visible = True And GenreListBox.ListIndex = -1 Then
+ElseIf GenreListBox.Visible = True And IsNull(GenreListBox.value) Then
     MsgBox ("Please enter a genre")
     MultiPage1.value = 1
     Exit Function
 ' Layout & Capacity
-ElseIf AuditoriumLayoutListBox.ListIndex = -1 Then
+ElseIf IsNull(AuditoriumLayoutListBox.value) Then
     MsgBox ("Please enter a layout for the Auditorium")
     MultiPage1.value = 2 ' Take the user to the layouts page
     Exit Function
-ElseIf EgremontLayoutListBox.ListIndex = -1 Then
+ElseIf IsNull(EgremontLayoutListBox.value) Then
     MsgBox ("Please enter a layout for the Egremont Room")
     MultiPage1.value = 2 ' Take the user to the layouts page
     Exit Function
@@ -1983,6 +1976,7 @@ If Worksheets(sheet).Cells(row, 24) <> "" Then
 Else
     ' Unselect item if no info provided
     CategoryListBox.ListIndex = -1
+    MsgBox ("Nothing in category")
 End If
 
 If Worksheets(sheet).Cells(row, 29) <> "" Then
@@ -1991,6 +1985,7 @@ If Worksheets(sheet).Cells(row, 29) <> "" Then
 Else
     ' Unselect item if no info provided
     TypeListBox.ListIndex = -1
+    MsgBox ("Nothing in type")
 End If
 
 If Worksheets(sheet).Cells(row, 4) <> "" Then
@@ -1999,6 +1994,7 @@ If Worksheets(sheet).Cells(row, 4) <> "" Then
 Else
     ' Unselect item if no info provided
     LocationListBox.ListIndex = -1
+    MsgBox ("nothing in location")
 End If
 
 If Worksheets(sheet).Cells(row, 28) <> "" Then
@@ -2006,6 +2002,7 @@ If Worksheets(sheet).Cells(row, 28) <> "" Then
     RoomListBox.Selected(RoomListBox.ListIndex) = True
 Else
     RoomListBox.ListIndex = -1
+    MsgBox ("nothing in room")
 End If
 
 If Worksheets(sheet).Cells(row, 30) <> "" Then
@@ -2013,6 +2010,7 @@ If Worksheets(sheet).Cells(row, 30) <> "" Then
     AudienceListBox.Selected(AudienceListBox.ListIndex) = True
 Else
     AudienceListBox.ListIndex = -1
+    MsgBox ("nothing in audience")
 End If
 
 MorningCheckBox.value = Worksheets(sheet).Cells(row, 5)
@@ -2040,20 +2038,24 @@ If Worksheets(sheet).Cells(row, 48) <> "" Then
     GenreListBox.Selected(GenreListBox.ListIndex) = True
 Else
     GenreListBox.ListIndex = -1
+    MsgBox ("Nothing in genre")
 End If
+
 ' Layout & Capacity
-If Worksheets(sheet).Cells(row, 31) <> "" Then
+If Worksheets(sheet).Cells(row, 32) <> "" Then
     AuditoriumLayoutListBox.value = Worksheets(sheet).Cells(row, 32)
     AuditoriumLayoutListBox.Selected(AuditoriumLayoutListBox.ListIndex) = True
 Else
     AuditoriumLayoutListBox.ListIndex = -1
+    MsgBox ("Nothing in auditorium")
 End If
 
-If Worksheets(sheet).Cells(row, 32) <> "" Then
+If Worksheets(sheet).Cells(row, 31) <> "" Then
     EgremontLayoutListBox.value = Worksheets(sheet).Cells(row, 31)
     EgremontLayoutListBox.Selected(EgremontLayoutListBox.ListIndex) = True
 Else
     EgremontLayoutListBox.ListIndex = -1
+    MsgBox ("Nothing in egremont")
 End If
 
 TotalCapacityTextBox.Text = Worksheets(sheet).Cells(row, 33)
