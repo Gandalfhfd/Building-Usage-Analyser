@@ -94,16 +94,13 @@ If EventIDListBox.ListIndex = -1 Then
     Exit Sub
 End If
 
-Dim nameLocation As Variant
-nameLocation = funcs.search(EventIDListBox.value, "Data")
+' Store row we're autofilling into
+Dim nameLocation As Integer
+nameLocation = EventIDListBox.ListIndex + 2
 
-If nameLocation(0) = 0 Then
-    MsgBox ("Event ID could not be found. Error in AutofillCheckBox_Click(). Contact support.")
-    Exit Sub
-End If
-
+' Autofill data into form
 If AutofillCheckBox.value = True Then
-    Call AutofillFromSelected(nameLocation(0))
+    Call AutofillFromSelected(nameLocation)
 End If
 End Sub
 
@@ -180,14 +177,9 @@ If response = vbNo Then
     Exit Sub
 End If
 
-' Store location of row to be deleted
-Dim location As Variant
-location = funcs.search(EventIDListBox.value, "Data")
-
-' Unlikely, but possible that the search fails.
-If location(0) = 0 Then
-    MsgBox ("EventID Not found. ")
-End If
+' Store index of row to be deleted
+Dim row As Integer
+row = EventIDListBox.ListIndex + 2
 
 Dim my_index As Long
 my_index = EventIDListBox.ListIndex
@@ -198,17 +190,17 @@ If EventIDListBox.ListCount < 1 Then
     EventIDListBox.ListIndex = -1
     DeleteIndicator = 1
     ' Delete entire row corresponding to selected event
-    Sheets("Data").Rows(location(0)).Delete
+    Sheets("Data").Rows(row).Delete
 ElseIf EventIDListBox.ListCount = my_index + 1 Then
     ' We are at end of list, so go up one
     EventIDListBox.ListIndex = my_index - 1
     DeleteIndicator = 1
     ' Delete entire row corresponding to selected event
-    Sheets("Data").Rows(location(0)).Delete
+    Sheets("Data").Rows(row).Delete
 Else
     ' Delete entire row corresponding to selected event
     DeleteIndicator = 1
-    Sheets("Data").Rows(location(0)).Delete
+    Sheets("Data").Rows(row).Delete
 End If
 
 ' Update EventIDListBox
@@ -1302,7 +1294,7 @@ If mode = False Then
     my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row + 1
 ElseIf mode = True Then
     ' Row corresponds to the row of the event selected by the user
-    my_row = funcs.search(SearchBox.Text, "Data")(0)
+    my_row = EventIDListBox.ListIndex + 2
 End If
 
 ' Add default data into spreadsheet can be overridden by user in the future
