@@ -1160,7 +1160,8 @@ If dateVariable <> 0 Then UserForm1.EventDateTextBox = Format(dateVariable, "dd/
 End Sub
 
 Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
-' Generate uniqueish UUID. Not unique if the same event is added twice within a second
+' Generate uniqueish UUID.
+' If name, category and date are all the same, there is a 1 in 844,596,301 change of a collision.
 UUIDGenerator = InptValid.RmSpecialChars(name) & InptValid.RmSpecialChars(category) _
                 & InptValid.RmSpecialChars(eventDate) & funcs.GenerateRandomAlphaNumericStr(5)
 End Function
@@ -1460,8 +1461,16 @@ Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 6))
 AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
+' Store current multipage1 index
+Dim currentIndex As Integer
+currentIndex = MultiPage1.value
+
+' Change page we're on so that everything loads
+MultiPage1.value = 2
+
 ' Set default value
 AuditoriumLayoutListBox.ListIndex = 1
+MultiPage1.value = currentIndex ' reset index
 
 AuditoriumCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
@@ -1480,8 +1489,16 @@ Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
                     Worksheets("Non-Specific Defaults").Cells(empty_row, 8))
 EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
+' Store current multipage1 index
+Dim currentIndex As Integer
+currentIndex = MultiPage1.value
+
+' Change page we're on so that everything loads
+MultiPage1.value = 2
+
 ' Set default value
 EgremontLayoutListBox.ListIndex = 2
+MultiPage1.value = currentIndex ' reset index
 
 EgremontCapacityTextBox.Locked = False
 TotalCapacityTextBox.Locked = False
@@ -1501,8 +1518,16 @@ Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 6), _
                     Worksheets("Non-Specific Defaults").Cells(2, 6))
 AuditoriumLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
+' Store current multipage1 index
+Dim currentIndex As Integer
+currentIndex = MultiPage1.value
+
+' Change page we're on so that everything loads
+MultiPage1.value = 2
+
 ' Set default value
 AuditoriumLayoutListBox.ListIndex = 0
+MultiPage1.value = currentIndex ' reset index
 
 AuditoriumCapacityTextBox.Locked = True
 AuditoriumCapacityTextBox.value = "0"
@@ -1516,8 +1541,15 @@ Set ListBoxRange = Range(Worksheets("Non-Specific Defaults").Cells(2, 8), _
                     Worksheets("Non-Specific Defaults").Cells(2, 8))
 EgremontLayoutListBox.RowSource = ListBoxRange.address(External:=True)
 
+' Store current multipage1 index
+Dim currentIndex As Integer
+currentIndex = MultiPage1.value
+
+' Change page we're on so that everything loads
+MultiPage1.value = 2
 ' Set default value
 EgremontLayoutListBox.ListIndex = 0
+MultiPage1.value = currentIndex ' reset index
 
 EgremontCapacityTextBox.Locked = True
 EgremontCapacityTextBox = "0"
@@ -1971,12 +2003,18 @@ AutofillCheck = True
 Dim sheet As String
 sheet = "Data"
 
+' Store current page user is on
+Dim currentPage As Integer
+currentPage = MultiPage1.value
+
 ' Basic Info
+' Go to page so that everything loads
+MultiPage1.value = 1
+
 NameTextBox.Text = Worksheets(sheet).Cells(row, 2)
 EventDateTextBox.Text = Worksheets(sheet).Cells(row, 3)
 If Worksheets(sheet).Cells(row, 24) <> "" Then
     CategoryListBox.value = Worksheets(sheet).Cells(row, 24)
-    CategoryListBox.Selected(CategoryListBox.ListIndex) = True
 Else
     ' Unselect item if no info provided
     CategoryListBox.ListIndex = -1
@@ -1985,7 +2023,6 @@ End If
 
 If Worksheets(sheet).Cells(row, 29) <> "" Then
     TypeListBox.value = Worksheets(sheet).Cells(row, 29)
-    TypeListBox.Selected(TypeListBox.ListIndex) = True
 Else
     ' Unselect item if no info provided
     TypeListBox.ListIndex = -1
@@ -1994,7 +2031,6 @@ End If
 
 If Worksheets(sheet).Cells(row, 4) <> "" Then
     LocationListBox.value = Worksheets(sheet).Cells(row, 4)
-    LocationListBox.Selected(LocationListBox.ListIndex) = True
 Else
     ' Unselect item if no info provided
     LocationListBox.ListIndex = -1
@@ -2003,7 +2039,6 @@ End If
 
 If Worksheets(sheet).Cells(row, 28) <> "" Then
     RoomListBox.value = Worksheets(sheet).Cells(row, 28)
-    RoomListBox.Selected(RoomListBox.ListIndex) = True
 Else
     RoomListBox.ListIndex = -1
     MsgBox ("nothing in room")
@@ -2011,7 +2046,6 @@ End If
 
 If Worksheets(sheet).Cells(row, 30) <> "" Then
     AudienceListBox.value = Worksheets(sheet).Cells(row, 30)
-    AudienceListBox.Selected(AudienceListBox.ListIndex) = True
 Else
     AudienceListBox.ListIndex = -1
     MsgBox ("nothing in audience")
@@ -2039,16 +2073,16 @@ End If
 
 If Worksheets(sheet).Cells(row, 48) <> "" Then
     GenreListBox.value = Worksheets(sheet).Cells(row, 48)
-    GenreListBox.Selected(GenreListBox.ListIndex) = True
 Else
     GenreListBox.ListIndex = -1
-    MsgBox ("Nothing in genre")
 End If
 
 ' Layout & Capacity
+' Go to page so that everything loads
+MultiPage1.value = 2
+
 If Worksheets(sheet).Cells(row, 32) <> "" Then
     AuditoriumLayoutListBox.value = Worksheets(sheet).Cells(row, 32)
-    AuditoriumLayoutListBox.Selected(AuditoriumLayoutListBox.ListIndex) = True
 Else
     AuditoriumLayoutListBox.ListIndex = -1
     MsgBox ("Nothing in auditorium")
@@ -2056,7 +2090,6 @@ End If
 
 If Worksheets(sheet).Cells(row, 31) <> "" Then
     EgremontLayoutListBox.value = Worksheets(sheet).Cells(row, 31)
-    EgremontLayoutListBox.Selected(EgremontLayoutListBox.ListIndex) = True
 Else
     EgremontLayoutListBox.ListIndex = -1
     MsgBox ("Nothing in egremont")
@@ -2064,7 +2097,11 @@ End If
 
 TotalCapacityTextBox.Text = Worksheets(sheet).Cells(row, 33)
 BlockedSeatsTextBox.Text = Worksheets(sheet).Cells(row, 34)
+
 ' Event Time
+' Go to page so that everything loads
+MultiPage1.value = 3
+
 SetupStartTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 8), "hh:mm")
 DoorsTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 47), "hh:mm")
 EventStartTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 9), "hh:mm")
@@ -2084,7 +2121,10 @@ BarCloseTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 56), "hh:mm")
 BarOpenDurationTextBox.Text = Worksheets(sheet).Cells(row, 57)
 BarSetupToTakedownEndDurationTextBox.Text = Worksheets(sheet).Cells(row, 58)
 BarSetupTakedownTextBox.Text = Worksheets(sheet).Cells(row, 59)
+
 ' Income
+' Go to page so that everything loads
+MultiPage1.value = 4
 NumTicketsSoldTextBox.Text = Worksheets(sheet).Cells(row, 14)
 BoxOfficeRevenueTextBox.Text = Worksheets(sheet).Cells(row, 42)
 SupportRevenueTextBox.Text = Worksheets(sheet).Cells(row, 44)
@@ -2099,7 +2139,10 @@ HiredPersonnelTextBox.Text = Worksheets(sheet).Cells(row, 43)
 HeatingTextBox.Text = Worksheets(sheet).Cells(row, 39)
 LightingTextBox.Text = Worksheets(sheet).Cells(row, 40)
 MiscCostTextBox.Text = Worksheets(sheet).Cells(row, 41)
+
 ' Volunteer minutes
+' Go to page so that everything loads
+MultiPage1.value = 5
 FoHTextBox.Text = Worksheets(sheet).Cells(row, 18)
 DMTextBox.Text = Worksheets(sheet).Cells(row, 19)
 TechTextBox.Text = Worksheets(sheet).Cells(row, 19)
@@ -2108,11 +2151,17 @@ BarTextBox.Text = Worksheets(sheet).Cells(row, 22)
 AoWVolTextBox.Text = Worksheets(sheet).Cells(row, 23)
 MiscVolTextBox.Text = Worksheets(sheet).Cells(row, 49)
 
+
+' Go to original page
+MultiPage1.value = currentPage
 ' Tell the programme we're done autofilling
 AutofillCheck = False
 End Sub
 
 Private Sub RefreshListBox(sourceSheet As String, sourceColumn As Integer, list As Control)
+' Will show column header if column is empty (apart from the header)
+' Not fixing it for now because it doesn't seem to matter.
+
 Dim empty_row As Long ' Store number of items in list box
 Dim DataRange As Range
 Dim myIndex As Long

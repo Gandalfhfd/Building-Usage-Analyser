@@ -1,7 +1,7 @@
 Attribute VB_Name = "InptValid"
 Public Function RmSpecialChars(inputStr As String) As String
 ' List of chars we want to remove
-Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',.,£"
+Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?, ,/,:,',.,£,-"
 Dim char As Variant
 
 RmSpecialChars = inputStr
