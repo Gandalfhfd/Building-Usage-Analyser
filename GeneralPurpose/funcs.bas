@@ -157,7 +157,7 @@ Public Function min(x, y As Variant) As Variant
    min = IIf(x < y, x, y)
 End Function
 
-Function IsWorkBookOpen(FileName As String)
+Public Sub IsWorkBookOpen(FileName As String)
     ' I don't know what most of this does. I got it from
     ' https://stackoverflow.com/questions/9373082/detect-whether-excel-workbook-is-already-open
     Dim ff As Long, ErrNo As Long
@@ -174,4 +174,45 @@ Function IsWorkBookOpen(FileName As String)
     Case 70:   IsWorkBookOpen = True
     Case Else: Error ErrNo
     End Select
+End Sub
+
+Function GenerateRandomInt(lowbound As Integer, upbound As Integer) As Integer
+' Return a random integer between lowbound and upbound
+GenerateRandomInt = Int((upbound - lowbound + 1) * Rnd + lowbound)
+End Function
+
+Function GenerateRandomAlphaNumericStr(length As Integer) As String
+' Returns a string of length length of upper and lower case letters and numbers
+' Will never return a zero, due to confusion between "0" and "O"
+' length = length of string to be returned
+
+' Decide what type of character to use
+Dim decider As Single
+
+' Store our string because it's shorter than the function name
+Dim randomStr As String
+randomStr = ""
+
+' for loop index
+Dim i As Integer
+
+' Repeat length times
+For i = 0 To length - 1
+    ' Need new decision each round
+    decider = Rnd
+    If decider < 9 / 61 Then
+        ' Generate a random integer between 1 and 9
+        randomStr = randomStr & GenerateRandomInt(1, 9)
+    ElseIf decider >= 9 / 61 And decider < 35 / 61 Then
+        ' Generate a random upper case letter
+        randomStr = randomStr & Chr(GenerateRandomInt(65, 90))
+    ElseIf decider >= 35 / 61 Then
+        ' Generate a random lower case letter
+        randomStr = randomStr & Chr(GenerateRandomInt(97, 122))
+    Else
+        MsgBox ("GenerateRandomAlphaNumbericStr has failed. Contact support.")
+    End If
+Next
+
+GenerateRandomAlphaNumericStr = randomStr
 End Function

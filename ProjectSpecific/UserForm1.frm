@@ -316,6 +316,10 @@ Call InptValid.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
 End Sub
 
+Private Sub TestButton_Click()
+MsgBox (funcs.GenerateRandomAlphaNumericStr(20))
+End Sub
+
 Private Sub TotalCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(TotalCapacityTextBox, TotalCapacity)
@@ -1158,7 +1162,7 @@ End Sub
 Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
 ' Generate uniqueish UUID. Not unique if the same event is added twice within a second
 UUIDGenerator = InptValid.RmSpecialChars(name) & InptValid.RmSpecialChars(category) _
-                & InptValid.RmSpecialChars(eventDate) & Format(Now, "ss")
+                & InptValid.RmSpecialChars(eventDate) & funcs.GenerateRandomAlphaNumericStr(5)
 End Function
 
 Public Function TotalCapDecider() As String ' Highly non-generic function. Sorry!
@@ -2111,10 +2115,14 @@ End Sub
 Private Sub RefreshListBox(sourceSheet As String, sourceColumn As Integer, list As Control)
 Dim empty_row As Long ' Store number of items in list box
 Dim DataRange As Range
+Dim myIndex As Long
+myIndex = list.ListIndex
 
 ' empty_row = lst non-empty row for specific list(box)
 empty_row = Worksheets(sourceSheet).Cells(Rows.Count, 1).End(xlUp).row
 Set DataRange = Range(Worksheets(sourceSheet).Cells(2, sourceColumn), _
                 Worksheets(sourceSheet).Cells(empty_row, sourceColumn))
 list.RowSource = DataRange.address(External:=True)
+list.ListIndex = myIndex
 End Sub
+
