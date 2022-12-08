@@ -317,8 +317,8 @@ Private Sub InitializeUserform(SelectedDate As Date, MinimumDate As Date, Maximu
     Dim cmdButtonsMaxHeight As Double           'Maximum height of command buttons and month scroll bar
     Dim cmdButtonsMaxWidth As Double            'Maximum width of command buttons
     Dim cmdButtonsMaxFontSize As Long           'Maximum font size of command buttons
-    Dim bgControl As MSForms.Control            'Stores current date label background in loop to initialize various settings
-    Dim lblControl As MSForms.Control           'Stores current date label in loop to initialize various settings
+    Dim bgControl As MsForms.Control            'Stores current date label background in loop to initialize various settings
+    Dim lblControl As MsForms.Control           'Stores current date label in loop to initialize various settings
     Dim HeightOffset As Double                  'Difference between form height and inside height, to account for toolbar
     Dim i As Long                               'Used for loops
     Dim j As Long                               'Used for loops
@@ -802,7 +802,7 @@ End Sub
 ' If the Okay button is enabled, clicking a date selects that date, but does not return.
 ' If Okay button is disabled, clicking a date hides the userform and returns that date.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Private Sub ClickControl(ctrl As MSForms.Control)
+Private Sub ClickControl(Ctrl As MsForms.Control)
     Dim SelectedMonth As Long           'Month of selected date
     Dim SelectedYear As Long            'Year of selected date
     Dim SelectedDay As Long             'Day of selected date
@@ -815,9 +815,9 @@ Private Sub ClickControl(ctrl As MSForms.Control)
     SelectedYear = cmbYear.value
     
     'Get indices of date label from label name and selected day from caption
-    RowIndex = CLng(Left(Right(ctrl.name, 2), 1))
-    ColumnIndex = CLng(Right(ctrl.name, 1))
-    SelectedDay = CLng(ctrl.Caption)
+    RowIndex = CLng(Left(Right(Ctrl.name, 2), 1))
+    ColumnIndex = CLng(Right(Ctrl.name, 1))
+    SelectedDay = CLng(Ctrl.Caption)
     
     'Selection is from previous month. The largest day that could exist in
     'the first row from the current month is 6, so if the day is larger than
@@ -875,13 +875,13 @@ End Sub
 ' hovered date label to the bgDateHoverColor, and stores its name and original color
 ' to global variables.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Private Sub HoverControl(ctrl As MSForms.Control)
+Private Sub HoverControl(Ctrl As MsForms.Control)
     If HoverControlName <> vbNullString Then
         Me.Controls(HoverControlName).BackColor = HoverControlColor
     End If
-    HoverControlName = ctrl.name
-    HoverControlColor = ctrl.BackColor
-    ctrl.BackColor = bgDateHoverColor
+    HoverControlName = Ctrl.name
+    HoverControlColor = Ctrl.BackColor
+    Ctrl.BackColor = bgDateHoverColor
 End Sub
 
 
@@ -1164,8 +1164,8 @@ Private Sub SetDays(MonthIn As Long, YearIn As Long, Optional DayIn As Long)
     Dim MaxDay As Long                  'Stores upper limit of days if maximum date falls in selected month
     Dim PrevMonthMinDay As Long         'Stores lower limit of days if minimum date falls in preceding month
     Dim NextMonthMaxDay As Long         'Stores upper limit of days if maximum date falls in next month
-    Dim lblControl As MSForms.Control   'Stores current date label while changing settings
-    Dim bgControl As MSForms.Control    'Stores current date label background while changing settings
+    Dim lblControl As MsForms.Control   'Stores current date label while changing settings
+    Dim bgControl As MsForms.Control    'Stores current date label background while changing settings
     Dim i As Long                       'Used for looping
     Dim j As Long                       'Used for looping
     

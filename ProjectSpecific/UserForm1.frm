@@ -119,7 +119,7 @@ Private Sub EventButton1_Click()
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub EventButton1_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventButton1_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
@@ -128,7 +128,7 @@ Private Sub EventButton2_Click()
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub EventButton2_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventButton2_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
@@ -137,7 +137,7 @@ Private Sub EventButton3_Click()
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub EventButton3_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventButton3_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
@@ -146,7 +146,7 @@ Private Sub EventButton4_Click()
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub EventButton4_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventButton4_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
@@ -155,7 +155,7 @@ Private Sub EventButton5_Click()
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
 
-Private Sub EventButton5_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventButton5_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Needed because a double click is counted differently to a single click
 Call AddEvent(EditToggleCheckBox1.value)
 End Sub
@@ -305,7 +305,7 @@ End Sub
 '' TEXT BOXES===============================================================
 
 ' Basic Info============================================================================
-Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventDateTextBox_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Re-show Date Picker if box has already been entered
 Call GetCalendar ' Show Date Picker
 End Sub
@@ -337,8 +337,7 @@ Call TotalCapDecider
 End Sub
 
 Private Sub TestButton_Click()
-Worksheets("Data").Rows(2).Copy
-Worksheets("Data").Rows(3).Insert
+Call UpdateVolunteerMinutes
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -351,7 +350,7 @@ Private Sub BlockedSeatsTextBox_Change()
 Call InptValid.SanitiseNonNegInt(BlockedSeatsTextBox, BlockedSeats)
 End Sub
 
-Private Sub BlockedSeatsTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BlockedSeatsTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Stop it from being left blank
 If BlockedSeatsTextBox.Text = "" Then
     BlockedSeatsTextBox.Text = 0
@@ -360,7 +359,7 @@ End Sub
 
 ' Time============================================================================
 
-Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub SetupStartTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(SetupStartTimeTextBox, SetupStartTime)
 
@@ -418,7 +417,7 @@ Else
 End If
 End Sub
 
-Private Sub DoorsTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub DoorsTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(DoorsTimeTextBox, DoorsTime)
 
@@ -437,7 +436,7 @@ End If
 
 End Sub
 
-Private Sub EventStartTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventStartTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(EventStartTimeTextBox, EventStartTime)
 
@@ -490,9 +489,12 @@ BarOpenTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15),
     
 ' Change bar close time
 BarCloseTimeTextBox.Text = EventStartTimeTextBox.Text
+
+' Update volunteer hours
+Call UpdateVolunteerMinutes
 End Sub
 
-Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub EventEndTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(EventEndTimeTextBox, EventEndTime)
 
@@ -531,7 +533,7 @@ If SetupStartTimeTextBox.Text <> "" And TakedownEndTimeTextBox.Text <> "" Then
 End If
 End Sub
 
-Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub TakedownEndTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(TakedownEndTimeTextBox, TakedownEndTime)
 
@@ -656,17 +658,17 @@ Private Sub SetupTakedownTextBox_Change()
 Call InptValid.SanitiseNonNegInt(SetupTakedownTextBox, SetupTakedown)
 End Sub
 
-Private Sub BarSetupTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BarSetupTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(BarSetupTimeTextBox, BarSetupTime)
 End Sub
 
-Private Sub BarOpenTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BarOpenTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(BarOpenTimeTextBox, BarOpenTime)
 End Sub
 
-Private Sub BarCloseTimeTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BarCloseTimeTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only valid 24hr times are input. Format hh:mm
 Call InptValid.Sanitise24Hr(BarCloseTimeTextBox, BarCloseTime)
 End Sub
@@ -697,7 +699,7 @@ Private Sub BoxOfficeRevenueTextBox_Change()
 Call InptValid.SanitiseReal(BoxOfficeRevenueTextBox, BoxOfficeRevenue)
 End Sub
 
-Private Sub BoxOfficeRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BoxOfficeRevenueTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 BoxOfficeRevenueTextBox.Text = StrManip.Convert2Currency(BoxOfficeRevenueTextBox)
 End Sub
 
@@ -706,7 +708,7 @@ Private Sub SupportRevenueTextBox_Change()
 Call InptValid.SanitiseReal(SupportRevenueTextBox, SupportRevenue)
 End Sub
 
-Private Sub SupportRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub SupportRevenueTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 SupportRevenueTextBox.Text = StrManip.Convert2Currency(SupportRevenueTextBox)
 End Sub
 
@@ -715,7 +717,7 @@ Private Sub BarRevenueTextBox_Change()
 Call InptValid.SanitiseReal(BarRevenueTextBox, BarRevenue)
 End Sub
 
-Private Sub BarRevenueTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BarRevenueTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 BarRevenueTextBox.Text = StrManip.Convert2Currency(BarRevenueTextBox)
 End Sub
 
@@ -729,7 +731,7 @@ Private Sub FilmCostTextBox_Change()
 Call InptValid.SanitiseReal(FilmCostTextBox, FilmCost)
 End Sub
 
-Private Sub FilmCostTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub FilmCostTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 FilmCostTextBox.Text = StrManip.Convert2Currency(FilmCostTextBox)
 End Sub
 
@@ -738,7 +740,7 @@ Private Sub FilmTransportTextBox_Change()
 Call InptValid.SanitiseReal(FilmTransportTextBox, FilmTransport)
 End Sub
 
-Private Sub FilmTransportTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub FilmTransportTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 FilmTransportTextBox.Text = StrManip.Convert2Currency(FilmTransportTextBox)
 End Sub
 
@@ -747,7 +749,7 @@ Private Sub AccommodationTextBox_Change()
 Call InptValid.SanitiseReal(AccommodationTextBox, Accommodation)
 End Sub
 
-Private Sub AccommodationTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub AccommodationTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 AccommodationTextBox.Text = StrManip.Convert2Currency(AccommodationTextBox)
 End Sub
 
@@ -756,7 +758,7 @@ Private Sub ArtistFoodTextBox_Change()
 Call InptValid.SanitiseReal(ArtistFoodTextBox, ArtistFood)
 End Sub
 
-Private Sub ArtistFoodTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub ArtistFoodTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ArtistFoodTextBox.Text = StrManip.Convert2Currency(ArtistFoodTextBox)
 End Sub
 
@@ -765,7 +767,7 @@ Private Sub HeatingTextBox_Change()
 Call InptValid.SanitiseReal(HeatingTextBox, Heating)
 End Sub
 
-Private Sub HeatingTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub HeatingTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 HeatingTextBox.Text = StrManip.Convert2Currency(HeatingTextBox)
 End Sub
 
@@ -774,7 +776,7 @@ Private Sub LightingTextBox_Change()
 Call InptValid.SanitiseReal(LightingTextBox, Lighting)
 End Sub
 
-Private Sub LightingTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub LightingTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 LightingTextBox.Text = StrManip.Convert2Currency(LightingTextBox)
 End Sub
 
@@ -783,7 +785,7 @@ Private Sub MiscCostTextBox_Change()
 Call InptValid.SanitiseReal(MiscCostTextBox, MiscCost)
 End Sub
 
-Private Sub MiscCostTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub MiscCostTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 MiscCostTextBox.Text = StrManip.Convert2Currency(MiscCostTextBox)
 End Sub
 
@@ -792,7 +794,7 @@ Private Sub HiredPersonnelTextBox_Change()
 Call InptValid.SanitiseReal(HiredPersonnelTextBox, HiredPersonnel)
 End Sub
 
-Private Sub HiredPersonnelTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub HiredPersonnelTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 HiredPersonnelTextBox.Text = StrManip.Convert2Currency(HiredPersonnelTextBox)
 End Sub
 
@@ -902,7 +904,7 @@ Private Sub FoHPayTextBox_Change()
 Call InptValid.SanitiseReal(FoHPayTextBox, FoHPay)
 End Sub
 
-Private Sub FoHPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub FoHPayTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only non-negative integers are input
 FoHPayTextBox.Text = StrManip.Convert2Currency(FoHPayTextBox)
 End Sub
@@ -912,7 +914,7 @@ Private Sub DMPayTextBox_Change()
 Call InptValid.SanitiseReal(DMPayTextBox, DMPay)
 End Sub
 
-Private Sub DMPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub DMPayTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only non-negative integers are input
 DMPayTextBox.Text = StrManip.Convert2Currency(DMPayTextBox)
 End Sub
@@ -922,7 +924,7 @@ Private Sub TechPayTextBox_Change()
 Call InptValid.SanitiseReal(TechPayTextBox, TechPay)
 End Sub
 
-Private Sub TechPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub TechPayTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only non-negative integers are input
 TechPayTextBox.Text = StrManip.Convert2Currency(TechPayTextBox)
 End Sub
@@ -932,7 +934,7 @@ Private Sub BoxOfficePayTextBox_Change()
 Call InptValid.SanitiseReal(BoxOfficePayTextBox, BoxOfficePay)
 End Sub
 
-Private Sub BoxOfficePayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BoxOfficePayTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only non-negative integers are input
 BoxOfficePayTextBox.Text = StrManip.Convert2Currency(BoxOfficePayTextBox)
 End Sub
@@ -942,7 +944,7 @@ Private Sub BarPayTextBox_Change()
 Call InptValid.SanitiseReal(BarPayTextBox, BarPay)
 End Sub
 
-Private Sub BarPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub BarPayTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only non-negative integers are input
 BarPayTextBox.Text = StrManip.Convert2Currency(BarPayTextBox)
 End Sub
@@ -952,7 +954,7 @@ Private Sub AoWVolPayTextBox_Change()
 Call InptValid.SanitiseReal(AoWVolPayTextBox, AoWVolPay)
 End Sub
 
-Private Sub AoWVolPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub AoWVolPayTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only non-negative integers are input
 AoWVolPayTextBox.Text = StrManip.Convert2Currency(AoWVolPayTextBox)
 End Sub
@@ -962,7 +964,7 @@ Private Sub MiscVolPayTextBox_Change()
 Call InptValid.SanitiseReal(MiscVolPayTextBox, MiscVolPay)
 End Sub
 
-Private Sub MiscVolPayTextBox_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+Private Sub MiscVolPayTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 ' Sanitise input to ensure only non-negative integers are input
 MiscVolPayTextBox.Text = StrManip.Convert2Currency(MiscVolPayTextBox)
 End Sub
@@ -1956,6 +1958,18 @@ Worksheets(dataSheetName).Cells(my_row, 25) = revenue
 Call ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
 
+Private Sub VolRef1Button_Click()
+If UpdateVolunteerMinutes = False Then
+    MsgBox ("Please fill all time and duration boxes in on this page before refreshing")
+End If
+End Sub
+
+Private Sub VolRef2Button_Click()
+If UpdateVolunteerMinutes = False Then
+    MsgBox ("Please fill all time and duration boxes in on the time page before refreshing")
+End If
+End Sub
+
 Private Sub ZettleImportButton_Click()
 '' Find the row of the selected event
 'Dim event_row As Long
@@ -2319,5 +2333,55 @@ BarSetupTakedownTextBox.Text = CInt((Worksheets(sheet).Cells(row, 8) _
 
 ' Reset time autofill to previous state
 AutoTimeCheckBox.value = autoTime
+
+' Refresh volunteer hours based on new times
+Call UpdateVolunteerMinutes
 End Sub
 
+Private Function UpdateVolunteerMinutes() As Boolean
+' use event and bar times to update minutes worked by volunteers
+
+Dim Ctrl As Control
+' Check everything is filled in. Exit sub if not.
+For Each Ctrl In Me.MultiPage1.Pages(3).Controls
+    If TypeOf Ctrl Is MsForms.TextBox Then
+        If Ctrl.Text = "" Then
+            UpdateVolunteerMinutes = False
+            Exit Function
+        End If
+    End If
+Next
+
+Dim FoH1 As Integer
+Dim FoH2 As Integer
+Dim DM As Integer
+Dim Tech As Integer
+Dim Bar As Integer
+
+' 15 minutes before doors, leave as event starts
+FoH1 = CInt(15 + DateDiff("n", DoorsTimeTextBox, EventStartTimeTextBox))
+' 15 minutes before event starts, 5 minutes after event ends
+FoH2 = CInt(15 + DateDiff("n", EventStartTimeTextBox, EventEndTimeTextBox) + 5)
+' 15 minutes before doors, leave 15 minutes after event ends
+DM = CInt(15 + DateDiff("n", DoorsTimeTextBox, EventEndTimeTextBox) + 15)
+' 15 minutes before doors, leave 15 minutes after event ends
+Tech = CInt(15 + DateDiff("n", DoorsTimeTextBox, EventEndTimeTextBox) + 15)
+' 15 minutes before doors, leave after bar closes
+Bar = CInt(DateDiff("n", BarSetupTimeTextBox, BarCloseTimeTextBox))
+
+' Change page to volunteer page
+Dim currentPage As Integer
+currentPage = MultiPage1.value
+MultiPage1.value = 5
+
+' Fill in volunteer minutes
+FoHTextBox.Text = FoH1 + FoH2
+DMTextBox.Text = DM
+TechTextBox.Text = Tech
+BarTextBox.Text = Bar
+
+' Go back to page user was on
+MultiPage1.value = currentPage
+
+UpdateVolunteerMinutes = True
+End Function
