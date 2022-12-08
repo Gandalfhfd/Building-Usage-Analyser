@@ -195,7 +195,6 @@ ElseIf EventIDListBox.ListCount = my_index + 1 Then
     ' We are at end of list, so go up one
     EventIDListBox.ListIndex = my_index - 1
     DeleteIndicator = 1
-    MsgBox ("Going up")
     ' Delete entire row corresponding to selected event
     Sheets("Data").Rows(row).Delete
 Else
@@ -209,6 +208,17 @@ Call RefreshListBox("Data", 1, EventIDListBox)
 
 ' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")
+End Sub
+
+Private Sub GenreListBox_Change()
+' Stop it from getting stroppy for comparing a string to null
+If GenreListBox.ListIndex = -1 Then
+    Exit Sub
+End If
+
+If GenreListBox.value = "Jazz" Then
+    Call DaySpecificDefaults("Day & Type-Specific Defaults", 10, "Jazz")
+End If
 End Sub
 
 Private Sub ImportSelectedButton_Click()
@@ -295,12 +305,22 @@ End Sub
 '' TEXT BOXES===============================================================
 
 ' Basic Info============================================================================
-Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean) ' Re-show Date Picker if box has already been entered
+Private Sub EventDateTextBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+' Re-show Date Picker if box has already been entered
 Call GetCalendar ' Show Date Picker
 End Sub
 
 Private Sub EventDateTextBox_Enter()
 Call GetCalendar ' Show Date Picker
+End Sub
+
+Private Sub EventDateTextBox_change()
+' Update times if date is changed and type matches what we want
+If TypeListBox.value = "Film" Then
+    Call DaySpecificDefaults("Day & Type-Specific Defaults", 2, "Film")
+ElseIf TypeListBox.value = "Live Music" And GenreListBox.value = "Jazz" Then
+    Call DaySpecificDefaults("Day & Type-Specific Defaults", 10, "Jazz")
+End If
 End Sub
 
 ' Layout & Capacity============================================================================
@@ -317,7 +337,8 @@ Call TotalCapDecider
 End Sub
 
 Private Sub TestButton_Click()
-MsgBox (funcs.GenerateRandomAlphaNumericStr(20))
+Worksheets("Data").Rows(2).Copy
+Worksheets("Data").Rows(3).Insert
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -960,17 +981,24 @@ row = TypeListBox.ListIndex + 2
 Me.MultiPage1.Pages("Page4").Visible = True
 
 ' Change some timing boxes
-' Event
-EventDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 10)
-SetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 13)
-SetupTakedownTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 9) + _
-                            Worksheets(TypeDefaultsSheet).Cells(row, 12)
-' Bar
-BarOpenDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 15)
-BarSetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 15) + _
-    Worksheets(TypeDefaultsSheet).Cells(row, 16) + Worksheets(TypeDefaultsSheet).Cells(row, 17)
-BarSetupTakedownTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 16) + _
-                                Worksheets(TypeDefaultsSheet).Cells(row, 17)
+' Routine is different if type is "Film"
+If TypeListBox.value = "Film" And EventDateTextBox.Text <> "" Then
+    Call DaySpecificDefaults("Day & Type-Specific Defaults", 2, "Film")
+ElseIf TypeListBox.value = "Live Music" And EventDateTextBox.Text <> "" _
+                            And GenreListBox.value = "Jazz" Then
+    Call DaySpecificDefaults("Day & Type-Specific Defaults", 10, "Jazz")
+Else
+    ' Event
+    EventDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 10)
+    SetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 13)
+    SetupTakedownTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 9) + _
+                                Worksheets(TypeDefaultsSheet).Cells(row, 12)
+    ' Bar
+    BarOpenDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 15)
+    BarSetupToTakedownEndDurationTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 15) + _
+        Worksheets(TypeDefaultsSheet).Cells(row, 16)
+    BarSetupTakedownTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 16)
+End If
 
 ' Show the genres if applicable
 If TypeListBox.value = "Live Music" Then
@@ -985,7 +1013,6 @@ End If
 FoHTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 3)
 DMTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 4)
 TechTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 5)
-BoxOfficeTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 6)
 BarTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 7)
 AoWVolTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 8)
 MiscVolTextBox.Text = Worksheets(TypeDefaultsSheet).Cells(row, 14)
@@ -1418,7 +1445,6 @@ Worksheets(sheet).Cells(my_row, 53) = "=RC[-1]+RC[-26]"
 Worksheets(sheet).Cells(my_row, 18) = FoHTextBox.Text
 Worksheets(sheet).Cells(my_row, 19) = DMTextBox.Text
 Worksheets(sheet).Cells(my_row, 20) = TechTextBox.Text
-Worksheets(sheet).Cells(my_row, 21) = BoxOfficeTextBox.Text
 Worksheets(sheet).Cells(my_row, 22) = BarTextBox.Text
 Worksheets(sheet).Cells(my_row, 23) = AoWVolTextBox.Text
 Worksheets(sheet).Cells(my_row, 49) = MiscVolTextBox.Text
@@ -1426,7 +1452,6 @@ Worksheets(sheet).Cells(my_row, 49) = MiscVolTextBox.Text
 Worksheets(sheet).Cells(my_row, 62) = FoHPayTextBox.Text
 Worksheets(sheet).Cells(my_row, 63) = DMPayTextBox.Text
 Worksheets(sheet).Cells(my_row, 64) = TechPayTextBox.Text
-Worksheets(sheet).Cells(my_row, 65) = BoxOfficePayTextBox.Text
 Worksheets(sheet).Cells(my_row, 66) = BarPayTextBox.Text
 Worksheets(sheet).Cells(my_row, 67) = AoWVolPayTextBox.Text
 Worksheets(sheet).Cells(my_row, 68) = MiscVolPayTextBox.Text
@@ -1497,7 +1522,7 @@ currentIndex = MultiPage1.value
 MultiPage1.value = 2
 
 ' Set default value
-EgremontLayoutListBox.ListIndex = 2
+EgremontLayoutListBox.ListIndex = 1
 MultiPage1.value = currentIndex ' reset index
 
 EgremontCapacityTextBox.Locked = False
@@ -1759,9 +1784,8 @@ offset = Array(1, 1)
 ' Find net sales
 tempSuccessCheck = ImportCell("Tax", sheetName, dataSheetName, exportCell, offset)
 
-' Find ticket sale revenue by getting net and subtracting Support the Kirkgate revenue
-Worksheets(dataSheetName).Cells(my_row, 42) = Worksheets(dataSheetName).Cells(my_row, 42) _
-                                            - Worksheets(dataSheetName).Cells(my_row, 44)
+' Find ticket sale revenue by getting net
+Worksheets(dataSheetName).Cells(my_row, 42) = Worksheets(dataSheetName).Cells(my_row, 42)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -2146,7 +2170,6 @@ MultiPage1.value = 5
 FoHTextBox.Text = Worksheets(sheet).Cells(row, 18)
 DMTextBox.Text = Worksheets(sheet).Cells(row, 19)
 TechTextBox.Text = Worksheets(sheet).Cells(row, 19)
-BoxOfficeTextBox.Text = Worksheets(sheet).Cells(row, 21)
 BarTextBox.Text = Worksheets(sheet).Cells(row, 22)
 AoWVolTextBox.Text = Worksheets(sheet).Cells(row, 23)
 MiscVolTextBox.Text = Worksheets(sheet).Cells(row, 49)
@@ -2173,5 +2196,128 @@ Set DataRange = Range(Worksheets(sourceSheet).Cells(2, sourceColumn), _
                 Worksheets(sourceSheet).Cells(empty_row, sourceColumn))
 list.RowSource = DataRange.address(External:=True)
 list.ListIndex = myIndex
+End Sub
+
+Private Sub DaySpecificDefaults(sheet As String, startRow As Integer, eventType As String)
+' Purpose:
+' Set event and bar times based on the day and event type.
+' Only works for specific boxes and setup we are using.
+' Assumes we start at Monday and go through to Sunday in usual order.
+'
+' Input:
+' sheet = sheet where defaults are found
+' startRow = row where the Monday values for event type are found.
+' eventType = name of event type. Used only for double checking startRow is correct.
+'
+' Output:
+' event and bar time boxes will be filled out
+
+' Double check startRow is correct
+If Worksheets(sheet).Cells(startRow - 1, 1) <> eventType Then
+    MsgBox ("in DaySpecificDefaults, eventType does not match what's on the sheet" & _
+            "eventType = " & eventType & ", and on the sheet: " _
+            & Worksheets(sheet).Cells(startRow - 1, 1))
+End If
+
+' Check that a date has been entered
+If EventDateTextBox = "" Then
+    Exit Sub
+End If
+
+' Find out day event is on
+Dim day As String
+day = Format(EventDateTextBox.Text, "dddd")
+
+' Store AutoTimeCheckbox value
+Dim autoTime As Boolean
+autoTime = AutoTimeCheckBox.value
+
+' Disable time autofill
+AutoTimeCheckBox.value = False
+
+' Store row to look on for defaults
+Dim row As Integer
+If day = "Monday" Then
+    row = startRow + 0
+ElseIf day = "Tuesday" Then
+    row = startRow + 1
+ElseIf day = "Wednesday" Then
+    row = startRow + 2
+ElseIf day = "Thursday" Then
+    row = startRow + 3
+ElseIf day = "Friday" Then
+    row = startRow + 4
+ElseIf day = "Saturday" Then
+    row = startRow + 5
+ElseIf day = "Sunday" Then
+    row = startRow + 6
+Else
+    MsgBox ("Day not found. Error in TypeListBox_Change(). Contact support.")
+    Exit Sub
+End If
+
+' Find out if first data cell in row is blank
+If Worksheets(sheet).Cells(row, 2) = "" Then
+    ' no point continuing because all of the times are blank
+    Exit Sub
+End If
+
+' Start filling in data
+
+' Rough time checkbox on basic info page
+' Reset checkboxes
+MorningCheckBox.value = False
+AfternoonCheckBox.value = False
+EveningCheckBox.value = False
+' Set correct checkbox
+If Worksheets(sheet).Cells(row, 10) = "Morning" Then
+    MorningCheckBox.value = True
+ElseIf Worksheets(sheet).Cells(row, 10) = "Afternoon" Then
+    AfternoonCheckBox.value = True
+ElseIf Worksheets(sheet).Cells(row, 10) = "Evening" Then
+    EveningCheckBox.value = True
+Else
+    ' Do nothing because we don't know what to do
+End If
+
+' Event Times
+SetupStartTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 2), "hh:mm")
+DoorsTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 3), "hh:mm")
+EventStartTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 4), "hh:mm")
+EventEndTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 5), "hh:mm")
+TakedownEndTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 6), "hh:mm")
+' Event Durations
+' event end time - event start time
+EventDurationTextBox.Text = CInt((Worksheets(sheet).Cells(row, 5) _
+                            - Worksheets(sheet).Cells(row, 4)) * 24 * 60)
+' event takedown end time - event setup start time
+SetupToTakedownEndDurationTextBox.Text = CInt((Worksheets(sheet).Cells(row, 6) _
+                                        - Worksheets(sheet).Cells(row, 2)) * 24 * 60)
+                                
+' (event takedown end time - event end time) + (event start time - event setup start time)
+SetupTakedownTextBox.Text = CInt((Worksheets(sheet).Cells(row, 6) _
+                            - Worksheets(sheet).Cells(row, 5) _
+                            + Worksheets(sheet).Cells(row, 4) _
+                            - Worksheets(sheet).Cells(row, 2)) * 24 * 60)
+
+' Bar
+BarSetupTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 7), "hh:mm")
+BarOpenTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 8), "hh:mm")
+BarCloseTimeTextBox.Text = Format(Worksheets(sheet).Cells(row, 9), "hh:mm")
+' Bar Durations
+' bar close time - bar open time
+BarOpenDurationTextBox.Text = CInt((Worksheets(sheet).Cells(row, 9) _
+                                - Worksheets(sheet).Cells(row, 8)) * 24 * 60)
+
+' bar close time - bar setup time
+BarSetupToTakedownEndDurationTextBox.Text = CInt((Worksheets(sheet).Cells(row, 9) _
+                                - Worksheets(sheet).Cells(row, 7)) * 24 * 60)
+
+' bar open time - bar steup time
+BarSetupTakedownTextBox.Text = CInt((Worksheets(sheet).Cells(row, 8) _
+                                - Worksheets(sheet).Cells(row, 7)) * 24 * 60)
+
+' Reset time autofill to previous state
+AutoTimeCheckBox.value = autoTime
 End Sub
 
