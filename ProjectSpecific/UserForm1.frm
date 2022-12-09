@@ -221,7 +221,7 @@ If GenreListBox.value = "Jazz" Then
 End If
 End Sub
 
-Private Sub ImportSelectedButton_Click()
+Private Sub TicketsolveImportSelectedButton_Click()
 ' Find the row of the selected event
 Dim event_row As Long
 event_row = funcs.search(SearchBox.Text, "Data")(0)
@@ -240,9 +240,32 @@ End If
 Call ImportFromTicketsolve("Selected")
 End Sub
 
-Private Sub ImportPreviousButton_Click()
+Private Sub TicketsolveImportPreviousButton_Click()
 ' Import data into the event which was most recently added
 Call ImportFromTicketsolve("Previous")
+End Sub
+
+Private Sub ZettleImportSelectedButton_Click()
+' Find the row of the selected event
+Dim event_row As Long
+event_row = funcs.search(SearchBox.Text, "Data")(0)
+
+' Input validation. If tests fail, sub must be exited.
+If SearchBox.Text = "" Then
+    MsgBox ("Please enter the Event ID into the search box so that " & _
+            "we know which event to import the data into")
+    Exit Sub
+ElseIf event_row = "0" Then
+    MsgBox ("Event ID could not be found")
+    Exit Sub
+End If
+
+' Import info from Zettle
+Call ImportFromZettle("Selected")
+End Sub
+Private Sub ZettleImportPreviousButton_Click()
+' Import info from Zettle
+Call ImportFromZettle("Previous")
 End Sub
 
 Private Sub NameSearchButton_Click()
@@ -976,18 +999,18 @@ Dim DataRange As Range
 
 ' empty_row = lst non-empty row for specific list(box)
 empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
-Set DataRange = Range(Worksheets("Data").Cells(2, 1), _
-                Worksheets("Data").Cells(empty_row, 1))
+Set DataRange = Union(Range(Worksheets("Data").Cells(2, 1), _
+                Worksheets("Data").Cells(empty_row, 1)), _
+                Range(Worksheets("Data").Cells(2, 2), _
+                Worksheets("Data").Cells(empty_row, 2)))
 
+' Clear items to avoid them being re-added
 ListBox1.ListIndex = -1
 ListBox1.Clear
-Dim dataSheet As Worksheet
-Set dataSheet = ThisWorkbook.Sheets("Data")
 
 ' Use "Union(Range1, Range2)"
 
-
-Call funcs.AddAllToListBox(NewSearchTextBox.Text, dataSheet, DataRange, Array(1), ListBox1, False)
+Call funcs.AddAllToListBox(NewSearchTextBox.Text, DataRange, Array(1), ListBox1, False)
 End Sub
 
 '' LIST BOXES===============================================================
@@ -1870,10 +1893,10 @@ End If
 Dim succeeded As Boolean
 succeeded = True
 
-' Check if the bar is/was open selling tickets. If not, prompt the user to update
+' Check if the bar is/was open selling. If not, prompt the user to update
 '   the event before importing
 If Worksheets(dataSheetName).Cells(my_row, 46) = False Then
-    MsgBox ("We are not selling tickets for this event. If you wish to import " _
+    MsgBox ("The bar is/was not open for this event. If you wish to import " _
             & "data from Zettle, please mark the event as 'Bar Open'.")
     Exit Sub
 End If
@@ -1907,7 +1930,7 @@ End If
 
 ' Find the last row of data
 Dim FinalRow As Integer
-FinalRow = Worksheets(sheetName).Cells(Rows.Count, 1).End(xlUp).row - 3
+FinalRow = Worksheets(sheetName).Cells(Rows.Count, 1).End(xlUp).row
 
 ' Find the bar open time
 Dim barOpen As String
@@ -1938,7 +1961,7 @@ End If
 
 ' Find column with final price in
 Dim priceAddress As Variant
-priceAddress = funcs.search("Net amount", sheetName)
+priceAddress = funcs.search("Final price (GBP)", sheetName)
 If priceAddress(0) = "0" Then
     MsgBox ("Import failed. Did you select the correct file?")
     succeeded = False
@@ -1989,26 +2012,6 @@ Private Sub VolRef2Button_Click()
 If UpdateVolunteerMinutes = False Then
     MsgBox ("Please fill all time and duration boxes in on the time page before refreshing")
 End If
-End Sub
-
-Private Sub ZettleImportButton_Click()
-'' Find the row of the selected event
-'Dim event_row As Long
-'event_row = funcs.search(SearchBox.Text, "Data")(0)
-'
-'' Input validation. If tests fail, sub must be exited.
-'If SearchBox.Text = "" Then
-'    MsgBox ("Please enter the Event ID into the search box so that " & _
-'            "we know which event to import the data into")
-'    Exit Sub
-'ElseIf event_row = "0" Then
-'    MsgBox ("Event ID could not be found")
-'    Exit Sub
-'End If
-
-'' Function not written yet
-Call ImportFromZettle("Previous")
-
 End Sub
 
 Private Function ChangeSource(dataSheetName As String, pivotSheetName As String, pivotName As String) As Boolean

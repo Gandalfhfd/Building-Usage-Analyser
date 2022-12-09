@@ -37,6 +37,11 @@ Set wsheet = ActiveWorkbook.Sheets(sheetName)
 ' Open file explorer and let the user select an xlsx. This just gets the file name & path.
 file_mrf = Application.GetOpenFilename("Excel Workbooks (*.xl??),*.xl??", , "Provide xlsx File:")
 
+' If no file is selected, exit function
+If file_mrf = "False" Then
+    Exit Function
+End If
+
 ' Find file name (not path)
 Dim file_name As String
 Dim pathArr As Variant
@@ -121,7 +126,7 @@ search = myAddress
 
 End Function
 
-Public Function AddAllToListBox(word As String, sheet As Worksheet, searchColumns As Range, _
+Public Function AddAllToListBox(word As String, searchColumns As Range, _
                                 listColumns As Variant, list As Control, exact As Boolean) _
                                 As Boolean
 ' Find all entries matching word, then add them to the listbox called list
@@ -146,8 +151,6 @@ End If
 
 Dim c As Range
 Dim firstAddress As String
-
-Dim newRange As Range
 
 Dim i As Integer
 With searchColumns
@@ -203,7 +206,7 @@ Public Function min(x, y As Variant) As Variant
    min = IIf(x < y, x, y)
 End Function
 
-Public Sub IsWorkBookOpen(FileName As String)
+Public Function IsWorkBookOpen(FileName As String)
     ' I don't know what most of this does. I got it from
     ' https://stackoverflow.com/questions/9373082/detect-whether-excel-workbook-is-already-open
     Dim ff As Long, ErrNo As Long
@@ -220,7 +223,7 @@ Public Sub IsWorkBookOpen(FileName As String)
     Case 70:   IsWorkBookOpen = True
     Case Else: Error ErrNo
     End Select
-End Sub
+End Function
 
 Function GenerateRandomInt(lowbound As Integer, upbound As Integer) As Integer
 ' Return a random integer between lowbound and upbound

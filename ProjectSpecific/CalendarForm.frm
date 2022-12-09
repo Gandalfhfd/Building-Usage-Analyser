@@ -317,8 +317,8 @@ Private Sub InitializeUserform(SelectedDate As Date, MinimumDate As Date, Maximu
     Dim cmdButtonsMaxHeight As Double           'Maximum height of command buttons and month scroll bar
     Dim cmdButtonsMaxWidth As Double            'Maximum width of command buttons
     Dim cmdButtonsMaxFontSize As Long           'Maximum font size of command buttons
-    Dim bgControl As MSForms.Control            'Stores current date label background in loop to initialize various settings
-    Dim lblControl As MSForms.Control           'Stores current date label in loop to initialize various settings
+    Dim bgControl As MsForms.Control            'Stores current date label background in loop to initialize various settings
+    Dim lblControl As MsForms.Control           'Stores current date label in loop to initialize various settings
     Dim HeightOffset As Double                  'Difference between form height and inside height, to account for toolbar
     Dim i As Long                               'Used for loops
     Dim j As Long                               'Used for loops
@@ -630,7 +630,7 @@ Private Sub InitializeUserform(SelectedDate As Date, MinimumDate As Date, Maximu
         SelectedDateIn = SelectedDate
         SelectedYear = Year(SelectedDateIn)
         SelectedMonth = Month(SelectedDateIn)
-        SelectedDay = Day(SelectedDateIn)
+        SelectedDay = day(SelectedDateIn)
         Call SetSelectionLabel(SelectedDateIn)
     Else 'No SelectedDate provided, default to today's date
         cmdOkay.Enabled = False
@@ -745,7 +745,7 @@ Private Sub cmdToday_Click()
         cmdOkay.Enabled = True
         SelectedDateIn = TodayDate
         Call SetSelectionLabel(TodayDate)
-        SelectedDay = Day(TodayDate)
+        SelectedDay = day(TodayDate)
     End If
     
     'Get the month, day, and year, and set month scroll bar
@@ -802,7 +802,7 @@ End Sub
 ' If the Okay button is enabled, clicking a date selects that date, but does not return.
 ' If Okay button is disabled, clicking a date hides the userform and returns that date.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Private Sub ClickControl(ctrl As MSForms.Control)
+Private Sub ClickControl(Ctrl As MsForms.Control)
     Dim SelectedMonth As Long           'Month of selected date
     Dim SelectedYear As Long            'Year of selected date
     Dim SelectedDay As Long             'Day of selected date
@@ -815,9 +815,9 @@ Private Sub ClickControl(ctrl As MSForms.Control)
     SelectedYear = cmbYear.value
     
     'Get indices of date label from label name and selected day from caption
-    RowIndex = CLng(Left(right(ctrl.name, 2), 1))
-    ColumnIndex = CLng(right(ctrl.name, 1))
-    SelectedDay = CLng(ctrl.Caption)
+    RowIndex = CLng(Left(Right(Ctrl.name, 2), 1))
+    ColumnIndex = CLng(Right(Ctrl.name, 1))
+    SelectedDay = CLng(Ctrl.Caption)
     
     'Selection is from previous month. The largest day that could exist in
     'the first row from the current month is 6, so if the day is larger than
@@ -875,13 +875,13 @@ End Sub
 ' hovered date label to the bgDateHoverColor, and stores its name and original color
 ' to global variables.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Private Sub HoverControl(ctrl As MSForms.Control)
+Private Sub HoverControl(Ctrl As MsForms.Control)
     If HoverControlName <> vbNullString Then
         Me.Controls(HoverControlName).BackColor = HoverControlColor
     End If
-    HoverControlName = ctrl.name
-    HoverControlColor = ctrl.BackColor
-    ctrl.BackColor = bgDateHoverColor
+    HoverControlName = Ctrl.name
+    HoverControlColor = Ctrl.BackColor
+    Ctrl.BackColor = bgDateHoverColor
 End Sub
 
 
@@ -1075,7 +1075,7 @@ Private Sub SetMonthCombobox(YearIn As Long, MonthIn As Long)
     
     'No minimum or maximum date in selected year. Add all months to combobox
     Else
-        cmbMonth.List = Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+        cmbMonth.list = Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
         cmbMonth.ListIndex = MonthIn - 1
     End If
 
@@ -1164,8 +1164,8 @@ Private Sub SetDays(MonthIn As Long, YearIn As Long, Optional DayIn As Long)
     Dim MaxDay As Long                  'Stores upper limit of days if maximum date falls in selected month
     Dim PrevMonthMinDay As Long         'Stores lower limit of days if minimum date falls in preceding month
     Dim NextMonthMaxDay As Long         'Stores upper limit of days if maximum date falls in next month
-    Dim lblControl As MSForms.Control   'Stores current date label while changing settings
-    Dim bgControl As MSForms.Control    'Stores current date label background while changing settings
+    Dim lblControl As MsForms.Control   'Stores current date label while changing settings
+    Dim bgControl As MsForms.Control    'Stores current date label background while changing settings
     Dim i As Long                       'Used for looping
     Dim j As Long                       'Used for looping
     
@@ -1173,8 +1173,8 @@ Private Sub SetDays(MonthIn As Long, YearIn As Long, Optional DayIn As Long)
     'respectively, since dates will never fall outside those bounds
     MinDay = 0
     MaxDay = 32
-    If YearIn = Year(MinDate) And MonthIn = Month(MinDate) Then MinDay = Day(MinDate)
-    If YearIn = Year(MaxDate) And MonthIn = Month(MaxDate) Then MaxDay = Day(MaxDate)
+    If YearIn = Year(MinDate) And MonthIn = Month(MinDate) Then MinDay = day(MinDate)
+    If YearIn = Year(MaxDate) And MonthIn = Month(MaxDate) Then MaxDay = day(MaxDate)
     
     'Find previous month and next month. Handle January
     'and December appropriately
@@ -1186,13 +1186,13 @@ Private Sub SetDays(MonthIn As Long, YearIn As Long, Optional DayIn As Long)
     'Set min and max days for previous month and next month, if applicable
     PrevMonthMinDay = 0
     NextMonthMaxDay = 32
-    If YearIn = Year(MinDate) And PrevMonth = Month(MinDate) Then PrevMonthMinDay = Day(MinDate)
-    If YearIn = Year(MaxDate) And NextMonth = Month(MaxDate) Then NextMonthMaxDay = Day(MaxDate)
+    If YearIn = Year(MinDate) And PrevMonth = Month(MinDate) Then PrevMonthMinDay = day(MinDate)
+    If YearIn = Year(MaxDate) And NextMonth = Month(MaxDate) Then NextMonthMaxDay = day(MaxDate)
 
     'Find last day of selected month and previous month. Find first weekday
     'in current month, and index of Saturday and Sunday relative to first weekday
-    LastDayOfMonth = Day(DateSerial(YearIn, MonthIn + 1, 0))
-    LastDayOfPrevMonth = Day(DateSerial(YearIn, MonthIn, 0))
+    LastDayOfMonth = day(DateSerial(YearIn, MonthIn + 1, 0))
+    LastDayOfPrevMonth = day(DateSerial(YearIn, MonthIn, 0))
     StartDayOfWeek = Weekday(DateSerial(YearIn, MonthIn, 1), StartWeek)
     If StartWeek = 1 Then SundayIndex = 1 Else SundayIndex = 9 - StartWeek
     SaturdayIndex = 8 - StartWeek
@@ -1201,7 +1201,7 @@ Private Sub SetDays(MonthIn As Long, YearIn As Long, Optional DayIn As Long)
     'not, TodayDay is set to 0, since that value will never be encountered
     Today = Date
     If YearIn = Year(Today) And MonthIn = Month(Today) Then
-        TodayDay = Day(Today)
+        TodayDay = day(Today)
     Else
         TodayDay = 0
     End If
@@ -1413,7 +1413,7 @@ Private Function GetSelectedDay(MonthIn As Long, YearIn As Long) As Long
     'Check if a selected date was provided by the user
     If SelectedDateIn <> 0 Then
         If MonthIn = Month(SelectedDateIn) And YearIn = Year(SelectedDateIn) Then
-            GetSelectedDay = Day(SelectedDateIn)
+            GetSelectedDay = day(SelectedDateIn)
         End If
     End If
 End Function
