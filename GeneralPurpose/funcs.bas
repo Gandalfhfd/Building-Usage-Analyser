@@ -126,20 +126,19 @@ search = myAddress
 
 End Function
 
-Public Function AddAllToListBox(word As String, searchColumns As Range, _
-                                listColumns As Variant, list As Control, exact As Boolean) _
+Public Function AddAllToListBox(word As String, searchRange As Range, _
+                                listColumns As Variant, nameList As Control, dateList As Control, _
+                                typeList As Control, IDList As Control, dataSheet As String) _
                                 As Boolean
 ' Find all entries matching word, then add them to the listbox called list
 ' Data from the row where the match is found is shown in the listbox, according to the
 '   listColumns array.
 ' Inputs:
 ' word = text you're searching for
-' sheet = worksheet you're looking on
-' searchColumns = the columns you're searching over. Blank if you want to look at the entire sheet.
+' searchRange = the range over which you're searching, including the worksheet.
 ' listColumns = which columns from the sheet should appear in the list
 ' list = the listbox we will be writing to
-' exact = whether the match must be perfect or not. True if it must be perfect.
-'   False if it needn't be
+' dataSheet = the name of the sheet we're pulling data from
 
 ' Output:
 ' boolean which says whether a match was found.
@@ -152,18 +151,27 @@ End If
 Dim c As Range
 Dim firstAddress As String
 
+' Store address of cell containing word
+Dim resultAddress As Variant
+
 Dim i As Integer
-With searchColumns
+With searchRange
     Set c = .Find(word, LookIn:=xlValues)
     If Not c Is Nothing Then
         firstAddress = c.address
         Do
-            For i = 0 To ArrLen(listColumns) - 1
-                ' Add items to listbox
-                list.AddItem (c.value)
-            Next
+            ' Find address
+            resultAddress = StrManip.SplitR1C1(c.address(ReferenceStyle:=xlR1C1))
+            ' Add items to listbox
+            nameList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), listColumns(0)))
+            dateList.AddItem (Format(Worksheets(dataSheet).Cells(resultAddress(0), listColumns(1)), _
+                                "dd/mm/yyyy"))
+            typeList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), listColumns(2)))
+            ' Add item to Event ID listbox. This listbox is hidden, but links the events on
+            '   this page to the data.
+            IDList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), 1))
             Set c = .FindNext(c)
-        Loop While firstAddress <> c.address
+        Loop While firstAddress <> c.address ' prevent the loop from continuing forever
     End If
 End With
 

@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6765
+   ClientHeight    =   6960
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   11175
@@ -357,10 +357,6 @@ Private Sub EgremontCapacityTextBox_Change()
 ' Sanitise input to ensure only non-negative integers are input
 Call InptValid.SanitiseNonNegInt(EgremontCapacityTextBox, EgremontCapacity)
 Call TotalCapDecider
-End Sub
-
-Private Sub TestButton_Click()
-Call UpdateVolunteerMinutes
 End Sub
 
 Private Sub TotalCapacityTextBox_Change()
@@ -999,18 +995,18 @@ Dim DataRange As Range
 
 ' empty_row = lst non-empty row for specific list(box)
 empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
-Set DataRange = Union(Range(Worksheets("Data").Cells(2, 1), _
-                Worksheets("Data").Cells(empty_row, 1)), _
-                Range(Worksheets("Data").Cells(2, 2), _
-                Worksheets("Data").Cells(empty_row, 2)))
+Set DataRange = Range(Worksheets("Data").Cells(2, 2), _
+                Worksheets("Data").Cells(empty_row, 2))
 
 ' Clear items to avoid them being re-added
-ListBox1.ListIndex = -1
-ListBox1.Clear
+SearchNameListBox.Clear
+SearchDateListBox.Clear
+SearchTypeListBox.Clear
 
 ' Use "Union(Range1, Range2)"
 
-Call funcs.AddAllToListBox(NewSearchTextBox.Text, DataRange, Array(1), ListBox1, False)
+Call funcs.AddAllToListBox(NewSearchTextBox.Text, DataRange, Array(2, 3, 29, 1), SearchNameListBox, _
+                           SearchDateListBox, SearchTypeListBox, HiddenEventIDListBox, "Data")
 End Sub
 
 '' LIST BOXES===============================================================
@@ -1147,11 +1143,36 @@ EventIDUpdaterLabel2.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel3.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel4.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel5.Caption = "Selected Event ID: " & EventIDListBox.value
+EventIDUpdaterLabel6.Caption = "Selected Event ID: " & EventIDListBox.value
 
 If AutofillCheckBox.value = True Then
     ' Fill in everything with values taken from this event.
     Call AutofillFromSelected(row)
 End If
+End Sub
+
+Private Sub SearchDateListBox_Click()
+' Keep other listboxes in lockstep
+SearchNameListBox.ListIndex = SearchDateListBox.ListIndex
+SearchTypeListBox.ListIndex = SearchDateListBox.ListIndex
+HiddenEventIDListBox.ListIndex = SearchDateListBox.ListIndex
+
+' Select event on Home page
+MultiPage1.value = 0
+EventIDListBox.value = HiddenEventIDListBox.value
+MultiPage1.value = 6
+End Sub
+
+Private Sub SearchNameListBox_Click()
+' Keep other listboxes in lockstep
+SearchDateListBox.ListIndex = SearchNameListBox.ListIndex
+SearchTypeListBox.ListIndex = SearchNameListBox.ListIndex
+End Sub
+
+Private Sub SearchTypeListBox_Click()
+' Keep other listboxes in lockstep
+SearchNameListBox.ListIndex = SearchTypeListBox.ListIndex
+SearchDateListBox.ListIndex = SearchTypeListBox.ListIndex
 End Sub
 
 '' USERFORM/MULTIPAGE===============================================================
@@ -1170,16 +1191,19 @@ spec = "Type-Specific Defaults"
 Call RefreshListBox("Data", 1, EventIDListBox)
 ' CATEGORY
 Call RefreshListBox(non, 4, CategoryListBox)
+CategoryListBox.ListIndex = 0
 ' TYPE
 Call RefreshListBox(spec, 1, TypeListBox)
 ' LOCATION
 Call RefreshListBox(non, 1, LocationListBox)
+LocationListBox.ListIndex = 0
 ' ROOM
 Call RefreshListBox(non, 2, RoomListBox)
 ' GENRE
 Call RefreshListBox(non, 13, GenreListBox)
 ' AUDIENCE
 Call RefreshListBox(non, 5, AudienceListBox)
+AudienceListBox.ListIndex = 0
 ' AUDITORIUM LAYOUT
 Call RefreshListBox(non, 6, AuditoriumLayoutListBox)
 ' EGREMONT LAYOUT
