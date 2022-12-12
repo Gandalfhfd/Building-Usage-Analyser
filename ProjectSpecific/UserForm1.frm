@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6960
+   ClientHeight    =   6990
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   11175
@@ -499,15 +499,16 @@ End If
 
 ' BAR
 ' Change bar setup start time
-BarSetupTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15) - _
+BarSetupTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 11) - _
     Worksheets(sheet).Cells(row, 16), EventStartTimeTextBox.Text), "hh:mm")
 
-' Change bar open time
-BarOpenTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 15), _
+' Change bar open time: event start time - doors open time
+BarOpenTimeTextBox.Text = Format(DateAdd("n", -Worksheets(sheet).Cells(row, 11), _
     EventStartTimeTextBox.Text), "hh:mm")
     
-' Change bar close time
-BarCloseTimeTextBox.Text = EventStartTimeTextBox.Text
+' Change bar close time: bar open time + bar open duration
+BarCloseTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 15), _
+                            BarOpenTimeTextBox.Text), "hh:mm")
 
 ' Update volunteer hours
 Call UpdateVolunteerMinutes
@@ -1144,6 +1145,7 @@ EventIDUpdaterLabel3.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel4.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel5.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel6.Caption = "Selected Event ID: " & EventIDListBox.value
+EventIDUpdaterLabel7.Caption = "Selected Event ID: " & EventIDListBox.value
 
 If AutofillCheckBox.value = True Then
     ' Fill in everything with values taken from this event.
@@ -1861,11 +1863,6 @@ If tempSuccessCheck = False Then
     succeeded = False
 End If
 
-' Must go at the bottom
-If succeeded = True Then
-    MsgBox ("Import successful")
-End If
-
 ' Determine actual capacity and write it to a cell
 Dim trueCapacity As Integer
 trueCapacity = Worksheets(dataSheetName).Cells(my_row, 33) _
@@ -1889,11 +1886,20 @@ End If
 
 ' Update pivot table(s)
 Call ChangeSource(dataSheetName, "Analysis", "PivotTable1")
+
+' Update autofilled info, if applicable
+If AutofillCheckBox = True Then
+    AutofillCheckBox = False
+    AutofillCheckBox = True
+End If
+
+' Must go at the bottom
+If succeeded = True Then
+    MsgBox ("Import successful")
+End If
 End Sub
 
 Private Sub ImportFromZettle(mode As String)
-' FUNCTION NOT COMPLETED YET
-
 ' Highly non-general function/sub which imports from the "Raw data Excel" file from Zettle
 
 ' Store which row we're working on. Depends on what we're after.
@@ -2021,6 +2027,19 @@ Next
 
 ' Put revenue into data sheet
 Worksheets(dataSheetName).Cells(my_row, 25) = revenue
+
+' Update autofilled info, if applicable
+If AutofillCheckBox = True Then
+    AutofillCheckBox = False
+    AutofillCheckBox = True
+End If
+
+If revenue <> 0 Then
+    MsgBox ("Import successful")
+Else
+    MsgBox ("Import could not find any transactions while the bar was open. " _
+            & "Did you import the correct file?")
+End If
 
 ' Update pivot table(s)
 Call ChangeSource("Data", "Analysis", "PivotTable1")

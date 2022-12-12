@@ -170,8 +170,9 @@ With searchRange
             ' Add item to Event ID listbox. This listbox is hidden, but links the events on
             '   this page to the data.
             IDList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), 1))
+            
             Set c = .FindNext(c)
-        Loop While firstAddress <> c.address ' prevent the loop from continuing forever
+        Loop While firstAddress <> c.address
     End If
 End With
 
