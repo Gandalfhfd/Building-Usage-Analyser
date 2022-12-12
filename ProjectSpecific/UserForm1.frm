@@ -1543,6 +1543,11 @@ End If
 EditingCheck = False
 Call RefreshListBox("Data", 1, EventIDListBox)
 
+' Change selected event to one just added, if one was added (and not edited)
+If EventIDListBox.ListCount > 0 And mode = False Then
+    EventIDListBox.ListIndex = EventIDListBox.ListCount - 1
+End If
+
 End Function
 
 Private Function AuditoriumUsed()
