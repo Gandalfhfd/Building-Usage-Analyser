@@ -156,7 +156,7 @@ Dim resultAddress As Variant
 
 Dim i As Integer
 With searchRange
-    Set c = .Find(word, LookIn:=xlValues)
+    Set c = .Find(word, LookIn:=xlValues, LookAt:=xlPart)
     If Not c Is Nothing Then
         firstAddress = c.address
         Do
