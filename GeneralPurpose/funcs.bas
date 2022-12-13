@@ -1,83 +1,6 @@
 Attribute VB_Name = "funcs"
 Option Explicit
 
-Public Function csv_Import(sheetName As String) As Boolean
-' Declare stuff
-Dim wsheet As Worksheet, file_mrf As String
-Set wsheet = ActiveWorkbook.Sheets(sheetName)
-
-' Open file explorer and let the user select a csv
-file_mrf = Application.GetOpenFilename("CSV (*.csv),*.csv", , "Provide Text or CSV File:")
-
-' Prevent it from crashing if the user doesn't select a file
-If file_mrf <> "False" Then
-    ' Clear sheet
-    Sheets(sheetName).Cells.Clear
-    ' Import file into sheet
-    With wsheet.QueryTables.Add(Connection:="TEXT;" & file_mrf, Destination:=wsheet.Cells)
-        .TextFileParseType = xlDelimited
-        .TextFileCommaDelimiter = True
-        .Refresh
-    End With
-    ' Set exit code
-    csv_Import = True
-Else
-    csv_Import = False
-End If
-End Function
-
-Public Function xlsx_Import(sheetName As String) As Boolean
-' Can actually import any Excel workbook
-' Only imports the first sheet into a workbook called "Fantasy Spreadsheet"
-
-' Declare stuff
-Dim wsheet As Worksheet, file_mrf As String
-Set wsheet = ActiveWorkbook.Sheets(sheetName)
-
-' Open file explorer and let the user select an xlsx. This just gets the file name & path.
-file_mrf = Application.GetOpenFilename("Excel Workbooks (*.xl??),*.xl??", , "Provide xlsx File:")
-
-' If no file is selected, exit function
-If file_mrf = "False" Then
-    Exit Function
-End If
-
-' Find file name (not path)
-Dim file_name As String
-Dim pathArr As Variant
-' Split file_mrf into sections delimited by "\"
-pathArr = Split(file_mrf, "\")
-' Find file name including extension
-file_name = pathArr(UBound(pathArr))
-
-' Detect if the workbook is open
-' Not very reliable.
-Dim workbook_open As Boolean
-workbook_open = IsWorkBookOpen(file_mrf)
-
-If file_mrf <> "False" Then
-    ' Clear sheet
-    Sheets(sheetName).Cells.Clear
-    If workbook_open = False Then
-        ' Open workbook
-        Workbooks.Open (file_mrf)
-    End If
-    
-    ' Import data from worksheet 1
-    Workbooks(file_name).Worksheets(1).Cells.Copy _
-        Destination:=Workbooks("Fantasy Spreadsheet").Worksheets(sheetName).Cells
-    
-    ' If it wasn't open to start with, we should close it
-    If workbook_open = False Then
-        Workbooks(file_name).Close
-    End If
-    xlsx_Import = True
-Else
-    xlsx_Import = False
-End If
-
-End Function
-
 Function search(word As String, sheetName As String) As Variant
 ' Search for word in current workbook, and sheetName sheet.
 ' Output location, if found.
@@ -274,3 +197,81 @@ Next
 
 GenerateRandomAlphaNumericStr = randomStr
 End Function
+
+Public Function ChangeSource(dataSheetName As String, pivotSheetName As String, pivotName As String) As Boolean
+'PURPOSE: Automatically readjust a Pivot Table's data source range
+'SOURCE: www.TheSpreadsheetGuru.com/The-Code-Vault
+' NOTE: do NOT select "Add this data to the data model" when creating the pivot table.
+
+Dim Data_Sheet As Worksheet
+Dim Pivot_Sheet As Worksheet
+Dim StartPoint As Range
+Dim DataRange As Range
+Dim newRange As String
+Dim LastCol As Long
+Dim lastRow As Long
+Dim DownCell As Long
+
+'Set Pivot Table & Source Worksheet
+Set Data_Sheet = ThisWorkbook.Worksheets(dataSheetName)
+Set Pivot_Sheet = ThisWorkbook.Worksheets(pivotSheetName)
+
+'Dynamically Retrieve Range Address of Data
+Set StartPoint = Data_Sheet.Range("A1")
+LastCol = StartPoint.End(xlToRight).Column
+DownCell = StartPoint.End(xlDown).row
+Set DataRange = Data_Sheet.Range(StartPoint, Data_Sheet.Cells(DownCell, LastCol))
+'Set DataRange = Data_Sheet.Range(StartPoint, Cells(42, 46))
+
+newRange = Data_Sheet.name & "!" & DataRange.address(ReferenceStyle:=xlR1C1)
+
+'Change Pivot Table Data Source Range Address
+Pivot_Sheet.PivotTables(pivotName). _
+ChangePivotCache ActiveWorkbook. _
+PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newRange)
+
+ 'Ensure Pivot Table is Refreshed
+Pivot_Sheet.PivotTables(pivotName).RefreshTable
+
+End Function
+
+Public Sub RefreshListBox(sourceSheet As String, sourceColumn As Integer, list As Control)
+' Will show column header if column is empty (apart from the header)
+' Not fixing it for now because it doesn't seem to matter.
+
+Dim empty_row As Long ' Store number of items in list box
+Dim DataRange As Range
+Dim myIndex As Long
+myIndex = list.ListIndex
+
+' empty_row = lst non-empty row for specific list(box)
+empty_row = Worksheets(sourceSheet).Cells(Rows.Count, 1).End(xlUp).row
+Set DataRange = Range(Worksheets(sourceSheet).Cells(2, sourceColumn), _
+                Worksheets(sourceSheet).Cells(empty_row, sourceColumn))
+list.RowSource = DataRange.address(External:=True)
+list.ListIndex = myIndex
+End Sub
+
+Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
+' Generate uniqueish UUID.
+' If name, category and date are all the same, there is a 1 in 844,596,301 change of a collision.
+UUIDGenerator = InptValid.RmSpecialChars(name) & InptValid.RmSpecialChars(category) _
+                & InptValid.RmSpecialChars(eventDate) & funcs.GenerateRandomAlphaNumericStr(5)
+End Function
+
+Sub GetCalendar(DateTextBox As Control) ' Calendar format
+    Dim dateVariable As Date
+    dateVariable = CalendarForm.GetDate(DateFontSize:=11, _
+        BackgroundColor:=RGB(242, 248, 238), _
+        HeaderColor:=RGB(84, 130, 53), _
+        HeaderFontColor:=RGB(255, 255, 255), _
+        SubHeaderColor:=RGB(226, 239, 218), _
+        SubHeaderFontColor:=RGB(55, 86, 35), _
+        DateColor:=RGB(242, 248, 238), _
+        DateFontColor:=RGB(55, 86, 35), _
+        TrailingMonthFontColor:=RGB(106, 163, 67), _
+        DateHoverColor:=RGB(198, 224, 180), _
+        DateSelectedColor:=RGB(169, 208, 142), _
+        TodayFontColor:=RGB(255, 0, 0))
+If dateVariable <> 0 Then DateTextBox = Format(dateVariable, "dd/mm/yyyy")
+End Sub

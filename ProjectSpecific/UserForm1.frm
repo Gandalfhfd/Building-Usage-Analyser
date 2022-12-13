@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   6990
+   ClientHeight    =   7065
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   11175
@@ -37,6 +37,8 @@ Public BlockedSeats As String
 Public NumTicketsSold As String
 Public BoxOfficeRevenue As String
 Public SupportRevenue As String ' Revenue from Support the Kirkgate donations
+Public RoomHireRevenue As String
+Public MiscRevenue As String
 ' Bar
 Public BarRevenue As String
 Public BarMargin As String
@@ -89,6 +91,14 @@ Public AoWVolPay As String
 Public MiscVolPay As String
 
 Private Sub AutofillCheckBox_Click()
+If AutofillCheckBox.value = True Then
+    ' Toggle edit mode
+    EditToggleCheckBox1.value = True
+Else
+    ' Toggle edit mode
+    EditToggleCheckBox1.value = False
+End If
+
 If EventIDListBox.ListIndex = -1 Then
     ' No event has been selected, so do nothing
     Exit Sub
@@ -98,10 +108,13 @@ End If
 Dim nameLocation As Integer
 nameLocation = EventIDListBox.ListIndex + 2
 
-' Autofill data into form
 If AutofillCheckBox.value = True Then
+    ' Autofill data into form
     Call AutofillFromSelected(nameLocation)
 End If
+
+' Toggle edit mode
+
 End Sub
 
 Private Sub BarOpenOptionButton_Change()
@@ -204,10 +217,10 @@ Else
 End If
 
 ' Update EventIDListBox
-Call RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, EventIDListBox)
 
 ' Update pivot table(s)
-Call ChangeSource("Data", "Analysis", "PivotTable1")
+Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
 
 Private Sub GenreListBox_Change()
@@ -237,12 +250,12 @@ ElseIf event_row = "0" Then
 End If
 
 ' Import data into the event that has been selected
-Call ImportFromTicketsolve("Selected")
+Call Import.ImportFromTicketsolve("Selected")
 End Sub
 
 Private Sub TicketsolveImportPreviousButton_Click()
 ' Import data into the event which was most recently added
-Call ImportFromTicketsolve("Previous")
+Call Import.ImportFromTicketsolve("Previous")
 End Sub
 
 Private Sub ZettleImportSelectedButton_Click()
@@ -261,11 +274,11 @@ ElseIf event_row = "0" Then
 End If
 
 ' Import info from Zettle
-Call ImportFromZettle("Selected")
+Call Import.ImportFromZettle("Selected")
 End Sub
 Private Sub ZettleImportPreviousButton_Click()
 ' Import info from Zettle
-Call ImportFromZettle("Previous")
+Call Import.ImportFromZettle("Previous")
 End Sub
 
 Private Sub NameSearchButton_Click()
@@ -325,16 +338,28 @@ BarSetupToTakedownEndDurationTextBox.Text = ""
 BarSetupTakedownTextBox.Text = ""
 End Sub
 
+Private Sub VolRef1Button_Click()
+If UpdateVolunteerMinutes = False Then
+    MsgBox ("Please fill all time and duration boxes in on this page before refreshing")
+End If
+End Sub
+
+Private Sub VolRef2Button_Click()
+If UpdateVolunteerMinutes = False Then
+    MsgBox ("Please fill all time and duration boxes in on the time page before refreshing")
+End If
+End Sub
+
 '' TEXT BOXES===============================================================
 
 ' Basic Info============================================================================
 Private Sub EventDateTextBox_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Re-show Date Picker if box has already been entered
-Call GetCalendar ' Show Date Picker
+Call funcs.GetCalendar(UserForm1.EventDateTextBox) ' Show Date Picker
 End Sub
 
 Private Sub EventDateTextBox_Enter()
-Call GetCalendar ' Show Date Picker
+Call funcs.GetCalendar(UserForm1.EventDateTextBox) ' Show Date Picker
 End Sub
 
 Private Sub EventDateTextBox_change()
@@ -730,6 +755,24 @@ End Sub
 
 Private Sub SupportRevenueTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
 SupportRevenueTextBox.Text = StrManip.Convert2Currency(SupportRevenueTextBox)
+End Sub
+
+Private Sub RoomHireRevenueTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitiseReal(RoomHireRevenueTextBox, RoomHireRevenue)
+End Sub
+
+Private Sub RoomHireRevenueTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
+RoomHireRevenueTextBox.Text = StrManip.Convert2Currency(RoomHireRevenueTextBox)
+End Sub
+
+Private Sub MiscRevenueTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitiseReal(MiscRevenueTextBox, MiscRevenue)
+End Sub
+
+Private Sub MiscRevenueTextBox_Exit(ByVal Cancel As MsForms.ReturnBoolean)
+MiscRevenueTextBox.Text = StrManip.Convert2Currency(MiscRevenueTextBox)
 End Sub
 
 Private Sub BarRevenueTextBox_Change()
@@ -1179,7 +1222,7 @@ End Sub
 
 '' USERFORM/MULTIPAGE===============================================================
 
-Private Sub UserForm_Initialize()
+Private Sub Userform_Initialize()
 ' Add items into listboxes based on cells in specified worksheets
 
 ' Name of non-specific defaults sheet
@@ -1190,26 +1233,26 @@ Dim spec As String
 spec = "Type-Specific Defaults"
 
 ' EVENT ID
-Call RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, EventIDListBox)
 ' CATEGORY
-Call RefreshListBox(non, 4, CategoryListBox)
+Call funcs.RefreshListBox(non, 4, CategoryListBox)
 CategoryListBox.ListIndex = 0
 ' TYPE
-Call RefreshListBox(spec, 1, TypeListBox)
+Call funcs.RefreshListBox(spec, 1, TypeListBox)
 ' LOCATION
-Call RefreshListBox(non, 1, LocationListBox)
+Call funcs.RefreshListBox(non, 1, LocationListBox)
 LocationListBox.ListIndex = 0
 ' ROOM
-Call RefreshListBox(non, 2, RoomListBox)
+Call funcs.RefreshListBox(non, 2, RoomListBox)
 ' GENRE
-Call RefreshListBox(non, 13, GenreListBox)
+Call funcs.RefreshListBox(non, 13, GenreListBox)
 ' AUDIENCE
-Call RefreshListBox(non, 5, AudienceListBox)
+Call funcs.RefreshListBox(non, 5, AudienceListBox)
 AudienceListBox.ListIndex = 0
 ' AUDITORIUM LAYOUT
-Call RefreshListBox(non, 6, AuditoriumLayoutListBox)
+Call funcs.RefreshListBox(non, 6, AuditoriumLayoutListBox)
 ' EGREMONT LAYOUT
-Call RefreshListBox(non, 8, EgremontLayoutListBox)
+Call funcs.RefreshListBox(non, 8, EgremontLayoutListBox)
 End Sub
 
 '' CHECKBOXES==============================================================
@@ -1240,30 +1283,6 @@ End Sub
 
 '' FUNCTIONS===============================================================
 ' Should move these into their own modules
-
-Sub GetCalendar() ' Calendar format
-    Dim dateVariable As Date
-    dateVariable = CalendarForm.GetDate(DateFontSize:=11, _
-        BackgroundColor:=RGB(242, 248, 238), _
-        HeaderColor:=RGB(84, 130, 53), _
-        HeaderFontColor:=RGB(255, 255, 255), _
-        SubHeaderColor:=RGB(226, 239, 218), _
-        SubHeaderFontColor:=RGB(55, 86, 35), _
-        DateColor:=RGB(242, 248, 238), _
-        DateFontColor:=RGB(55, 86, 35), _
-        TrailingMonthFontColor:=RGB(106, 163, 67), _
-        DateHoverColor:=RGB(198, 224, 180), _
-        DateSelectedColor:=RGB(169, 208, 142), _
-        TodayFontColor:=RGB(255, 0, 0))
-If dateVariable <> 0 Then UserForm1.EventDateTextBox = Format(dateVariable, "dd/mm/yyyy")
-End Sub
-
-Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
-' Generate uniqueish UUID.
-' If name, category and date are all the same, there is a 1 in 844,596,301 change of a collision.
-UUIDGenerator = InptValid.RmSpecialChars(name) & InptValid.RmSpecialChars(category) _
-                & InptValid.RmSpecialChars(eventDate) & funcs.GenerateRandomAlphaNumericStr(5)
-End Function
 
 Public Function TotalCapDecider() As String ' Highly non-generic function. Sorry!
 If AuditoriumCapacityTextBox.Text & EgremontCapacityTextBox.Text = "" Then ' Set total capacity to blank if both are blank
@@ -1410,7 +1429,7 @@ Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 
 ' Add data given by user into spreadsheet
 ' Basic Info
-Worksheets(sheet).Cells(my_row, 1) = UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
+Worksheets(sheet).Cells(my_row, 1) = funcs.UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, 2) = NameTextBox.Text
 Worksheets(sheet).Cells(my_row, 3) = StrManip.ConvertDate(EventDateTextBox.Text)
 Worksheets(sheet).Cells(my_row, 4) = LocationListBox.value
@@ -1476,6 +1495,8 @@ End If
 Worksheets(sheet).Cells(my_row, 14) = NumTicketsSoldTextBox.Text
 Worksheets(sheet).Cells(my_row, 42) = BoxOfficeRevenueTextBox.Text
 Worksheets(sheet).Cells(my_row, 44) = SupportRevenueTextBox.Text
+Worksheets(sheet).Cells(my_row, 70) = RoomHireRevenueTextBox.Text
+Worksheets(sheet).Cells(my_row, 71) = MiscRevenueTextBox.Text
 Worksheets(sheet).Cells(my_row, 35) = FilmCostTextBox.Text
 Worksheets(sheet).Cells(my_row, 36) = FilmTransportTextBox.Text
 Worksheets(sheet).Cells(my_row, 37) = AccommodationTextBox.Text
@@ -1510,7 +1531,7 @@ End If
 ' Calculate contribution to overheads with and without bar
 ' Uneccessary because of pivot table formulae
 Worksheets(sheet).Cells(my_row, 52) = _
-        "=RC[-8]+RC[-10]-RC[-1]-RC[-11]-RC[-12]-RC[-13]-RC[-14]-RC[-15]-RC[-16]-RC[-17]"
+        "=RC[-8]+RC[-10]+RC[18]-RC[-1]-RC[-11]-RC[-12]-RC[-13]-RC[-14]-RC[-15]-RC[-16]-RC[-17]"
 Worksheets(sheet).Cells(my_row, 53) = "=RC[-1]+RC[-26]"
 
 ' Volunteer Minutes
@@ -1528,8 +1549,12 @@ Worksheets(sheet).Cells(my_row, 66) = BarPayTextBox.Text
 Worksheets(sheet).Cells(my_row, 67) = AoWVolPayTextBox.Text
 Worksheets(sheet).Cells(my_row, 68) = MiscVolPayTextBox.Text
 
+'Add a 1 in the column counting the number of events.
+' Need to do this because pivot tables can't be added to the data model.
+Worksheets(sheet).Cells(my_row, 69) = 1
+
 ' Update pivot table(s)
-Call ChangeSource(sheet, "Analysis", "PivotTable1")
+Call funcs.ChangeSource(sheet, "Analysis", "PivotTable1")
 
 ' Change message depending on mode
 If mode = False Then
@@ -1541,7 +1566,7 @@ Else
 End If
 
 EditingCheck = False
-Call RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, EventIDListBox)
 
 ' Change selected event to one just added, if one was added (and not edited)
 If EventIDListBox.ListCount > 0 And mode = False Then
@@ -1768,337 +1793,6 @@ ElseIf state = False Then
 End If
 End Sub
 
-Private Sub ImportFromTicketsolve(mode As String)
-' Highly non-general function/sub which imports from the "Events Summary" csv from Ticketsolve
-
-' Store which row we're working on. Depends on what we're after.
-Dim my_row As Long
-
-' Not strictly necessary. Used to avoid too much hard-coding.
-Dim dataSheetName As String
-dataSheetName = "Data"
-
-' Decide which event to import info into
-If mode = "Selected" Then
-    my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
-ElseIf mode = "Previous" Then
-    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).row
-Else
-    MsgBox ("Programmer error in Private Sub ImportFromTicketsolve")
-    Exit Sub
-End If
-
-' Check if we were selling tickets. If not, prompt the user to update
-'   the event before importing
-If Worksheets(dataSheetName).Cells(my_row, 46) = "False" Then
-    MsgBox ("We are not selling tickets for this event. If you wish to import " _
-            & "data from Ticketsolve, please mark the event as 'Ticketed'.")
-    Exit Sub
-End If
-
-' Not strictly necessary. Used to avoid too much hard-coding.
-Dim sheetName As String
-sheetName = "TicketsolveImport"
-
-Dim csvImportSuccessCheck As Boolean
-' Import the csv selected by the user into sheet "sheetName"
-csvImportSuccessCheck = funcs.csv_Import(sheetName)
-If csvImportSuccessCheck = True Then
-    ' Continue with sub
-Else
-    ' Exit sub, since a file wasn't selected
-    Exit Sub
-End If
-
-' Store whether import is successful or not.
-Dim succeeded As Boolean
-succeeded = True
-
-
-Dim tempSuccessCheck As Boolean
-Dim exportCell() As Variant ' stores the cell we're working on
-Dim offset() As Variant
-
-'Find total number of ticket sales
-exportCell = Array(my_row, 14)
-offset = Array(0, 1)
-
-tempSuccessCheck = ImportCell("Sold", sheetName, dataSheetName, exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find event capacity
-exportCell(1) = 33
-tempSuccessCheck = ImportCell("Capacity", sheetName, dataSheetName, exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find number of blocked seats
-exportCell(1) = 34
-offset = Array(1, 0)
-tempSuccessCheck = ImportCell("Blocked", sheetName, dataSheetName, exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find total Support the Kirkgate revenue
-exportCell(1) = 44
-offset = Array(0, 3)
-tempSuccessCheck = ImportCell("Support the Kirkgate", sheetName, dataSheetName, exportCell, offset)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Find total ticket revenue
-exportCell(1) = 42
-offset = Array(1, 1)
-' Find net sales
-tempSuccessCheck = ImportCell("Tax", sheetName, dataSheetName, exportCell, offset)
-
-' Find ticket sale revenue by getting net
-Worksheets(dataSheetName).Cells(my_row, 42) = Worksheets(dataSheetName).Cells(my_row, 42)
-
-If tempSuccessCheck = False Then
-    succeeded = False
-End If
-
-' Determine actual capacity and write it to a cell
-Dim trueCapacity As Integer
-trueCapacity = Worksheets(dataSheetName).Cells(my_row, 33) _
-                - Worksheets(dataSheetName).Cells(exportCell(0), 34)
-Worksheets(dataSheetName).Cells(my_row, 45) = trueCapacity
-
-' Find Ticketsolve fees and revenue after fees
-
-' We need to be selling tickets ourselves and have positive box office revenue
-'   and know how many tickets we've sold
-If Worksheets(dataSheetName).Cells(my_row, 46) = True And _
-    Worksheets(dataSheetName).Cells(my_row, 42) > 0 And _
-    Worksheets(dataSheetName).Cells(my_row, 14) <> "" Then
-    
-    ' Calculate Ticketsolve fee estimate
-    ' 80p per ticket sold
-    Worksheets(dataSheetName).Cells(my_row, 51) = 0.8 * Worksheets(dataSheetName).Cells(my_row, 14)
-    Worksheets(dataSheetName).Cells(my_row, 50) = Worksheets(dataSheetName).Cells(my_row, 42) - _
-        0.8 * Worksheets(dataSheetName).Cells(my_row, 14)
-End If
-
-' Update pivot table(s)
-Call ChangeSource(dataSheetName, "Analysis", "PivotTable1")
-
-' Update autofilled info, if applicable
-If AutofillCheckBox = True Then
-    AutofillCheckBox = False
-    AutofillCheckBox = True
-End If
-
-' Must go at the bottom
-If succeeded = True Then
-    MsgBox ("Import successful")
-End If
-End Sub
-
-Private Sub ImportFromZettle(mode As String)
-' Highly non-general function/sub which imports from the "Raw data Excel" file from Zettle
-
-' Store which row we're working on. Depends on what we're after.
-Dim my_row As Long
-
-' Not strictly necessary. Used to avoid too much hard-coding.
-Dim dataSheetName As String
-dataSheetName = "Data"
-
-' Decide which event to import info into
-If mode = "Selected" Then
-    my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
-ElseIf mode = "Previous" Then
-    my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).row
-Else
-    MsgBox ("Programm   er error in Private Sub ImportFromZettle")
-    Exit Sub
-End If
-
-' Store whether import is successful or not.
-Dim succeeded As Boolean
-succeeded = True
-
-' Check if the bar is/was open selling. If not, prompt the user to update
-'   the event before importing
-If Worksheets(dataSheetName).Cells(my_row, 46) = False Then
-    MsgBox ("The bar is/was not open for this event. If you wish to import " _
-            & "data from Zettle, please mark the event as 'Bar Open'.")
-    Exit Sub
-End If
-
-' Not strictly necessary. Used to avoid too much hard-coding.
-Dim sheetName As String
-sheetName = "ZettleImport"
-
-Dim xlsxImportSuccessCheck As Boolean
-' Import the xlsx selected by the user into sheet "sheetName"
-xlsxImportSuccessCheck = funcs.xlsx_Import(sheetName)
-If xlsxImportSuccessCheck = True Then
-    ' Continue with sub
-Else
-    ' Exit sub, since a file wasn't selected
-    Exit Sub
-End If
-
-' Find the first row of data
-' First row = dateAddress(0) + 1
-' Store address of various things
-Dim dateAddress As Variant
-
-' Find address of "Date" in "ZettleImport" sheet.
-dateAddress = funcs.search("Date", sheetName)
-If dateAddress(0) = "0" Then
-    MsgBox ("Import failed. Did you select the correct file?")
-    succeeded = False
-    Exit Sub
-End If
-
-' Find the last row of data
-Dim FinalRow As Integer
-FinalRow = Worksheets(sheetName).Cells(Rows.Count, 1).End(xlUp).row
-
-' Find the bar open time
-Dim barOpen As String
-barOpen = Worksheets(dataSheetName).Cells(my_row, 55)
-If barOpen = "" Then
-    MsgBox ("Import failed. Enter the bar opening time " _
-            & "before attempting to import from Zettle")
-    succeeded = False
-    Exit Sub
-Else
-    ' Convert into a format VBA finds acceptable
-    barOpen = Format(barOpen, "hh:mm:ss")
-End If
-
-' Find the bar close time
-Dim barClosed As String
-barClosed = Worksheets(dataSheetName).Cells(my_row, 56)
-If barClosed = "" Then
-    MsgBox ("Import failed. Enter the bar close time " _
-            & "before attempting to import from Zettle")
-    succeeded = False
-    Exit Sub
-Else
-    ' Convert into a format VBA finds acceptable
-    ' And add 10 minutes as a fudge-factor
-    barClosed = DateAdd("n", 10, Format(barClosed, "hh:mm:ss"))
-End If
-
-' Find column with final price in
-Dim priceAddress As Variant
-priceAddress = funcs.search("Final price (GBP)", sheetName)
-If priceAddress(0) = "0" Then
-    MsgBox ("Import failed. Did you select the correct file?")
-    succeeded = False
-    Exit Sub
-End If
-
-' Store revenue
-Dim revenue As Double
-revenue = 0
-
-' Run down the date column to find the first and last row which
-'   are within the time range
-Dim i As Integer ' index
-Dim iTime As String ' time we're currently inspecting
-Dim iDate As String ' date we're currently inspecting
-
-For i = dateAddress(0) + 1 To FinalRow
-    ' The value from the worksheet comes in as a date followed by a space, then a time
-    ' First split the value using a space as a delimiter.
-    ' Then take the second item in the array generated.
-    ' Now format the resulting time to something acceptable to be turned into a TimeValue
-    iTime = Format(Split(Worksheets(sheetName).Cells(i, 1), " ")(1), "hh:mm:ss")
-    iDate = Split(Worksheets(sheetName).Cells(i, 1), " ")(0)
-    
-    ' Check if the transaction is within the time range and on the right date.
-    If TimeValue(iTime) >= TimeValue(barOpen) _
-        And TimeValue(iTime) <= TimeValue(barClosed) And _
-        Worksheets(dataSheetName).Cells(my_row, 3) = iDate Then
-        revenue = revenue + CDbl(Worksheets(sheetName).Cells(i, CInt(priceAddress(1))))
-    Else
-    End If
-Next
-
-' Put revenue into data sheet
-Worksheets(dataSheetName).Cells(my_row, 25) = revenue
-
-' Update autofilled info, if applicable
-If AutofillCheckBox = True Then
-    AutofillCheckBox = False
-    AutofillCheckBox = True
-End If
-
-If revenue <> 0 Then
-    MsgBox ("Import successful")
-Else
-    MsgBox ("Import could not find any transactions while the bar was open. " _
-            & "Did you import the correct file?")
-End If
-
-' Update pivot table(s)
-Call ChangeSource("Data", "Analysis", "PivotTable1")
-End Sub
-
-Private Sub VolRef1Button_Click()
-If UpdateVolunteerMinutes = False Then
-    MsgBox ("Please fill all time and duration boxes in on this page before refreshing")
-End If
-End Sub
-
-Private Sub VolRef2Button_Click()
-If UpdateVolunteerMinutes = False Then
-    MsgBox ("Please fill all time and duration boxes in on the time page before refreshing")
-End If
-End Sub
-
-Private Function ChangeSource(dataSheetName As String, pivotSheetName As String, pivotName As String) As Boolean
-'PURPOSE: Automatically readjust a Pivot Table's data source range
-'SOURCE: www.TheSpreadsheetGuru.com/The-Code-Vault
-' NOTE: do NOT select "Add this data to the data model" when creating the pivot table.
-
-Dim Data_Sheet As Worksheet
-Dim Pivot_Sheet As Worksheet
-Dim StartPoint As Range
-Dim DataRange As Range
-Dim newRange As String
-Dim LastCol As Long
-Dim lastRow As Long
-Dim DownCell As Long
-
-'Set Pivot Table & Source Worksheet
-Set Data_Sheet = ThisWorkbook.Worksheets(dataSheetName)
-Set Pivot_Sheet = ThisWorkbook.Worksheets(pivotSheetName)
-
-'Dynamically Retrieve Range Address of Data
-Set StartPoint = Data_Sheet.Range("A1")
-LastCol = StartPoint.End(xlToRight).Column
-DownCell = StartPoint.End(xlDown).row
-Set DataRange = Data_Sheet.Range(StartPoint, Data_Sheet.Cells(DownCell, LastCol))
-'Set DataRange = Data_Sheet.Range(StartPoint, Cells(42, 46))
-
-newRange = Data_Sheet.name & "!" & DataRange.address(ReferenceStyle:=xlR1C1)
-
-'Change Pivot Table Data Source Range Address
-Pivot_Sheet.PivotTables(pivotName). _
-ChangePivotCache ActiveWorkbook. _
-PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newRange)
-
- 'Ensure Pivot Table is Refreshed
-Pivot_Sheet.PivotTables(pivotName).RefreshTable
-
-End Function
-
 Private Sub AutofillFromSelected(row As Variant)
 ' Don't autofill if user is trying to edit
 If EditingCheck = True Then
@@ -2265,23 +1959,6 @@ MiscVolTextBox.Text = Worksheets(sheet).Cells(row, 49)
 MultiPage1.value = currentPage
 ' Tell the programme we're done autofilling
 AutofillCheck = False
-End Sub
-
-Private Sub RefreshListBox(sourceSheet As String, sourceColumn As Integer, list As Control)
-' Will show column header if column is empty (apart from the header)
-' Not fixing it for now because it doesn't seem to matter.
-
-Dim empty_row As Long ' Store number of items in list box
-Dim DataRange As Range
-Dim myIndex As Long
-myIndex = list.ListIndex
-
-' empty_row = lst non-empty row for specific list(box)
-empty_row = Worksheets(sourceSheet).Cells(Rows.Count, 1).End(xlUp).row
-Set DataRange = Range(Worksheets(sourceSheet).Cells(2, sourceColumn), _
-                Worksheets(sourceSheet).Cells(empty_row, sourceColumn))
-list.RowSource = DataRange.address(External:=True)
-list.ListIndex = myIndex
 End Sub
 
 Private Sub DaySpecificDefaults(sheet As String, startRow As Integer, eventType As String)
