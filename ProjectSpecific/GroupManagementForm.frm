@@ -23,6 +23,14 @@ Private Sub BackButton_Click()
 GroupManagementForm.Hide
 End Sub
 
+Private Sub EditToggleCheckBox1_Click()
+If EditToggleCheckBox1.value = True Then
+    AddGroupButton.Caption = "Edit Selected Group"
+Else
+    AddGroupButton.Caption = "Add New Group"
+End If
+End Sub
+
 Private Sub StartDateTextBox_change()
 If EndDateTextBox.Text = "" Then
     EndDateTextBox.Text = StartDateTextBox.Text
@@ -83,6 +91,23 @@ Else
     EditingCheck = False
 End If
 
+' Ensure everything that needs to be entered has been entered
+If GroupNameTextBox.Text = "" Then
+    MsgBox ("Please enter a name")
+    Exit Sub
+ElseIf StartDateTextBox.Text = "" Then
+    MsgBox ("Please enter a start date")
+    Exit Sub
+ElseIf EndDateTextBox.Text = "" Then
+    MsgBox ("Please enter an end date")
+    Exit Sub
+ElseIf CategoryListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a category")
+    Exit Sub
+ElseIf TypeListBox.ListIndex = -1 Then
+    MsgBox ("Please enter a type")
+    Exit Sub
+End If
 
 
 End Sub
