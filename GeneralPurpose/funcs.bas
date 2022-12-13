@@ -80,7 +80,7 @@ Dim resultAddress As Variant
 Dim i As Integer
 With searchRange
     Set c = .Find(word, LookIn:=xlValues, LookAt:=xlPart)
-    If Not c Is Nothing Then
+    If Not c Is Nothing Then ' if something is found, then...
         firstAddress = c.address
         Do
             ' Find address
@@ -90,16 +90,88 @@ With searchRange
             dateList.AddItem (Format(Worksheets(dataSheet).Cells(resultAddress(0), listColumns(1)), _
                                 "dd/mm/yyyy"))
             typeList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), listColumns(2)))
-            ' Add item to Event ID listbox. This listbox is hidden, but links the events on
-            '   this page to the data.
-            IDList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), 1))
+            ' Add item to hidden Event ID listbox. This listbox is hidden, but links the
+            '   events on this page to the data.
+            IDList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), listColumns(3)))
             
             Set c = .FindNext(c)
         Loop While firstAddress <> c.address
     End If
 End With
+End Function
 
+Public Function AddSomeToListBox(word As String, searchRange As Range, _
+                                listColumns As Variant, nameList As Control, startDateList As Control, _
+                                typeList As Control, IDList As Control, dataSheet As String, _
+                                discriminatorCol As Long, discriminator As Boolean, _
+                                Optional endDateList As Control) _
+                                As Boolean
+' Find all entries matching word, then add them to the listbox called list
+' Data from the row where the match is found is shown in the listbox, according to the
+'   listColumns array.
+' Inputs:
+' word = text you're searching for
+' searchRange = the range over which you're searching, including the worksheet.
+' listColumns = which columns from the sheet should appear in the list
+' startDatelist = the listbox that the start date should be written to
+' typeList = a listbox to be written to
+' IDList = a listbox to be written to
+' endDateList = an optional listbox to be written to.
+' dataSheet = the name of the sheet we're pulling data from
+' discriminatorCol = column in which to look for the discriminator
+' discriminator = in the cell where the row is the (row where the word is found) where the
+'   column is (discriminatorCol) if the cell value matches discriminator, then we discard
+'   this search result.
+' Output:
+' boolean which says whether a match was found.
+' True if one was, False if one wasn't
 
+If word = "" Then
+    Exit Function
+End If
+
+Dim c As Range
+Dim firstAddress As String
+
+' Store address of cell containing word
+Dim resultAddress As Variant
+
+Dim i As Integer
+
+With searchRange
+    Set c = .Find(word, LookIn:=xlValues, LookAt:=xlPart)
+    If Not c Is Nothing Then ' if something is found, then...
+        ' Store first address we find to prevent loop from continuing forever
+        firstAddress = c.address
+        Do
+            ' Find address and store as 2-element array. Row, then column.
+            resultAddress = StrManip.SplitR1C1(c.address(ReferenceStyle:=xlR1C1))
+            
+            If Worksheets(dataSheet).Cells(resultAddress(0), discriminatorCol) = _
+                                                                discriminator Then
+                ' Discard this result
+            Else ' Continue adding everything
+                ' Add items to listbox
+                nameList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), _
+                                    listColumns(0)))
+                startDateList.AddItem (Format(Worksheets(dataSheet).Cells(resultAddress(0), _
+                                    listColumns(1)), "dd/mm/yyyy"))
+                typeList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), _
+                                    listColumns(2)))
+                ' Add item to hidden Group ID listbox. This listbox is hidden, but links
+                '   the groups on this page to the data.
+                IDList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), listColumns(3)))
+                
+                If Not endDateList Is Nothing Then
+                    endDateList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), _
+                                            listColumns(4)))
+                End If
+            End If
+            
+            Set c = .FindNext(c)
+        Loop While firstAddress <> c.address
+    End If
+End With
 End Function
 
 Public Function ReverseArray(arr As Variant) As Variant
@@ -252,11 +324,11 @@ list.RowSource = DataRange.address(External:=True)
 list.ListIndex = myIndex
 End Sub
 
-Public Function UUIDGenerator(category As String, eventDate As String, name As String) As String
+Public Function UUIDGenerator(category As String, myDate As String, name As String) As String
 ' Generate uniqueish UUID.
 ' If name, category and date are all the same, there is a 1 in 844,596,301 change of a collision.
 UUIDGenerator = InptValid.RmSpecialChars(name) & InptValid.RmSpecialChars(category) _
-                & InptValid.RmSpecialChars(eventDate) & funcs.GenerateRandomAlphaNumericStr(5)
+                & InptValid.RmSpecialChars(myDate) & funcs.GenerateRandomAlphaNumericStr(5)
 End Function
 
 Sub GetCalendar(DateTextBox As Control) ' Calendar format

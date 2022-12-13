@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   7065
+   ClientHeight    =   7050
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   11175
@@ -1033,24 +1033,50 @@ MiscVolPayTextBox.Text = StrManip.Convert2Currency(MiscVolPayTextBox)
 End Sub
 
 Private Sub NewSearchTextBox_Change()
-
-Dim empty_row As Long ' Store number of items in list box
+Dim non_empty_row As Long
 Dim DataRange As Range
 
-' empty_row = lst non-empty row for specific list(box)
-empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
+' non_empty_row = lst non-empty row for specific list(box)
+non_empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
 Set DataRange = Range(Worksheets("Data").Cells(2, 2), _
-                Worksheets("Data").Cells(empty_row, 2))
+                Worksheets("Data").Cells(non_empty_row, 2))
 
 ' Clear items to avoid them being re-added
 SearchNameListBox.Clear
 SearchDateListBox.Clear
 SearchTypeListBox.Clear
+HiddenEventIDListBox.Clear
 
-' Use "Union(Range1, Range2)"
+' Use "Union(Range1, Range2)" to combine ranges
 
-Call funcs.AddAllToListBox(NewSearchTextBox.Text, DataRange, Array(2, 3, 29, 1), SearchNameListBox, _
-                           SearchDateListBox, SearchTypeListBox, HiddenEventIDListBox, "Data")
+' Search for events and add them to the listbox
+Call funcs.AddSomeToListBox(NewSearchTextBox.Text, DataRange, Array(2, 3, 29, 1), SearchNameListBox, _
+                           SearchDateListBox, SearchTypeListBox, HiddenEventIDListBox, "Data", 73, _
+                           True)
+End Sub
+
+Private Sub GroupSearchBox_Change()
+Dim non_empty_row As Long
+Dim DataRange As Range
+
+' non_empty_row = lst non-empty row for specific list(box)
+non_empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
+Set DataRange = Range(Worksheets("Data").Cells(2, 2), _
+                Worksheets("Data").Cells(non_empty_row, 2))
+
+' Clear items to avoid them being re-added
+GroupNameListBox.Clear
+StartDateListBox.Clear
+EndDateListBox.Clear
+GroupTypeListBox.Clear
+HiddenGroupIDListBox.Clear
+
+' Use "Union(Range1, Range2)" to combine ranges
+
+' Search for events and add them to the listbox
+Call funcs.AddSomeToListBox(GroupSearchBox.Text, DataRange, Array(2, 3, 29, 1, 74), _
+                            GroupNameListBox, StartDateListBox, GroupTypeListBox, _
+                            HiddenGroupIDListBox, "Data", 73, False, EndDateListBox)
 End Sub
 
 '' LIST BOXES===============================================================
@@ -1196,7 +1222,17 @@ If AutofillCheckBox.value = True Then
 End If
 End Sub
 
+'' Search for events tab
+Private Sub SearchNameListBox_Click()
+' Keep other listboxes in lockstep
+SearchDateListBox.ListIndex = SearchNameListBox.ListIndex
+SearchTypeListBox.ListIndex = SearchNameListBox.ListIndex
+End Sub
+
 Private Sub SearchDateListBox_Click()
+' These click subs act like change subs, so calling one
+'   calls the others because calling one changes the others.
+
 ' Keep other listboxes in lockstep
 SearchNameListBox.ListIndex = SearchDateListBox.ListIndex
 SearchTypeListBox.ListIndex = SearchDateListBox.ListIndex
@@ -1208,16 +1244,40 @@ EventIDListBox.value = HiddenEventIDListBox.value
 MultiPage1.value = 6
 End Sub
 
-Private Sub SearchNameListBox_Click()
-' Keep other listboxes in lockstep
-SearchDateListBox.ListIndex = SearchNameListBox.ListIndex
-SearchTypeListBox.ListIndex = SearchNameListBox.ListIndex
-End Sub
-
 Private Sub SearchTypeListBox_Click()
 ' Keep other listboxes in lockstep
 SearchNameListBox.ListIndex = SearchTypeListBox.ListIndex
 SearchDateListBox.ListIndex = SearchTypeListBox.ListIndex
+End Sub
+
+'' Manage groups tab
+Private Sub GroupNameListBox_Click()
+' Keep other listboxes in lockstep
+StartDateListBox.ListIndex = GroupNameListBox.ListIndex
+EndDateListBox.ListIndex = GroupNameListBox.ListIndex
+GroupTypeListBox.ListIndex = GroupNameListBox.ListIndex
+HiddenGroupIDListBox.ListIndex = GroupNameListBox.ListIndex
+End Sub
+
+Private Sub StartDateListBox_Click()
+' Keep other listboxes in lockstep
+GroupNameListBox.ListIndex = StartDateListBox.ListIndex
+EndDateListBox.ListIndex = StartDateListBox.ListIndex
+GroupTypeListBox.ListIndex = StartDateListBox.ListIndex
+End Sub
+
+Private Sub EndDateListBox_Click()
+' Keep other listboxes in lockstep
+GroupNameListBox.ListIndex = EndDateListBox.ListIndex
+StartDateListBox.ListIndex = EndDateListBox.ListIndex
+GroupTypeListBox.ListIndex = EndDateListBox.ListIndex
+End Sub
+
+Private Sub GroupTypeListBox_Click()
+' Keep other listboxes in lockstep
+GroupNameListBox.ListIndex = GroupTypeListBox.ListIndex
+StartDateListBox.ListIndex = GroupTypeListBox.ListIndex
+EndDateListBox.ListIndex = GroupTypeListBox.ListIndex
 End Sub
 
 '' USERFORM/MULTIPAGE===============================================================
@@ -1429,7 +1489,8 @@ Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 
 ' Add data given by user into spreadsheet
 ' Basic Info
-Worksheets(sheet).Cells(my_row, 1) = funcs.UUIDGenerator(CategoryListBox.value, EventDateTextBox.Text, NameTextBox.Text)
+Worksheets(sheet).Cells(my_row, 1) = "E" & funcs.UUIDGenerator(CategoryListBox.value, _
+                                        EventDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, 2) = NameTextBox.Text
 Worksheets(sheet).Cells(my_row, 3) = StrManip.ConvertDate(EventDateTextBox.Text)
 Worksheets(sheet).Cells(my_row, 4) = LocationListBox.value
@@ -1552,6 +1613,9 @@ Worksheets(sheet).Cells(my_row, 68) = MiscVolPayTextBox.Text
 'Add a 1 in the column counting the number of events.
 ' Need to do this because pivot tables can't be added to the data model.
 Worksheets(sheet).Cells(my_row, 69) = 1
+
+' Declare that this is an event, not a dummy event representing a group
+Worksheet(sheet).Cells(my_row, 73) = False
 
 ' Update pivot table(s)
 Call funcs.ChangeSource(sheet, "Analysis", "PivotTable1")

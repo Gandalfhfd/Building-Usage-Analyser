@@ -15,6 +15,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 '' TEXT BOXES===============================================================
 
+Private Sub AddGroupButton_Click()
+Call AddGroup(EditToggleCheckBox1.value)
+End Sub
+
 Private Sub StartDateTextBox_Change()
 If EndDateTextBox.Text = "" Then
     EndDateTextBox.Text = StartDateTextBox.Text
@@ -60,4 +64,21 @@ Call funcs.RefreshListBox("Type-Specific Defaults", 1, TypeListBox)
 
 ' Set default value of category
 CategoryListBox.ListIndex = 0
+End Sub
+
+Private Sub AddGroup(mode As Boolean)
+' Add or edit group
+
+' mode = False = Add event
+' mode = True = Edit event
+
+' Store which mode we're in publically
+If mode = True Then
+    EditingCheck = True
+Else
+    EditingCheck = False
+End If
+
+
+
 End Sub
