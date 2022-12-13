@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   7050
+   ClientHeight    =   7020
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   11175
+   ClientWidth     =   14595
    OleObjectBlob   =   "UserForm1.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -234,6 +234,10 @@ If GenreListBox.value = "Jazz" Then
 End If
 End Sub
 
+Private Sub GroupButton1_Click()
+GroupManagementForm.Show
+End Sub
+
 Private Sub TicketsolveImportSelectedButton_Click()
 ' Find the row of the selected event
 Dim event_row As Long
@@ -353,16 +357,16 @@ End Sub
 '' TEXT BOXES===============================================================
 
 ' Basic Info============================================================================
-Private Sub EventDateTextBox_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
+Private Sub StartDateTextBox_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
 ' Re-show Date Picker if box has already been entered
-Call funcs.GetCalendar(UserForm1.EventDateTextBox) ' Show Date Picker
+Call funcs.GetCalendar(UserForm1.StartDateTextBox) ' Show Date Picker
 End Sub
 
-Private Sub EventDateTextBox_Enter()
-Call funcs.GetCalendar(UserForm1.EventDateTextBox) ' Show Date Picker
+Private Sub StartDateTextBox_Enter()
+Call funcs.GetCalendar(UserForm1.StartDateTextBox) ' Show Date Picker
 End Sub
 
-Private Sub EventDateTextBox_change()
+Private Sub StartDateTextBox_change()
 ' Update times if date is changed and type matches what we want
 If TypeListBox.value = "Film" Then
     Call DaySpecificDefaults("Day & Type-Specific Defaults", 2, "Film")
@@ -1094,9 +1098,9 @@ Me.MultiPage1.Pages("Page4").Visible = True
 
 ' Change some timing boxes
 ' Routine is different if type is "Film"
-If TypeListBox.value = "Film" And EventDateTextBox.Text <> "" Then
+If TypeListBox.value = "Film" And StartDateTextBox.Text <> "" Then
     Call DaySpecificDefaults("Day & Type-Specific Defaults", 2, "Film")
-ElseIf TypeListBox.value = "Live Music" And EventDateTextBox.Text <> "" _
+ElseIf TypeListBox.value = "Live Music" And StartDateTextBox.Text <> "" _
                             And GenreListBox.value = "Jazz" Then
     Call DaySpecificDefaults("Day & Type-Specific Defaults", 10, "Jazz")
 Else
@@ -1193,18 +1197,10 @@ End If
 ' Store name of data sheet
 Dim sheet As String
 sheet = "Data"
-' Display Event ID in search box
-If EventIDListBox.ListIndex <> -1 Then
-    SearchBox.Text = EventIDListBox.value
-End If
 
 ' Store row of selected event.
 Dim row As Long
 row = EventIDListBox.ListIndex + 2
-
-' Display the event name in search box.
-' It will always be found in the second column, so hard coding is ok.
-NameSearchTextBox.Text = Worksheets(sheet).Cells(row, 2)
 
 ' So the user always knows which event has been selected.
 ' Might want to hide that if they're not in edit mode, idk.
@@ -1214,7 +1210,7 @@ EventIDUpdaterLabel3.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel4.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel5.Caption = "Selected Event ID: " & EventIDListBox.value
 EventIDUpdaterLabel6.Caption = "Selected Event ID: " & EventIDListBox.value
-EventIDUpdaterLabel7.Caption = "Selected Event ID: " & EventIDListBox.value
+'EventIDUpdaterLabel7.Caption = "Selected Event ID: " & EventIDListBox.value
 
 If AutofillCheckBox.value = True Then
     ' Fill in everything with values taken from this event.
@@ -1239,9 +1235,7 @@ SearchTypeListBox.ListIndex = SearchDateListBox.ListIndex
 HiddenEventIDListBox.ListIndex = SearchDateListBox.ListIndex
 
 ' Select event on Home page
-MultiPage1.value = 0
 EventIDListBox.value = HiddenEventIDListBox.value
-MultiPage1.value = 6
 End Sub
 
 Private Sub SearchTypeListBox_Click()
@@ -1382,7 +1376,7 @@ ElseIf NameTextBox.Text = "" Then
     MsgBox ("Please enter an event name")
     MultiPage1.value = 1
     Exit Function
-ElseIf EventDateTextBox.Text = "" Then
+ElseIf StartDateTextBox.Text = "" Then
     MsgBox ("Please select a date using the calendar. Double click on the text box to show the calendar.")
     MultiPage1.value = 1
     Exit Function
@@ -1490,9 +1484,9 @@ Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 ' Add data given by user into spreadsheet
 ' Basic Info
 Worksheets(sheet).Cells(my_row, 1) = "E" & funcs.UUIDGenerator(CategoryListBox.value, _
-                                        EventDateTextBox.Text, NameTextBox.Text)
+                                        StartDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, 2) = NameTextBox.Text
-Worksheets(sheet).Cells(my_row, 3) = StrManip.ConvertDate(EventDateTextBox.Text)
+Worksheets(sheet).Cells(my_row, 3) = StrManip.ConvertDate(StartDateTextBox.Text)
 Worksheets(sheet).Cells(my_row, 4) = LocationListBox.value
 Worksheets(sheet).Cells(my_row, 24) = CategoryListBox.value
 Worksheets(sheet).Cells(my_row, 28) = RoomListBox.value
@@ -1830,7 +1824,7 @@ currentPage = MultiPage1.value
 MultiPage1.value = 1
 
 NameTextBox.Text = Worksheets(sheet).Cells(row, 2)
-EventDateTextBox.Text = Worksheets(sheet).Cells(row, 3)
+StartDateTextBox.Text = Worksheets(sheet).Cells(row, 3)
 If Worksheets(sheet).Cells(row, 24) <> "" Then
     CategoryListBox.value = Worksheets(sheet).Cells(row, 24)
 Else
@@ -1997,13 +1991,13 @@ If Worksheets(sheet).Cells(startRow - 1, 1) <> eventType Then
 End If
 
 ' Check that a date has been entered
-If EventDateTextBox = "" Then
+If StartDateTextBox = "" Then
     Exit Sub
 End If
 
 ' Find out day event is on
 Dim day As String
-day = Format(EventDateTextBox.Text, "dddd")
+day = Format(StartDateTextBox.Text, "dddd")
 
 ' Store AutoTimeCheckbox value
 Dim autoTime As Boolean
