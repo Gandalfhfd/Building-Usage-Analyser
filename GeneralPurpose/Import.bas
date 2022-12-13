@@ -133,7 +133,7 @@ Dim offset() As Variant
 exportCell = Array(my_row, 14)
 offset = Array(0, 1)
 
-tempSuccessCheck = ImportCell("Sold", sheetName, dataSheetName, exportCell, offset)
+tempSuccessCheck = Import.ImportCell("Sold", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -141,7 +141,7 @@ End If
 
 ' Find event capacity
 exportCell(1) = 33
-tempSuccessCheck = ImportCell("Capacity", sheetName, dataSheetName, exportCell, offset)
+tempSuccessCheck = Import.ImportCell("Capacity", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -150,7 +150,7 @@ End If
 ' Find number of blocked seats
 exportCell(1) = 34
 offset = Array(1, 0)
-tempSuccessCheck = ImportCell("Blocked", sheetName, dataSheetName, exportCell, offset)
+tempSuccessCheck = Import.ImportCell("Blocked", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -159,7 +159,7 @@ End If
 ' Find total Support the Kirkgate revenue
 exportCell(1) = 44
 offset = Array(0, 3)
-tempSuccessCheck = ImportCell("Support the Kirkgate", sheetName, dataSheetName, exportCell, offset)
+tempSuccessCheck = Import.ImportCell("Support the Kirkgate", sheetName, dataSheetName, exportCell, offset)
 
 If tempSuccessCheck = False Then
     succeeded = False
@@ -169,7 +169,7 @@ End If
 exportCell(1) = 42
 offset = Array(1, 1)
 ' Find net sales
-tempSuccessCheck = ImportCell("Tax", sheetName, dataSheetName, exportCell, offset)
+tempSuccessCheck = Import.ImportCell("Tax", sheetName, dataSheetName, exportCell, offset)
 
 ' Find ticket sale revenue by getting net
 Worksheets(dataSheetName).Cells(my_row, 42) = Worksheets(dataSheetName).Cells(my_row, 42)
@@ -359,3 +359,53 @@ End If
 ' Update pivot table(s)
 Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
+
+Function ImportCell(keyword As String, importSheet As String, exportSheet As String, _
+                        exportCell() As Variant, offset() As Variant, Optional errorMsg As String, _
+                        Optional substitute As String = "N/A") As Boolean
+' MOVE TO FUNCTIONS SECTION, OR funcs WHEN DONE
+
+' Designed to transplant value of a cell from one sheet to another in the same workbook.
+' Could be modified to go from one workbook to another at some point, but that would require modification of the search function too.
+
+' INPUTS
+' All arrays must contain 2 items, like coordinates. (row, column) 1 indexing.
+' keyword = word found near our target cell
+' importSheet = name of sheet target cell is found in
+' exportSheet = name of sheet we want to send target value to
+' exportCell = position of cell we want to send target value to. Must be 2-item array.
+' offset = 2-item array describing the offset of the target cell to the keyword
+' errorMsg = (OPTIONAL) message displayed in MsgBox if keyword is not found. errorMsg is always defined
+' substitute = (OPTIONAL) what will go into the exportCell if keyword is not found
+
+' OUTPUTS
+' ImportCell = Boolean which states whether this was successful or not
+
+' Set default value of errorMsg, if user hasn't supplied one
+If IsMissing(errorMsg) Then
+    errorMsg = keyword & " could not be found when importing."
+End If
+
+' Store address of various things
+Dim myAddress As Variant
+
+' Store success status of import
+Dim succeeded As Boolean
+succeeded = True
+
+Dim value As String ' Store target cell's value
+myAddress = funcs.search(keyword, importSheet)
+If myAddress(0) = "0" Then
+    value = substitute
+    MsgBox (errorMsg)
+    succeeded = False
+Else
+    ' Store value of cell we're interested in importing
+    value = Worksheets(importSheet).Cells(CInt(myAddress(0) + offset(0)), CInt(myAddress(1) + offset(1)))
+End If
+
+' Update cell with target cell value, if found, or value of 'substitue' variable if not
+Worksheets(exportSheet).Cells(exportCell(0), exportCell(1)) = value
+
+ImportCell = succeeded
+End Function
