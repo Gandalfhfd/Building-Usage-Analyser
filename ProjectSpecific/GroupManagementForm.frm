@@ -139,4 +139,10 @@ Worksheets(sheet).Cells(my_row, 29) = TypeListBox.value
 Worksheets(sheet).Cells(my_row, 73) = True
 Worksheets(sheet).Cells(my_row, 74) = StrManip.ConvertDate(EndDateTextBox.Text)
 
+' Update pivot table(s)
+Call funcs.ChangeSource(sheet, "Analysis", "PivotTable1")
+
+' Update listboxes
+Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
 End Sub

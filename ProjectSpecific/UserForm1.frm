@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   7125
+   ClientHeight    =   10770
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   14595
@@ -115,7 +115,7 @@ nameLocation = EventIDListBox.ListIndex + 2
 
 If AutofillCheckBox.value = True Then
     ' Autofill data into form
-    Call AutofillFromSelected(nameLocation)
+    Call AutofillEventFromSelected(nameLocation)
 End If
 
 ' Toggle edit mode
@@ -254,12 +254,21 @@ End If
 End Sub
 
 Private Sub GroupButton1_Click()
+Dim my_row As Integer
+
 ' Pre-fill in details to make adding groups quicker
-GroupManagementForm.GroupNameTextBox.Text = UserForm1.GroupSearchBox.Text
-GroupManagementForm.StartDateTextBox.Text = UserForm1.StartDateTextBox.Text
-GroupManagementForm.EndDateTextBox.Text = UserForm1.EndDateTextBox.Text
-GroupManagementForm.CategoryListBox.value = UserForm1.CategoryListBox.value
-GroupManagementForm.TypeListBox.value = UserForm1.TypeListBox.value
+If GroupNameListBox.ListIndex = -1 Then ' Nothing is selected, so use event info
+    GroupManagementForm.GroupNameTextBox.Text = UserForm1.GroupSearchBox.Text
+    GroupManagementForm.StartDateTextBox.Text = UserForm1.StartDateTextBox.Text
+    GroupManagementForm.EndDateTextBox.Text = UserForm1.EndDateTextBox.Text
+    GroupManagementForm.CategoryListBox.value = UserForm1.CategoryListBox.value
+    GroupManagementForm.TypeListBox.value = UserForm1.TypeListBox.value
+Else
+    ' find row group is on
+    my_row = funcs.search(GroupNameListBox.value, "Data")(0)
+    ' Use info from group
+    Call AutofillGroupFromSelected(my_row)
+End If
 
 GroupManagementForm.EditToggleCheckBox1.value = GroupEditToggleCheckBox.value
 
@@ -1126,7 +1135,7 @@ HiddenGroupIDListBox.Clear
 ' Use "Union(Range1, Range2)" to combine ranges
 
 ' Search for events and add them to the listbox
-Call funcs.AddSomeToListBox(GroupSearchBox.Text, DataRange, Array(2, 3, 29, 1, 74), _
+Call funcs.AddSomeToListBox(GroupSearchBox.Text, DataRange, Array(2, 3, 29, 72, 74), _
                             GroupNameListBox, StartDateListBox, GroupTypeListBox, _
                             HiddenGroupIDListBox, "Data", 73, False, EndDateListBox)
 End Sub
@@ -1260,7 +1269,7 @@ EventIDUpdaterLabel6.Caption = "Selected Event ID: " & EventIDListBox.value
 
 If AutofillCheckBox.value = True Then
     ' Fill in everything with values taken from this event.
-    Call AutofillFromSelected(row)
+    Call AutofillEventFromSelected(row)
 End If
 End Sub
 
@@ -1894,7 +1903,7 @@ ElseIf state = False Then
 End If
 End Sub
 
-Private Sub AutofillFromSelected(row As Variant)
+Private Sub AutofillEventFromSelected(row As Variant)
 ' Don't autofill if user is trying to edit
 If EditingCheck = True Then
     Exit Sub
@@ -2060,6 +2069,19 @@ MiscVolTextBox.Text = Worksheets(sheet).Cells(row, 49)
 MultiPage1.value = currentPage
 ' Tell the programme we're done autofilling
 AutofillCheck = False
+End Sub
+
+Private Sub AutofillGroupFromSelected(row As Variant)
+' Sheet data is stored on. Makes things easier to read.
+Dim sheet As String
+sheet = "Data"
+
+' Do the autofilling
+GroupManagementForm.GroupNameTextBox.Text = Worksheets(sheet).Cells(row, 2)
+GroupManagementForm.StartDateTextBox.Text = Worksheets(sheet).Cells(row, 3)
+GroupManagementForm.EndDateTextBox.Text = Worksheets(sheet).Cells(row, 74)
+GroupManagementForm.CategoryListBox.Text = Worksheets(sheet).Cells(row, 24)
+GroupManagementForm.TypeListBox.Text = Worksheets(sheet).Cells(row, 29)
 End Sub
 
 Private Sub DaySpecificDefaults(sheet As String, startRow As Integer, eventType As String)
