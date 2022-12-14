@@ -220,8 +220,18 @@ Else
     Sheets("Data").Rows(row).Delete
 End If
 
+'' Update listboxes
 ' Update EventIDListBox
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+' Update search listboxes
+' HiddenEventIDListBox must be updated first so that the internal record
+'   of events is correct. If this doesn't make sense, dw, I got confused while
+'   writing this comment. It needs to go first though. Try it without and see
+'   what you get.
+HiddenEventIDListBox.RemoveItem (SearchNameListBox.ListIndex)
+SearchNameListBox.RemoveItem (SearchNameListBox.ListIndex)
+SearchDateListBox.RemoveItem (SearchNameListBox.ListIndex)
+SearchTypeListBox.RemoveItem (SearchNameListBox.ListIndex)
 
 ' Update pivot table(s)
 Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
@@ -1649,7 +1659,8 @@ Call funcs.ChangeSource(sheet, "Analysis", "PivotTable1")
 Dim response As Variant
 If mode = False Then
     MsgBox ("Event Added")
-    response = MsgBox("Would you like to add this to a group?", vbQuestion + vbYesNo + vbDefaultButton2, "Message Box Title")
+    response = MsgBox("Would you like to add this to a group?", _
+                vbQuestion + vbYesNo + vbDefaultButton2, "Question")
 ElseIf mode = True Then
     MsgBox ("Event Edited")
 Else
@@ -1662,7 +1673,11 @@ If response = vbYes Then
 End If
 
 EditingCheck = False
+
+' Update listboxes
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+
+Call NewSearchTextBox_Change
 
 ' Change selected event to one just added, if one was added (and not edited)
 If EventIDListBox.ListCount > 0 And mode = False Then
