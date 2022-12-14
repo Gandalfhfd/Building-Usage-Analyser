@@ -42,7 +42,7 @@ ElseIf CDate(EndDateTextBox.Text) < CDate(StartDateTextBox.Text) Then
 End If
 End Sub
 
-Private Sub StartDateTextBox_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
+Private Sub StartDateTextBox_DblClick(ByVal cancel As MSForms.ReturnBoolean)
 ' Re-show Date Picker if box has already been entered
 Call funcs.GetCalendar(UserForm2.StartDateTextBox) ' Show Date Picker
 End Sub
@@ -60,7 +60,7 @@ ElseIf CDate(EndDateTextBox.Text) < CDate(StartDateTextBox.Text) Then
 End If
 End Sub
 
-Private Sub EndDateTextBox_DblClick(ByVal Cancel As MsForms.ReturnBoolean)
+Private Sub EndDateTextBox_Dblclick(ByVal cancel As MSForms.ReturnBoolean)
 ' Re-show Date Picker if box has already been entered
 Call funcs.GetCalendar(UserForm2.EndDateTextBox) ' Show Date Picker
 End Sub
