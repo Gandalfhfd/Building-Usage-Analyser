@@ -13,6 +13,10 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
+Public EditingCheck As Boolean
+
 '' TEXT BOXES===============================================================
 
 Private Sub AddGroupButton_Click()
@@ -20,6 +24,7 @@ Call AddGroup(EditToggleCheckBox1.value)
 End Sub
 
 Private Sub BackButton_Click()
+UserForm1.NewSearchTextBox.Text = GroupManagementForm.GroupNameTextBox.Text
 GroupManagementForm.Hide
 End Sub
 
@@ -44,11 +49,11 @@ End Sub
 
 Private Sub StartDateTextBox_DblClick(ByVal cancel As MSForms.ReturnBoolean)
 ' Re-show Date Picker if box has already been entered
-Call funcs.GetCalendar(UserForm2.StartDateTextBox) ' Show Date Picker
+Call funcs.GetCalendar(GroupManagementForm.StartDateTextBox) ' Show Date Picker
 End Sub
 
 Private Sub StartDateTextBox_Enter()
-Call funcs.GetCalendar(UserForm2.StartDateTextBox) ' Show Date Picker
+Call funcs.GetCalendar(GroupManagementForm.StartDateTextBox) ' Show Date Picker
 End Sub
 
 Private Sub EndDateTextBox_Change()
@@ -62,11 +67,11 @@ End Sub
 
 Private Sub EndDateTextBox_Dblclick(ByVal cancel As MSForms.ReturnBoolean)
 ' Re-show Date Picker if box has already been entered
-Call funcs.GetCalendar(UserForm2.EndDateTextBox) ' Show Date Picker
+Call funcs.GetCalendar(GroupManagementForm.EndDateTextBox) ' Show Date Picker
 End Sub
 
 Private Sub EndDateTextBox_Enter()
-Call funcs.GetCalendar(UserForm2.EndDateTextBox) ' Show Date Picker
+Call funcs.GetCalendar(GroupManagementForm.EndDateTextBox) ' Show Date Picker
 End Sub
 
 Private Sub Userform_Initialize()
@@ -109,5 +114,29 @@ ElseIf TypeListBox.ListIndex = -1 Then
     Exit Sub
 End If
 
+Dim my_row As Long
+If mode = False Then
+    ' Next available row
+    my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row + 1
+ElseIf mode = True Then
+    ' Row corresponds to the row of the event selected by the user
+    my_row = UserForm1.GroupIDListBox.ListIndex + 2
+End If
+
+Dim sheet As String
+sheet = "Data"
+
+' Add data given by user into spreadsheet
+' G stands for "group"
+Worksheets(sheet).Cells(my_row, 1) = "G" & funcs.UUIDGenerator(CategoryListBox.value, _
+                                StartDateTextBox.Text, GroupNameTextBox.Text)
+Worksheets(sheet).Cells(my_row, 72) = "G" & funcs.UUIDGenerator(CategoryListBox.value, _
+                                StartDateTextBox.Text, GroupNameTextBox.Text)
+Worksheets(sheet).Cells(my_row, 2) = GroupNameTextBox.Text
+Worksheets(sheet).Cells(my_row, 3) = StrManip.ConvertDate(StartDateTextBox.Text)
+Worksheets(sheet).Cells(my_row, 24) = CategoryListBox.value
+Worksheets(sheet).Cells(my_row, 29) = TypeListBox.value
+Worksheets(sheet).Cells(my_row, 73) = True
+Worksheets(sheet).Cells(my_row, 74) = StrManip.ConvertDate(EndDateTextBox.Text)
 
 End Sub

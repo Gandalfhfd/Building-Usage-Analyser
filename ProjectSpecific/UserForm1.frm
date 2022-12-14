@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   7020
+   ClientHeight    =   7125
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   14595
@@ -15,7 +15,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 ' Dumb, but why not
-Public DeleteIndicator As Integer
+Public EventDeleteIndicator As Integer
+Public GroupDeleteIndicator As Integer
 
 ' Store whether editing is happening
 Public EditingCheck As Boolean
@@ -130,6 +131,10 @@ Else
 End If
 End Sub
 
+Private Sub CreditsButton_Click()
+CreditsForm.Show
+End Sub
+
 '' BUTTON CLICKING===============================================================
 
 Private Sub EventButton1_Click()
@@ -205,18 +210,18 @@ my_index = EventIDListBox.ListIndex
 If EventIDListBox.ListCount < 1 Then
     ' There are no more items, so select nothing
     EventIDListBox.ListIndex = -1
-    DeleteIndicator = 1
+    EventDeleteIndicator = 1
     ' Delete entire row corresponding to selected event
     Sheets("Data").Rows(row).Delete
 ElseIf EventIDListBox.ListCount = my_index + 1 Then
     ' We are at end of list, so go up one
     EventIDListBox.ListIndex = my_index - 1
-    DeleteIndicator = 1
+    EventDeleteIndicator = 1
     ' Delete entire row corresponding to selected event
     Sheets("Data").Rows(row).Delete
 Else
     ' Delete entire row corresponding to selected event
-    DeleteIndicator = 1
+    EventDeleteIndicator = 1
     Sheets("Data").Rows(row).Delete
 End If
 
@@ -255,6 +260,8 @@ GroupManagementForm.StartDateTextBox.Text = UserForm1.StartDateTextBox.Text
 GroupManagementForm.EndDateTextBox.Text = UserForm1.EndDateTextBox.Text
 GroupManagementForm.CategoryListBox.value = UserForm1.CategoryListBox.value
 GroupManagementForm.TypeListBox.value = UserForm1.TypeListBox.value
+
+GroupManagementForm.EditToggleCheckBox1.value = GroupEditToggleCheckBox.value
 
 ' This needs to be last in the sub so that the other code executes
 GroupManagementForm.Show
@@ -1214,15 +1221,13 @@ Call CapacityListBoxDecider
 End Sub
 
 Private Sub EventIDListBox_Change()
-'MsgBox ("EventIDListBox_Change was called")
-
 ' Stop it freaking out when an item is deleted
-If DeleteIndicator = 1 Then
-    DeleteIndicator = 2
+If EventDeleteIndicator = 1 Then
+    EventDeleteIndicator = 2
     Exit Sub
-ElseIf DeleteIndicator = 2 Then
-    ' Reset DeleteIndicator on second time of asking
-    DeleteIndicator = 0
+ElseIf EventDeleteIndicator = 2 Then
+    ' Reset EventDeleteIndicator on second time of asking
+    EventDeleteIndicator = 0
     Exit Sub
 Else
     ' Carry on with the sub
@@ -1259,6 +1264,31 @@ If AutofillCheckBox.value = True Then
 End If
 End Sub
 
+Private Sub GroupIdListbox_Change()
+' Stop it freaking out when an item is deleted
+If GroupDeleteIndicator = 1 Then
+    GroupDeleteIndicator = 2
+    Exit Sub
+ElseIf GroupDeleteIndicator = 2 Then
+    ' Reset GroupDeleteIndicator on second time of asking
+    GroupDeleteIndicator = 0
+    Exit Sub
+Else
+    ' Carry on with the sub
+End If
+
+' start at 0
+' increase by 1 when deletion called
+' now 1
+' increase by 1 one first change
+' now 2
+' reset to 0, then exit sub
+
+GroupIDUpdater1.Caption = "Selected Group ID: " & GroupIDListBox.value
+GroupManagementForm.GroupIDUpdaterLabel2.Caption = "Selected Group ID: " & GroupIDListBox.value
+
+End Sub
+
 '' Search for events tab
 Private Sub SearchNameListBox_Click()
 ' Keep other listboxes in lockstep
@@ -1275,7 +1305,7 @@ SearchNameListBox.ListIndex = SearchDateListBox.ListIndex
 SearchTypeListBox.ListIndex = SearchDateListBox.ListIndex
 HiddenEventIDListBox.ListIndex = SearchDateListBox.ListIndex
 
-' Select event on Home page
+' Select event in EventIDListBox so that we know which row it is on
 EventIDListBox.value = HiddenEventIDListBox.value
 End Sub
 
@@ -1292,6 +1322,9 @@ StartDateListBox.ListIndex = GroupNameListBox.ListIndex
 EndDateListBox.ListIndex = GroupNameListBox.ListIndex
 GroupTypeListBox.ListIndex = GroupNameListBox.ListIndex
 HiddenGroupIDListBox.ListIndex = GroupNameListBox.ListIndex
+
+' Select event in GroupIDListBox so that we know which row it is on
+GroupIDListBox.value = HiddenGroupIDListBox.value
 End Sub
 
 Private Sub StartDateListBox_Click()
@@ -1329,6 +1362,8 @@ spec = "Type-Specific Defaults"
 
 ' EVENT ID
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+' GROUP ID
+Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
 ' CATEGORY
 Call funcs.RefreshListBox(non, 4, CategoryListBox)
 CategoryListBox.ListIndex = 0
@@ -1524,7 +1559,11 @@ Worksheets(sheet).Cells(my_row, 27) = "=RC[-2]*RC[-1]"
 
 ' Add data given by user into spreadsheet
 ' Basic Info
+' E stands for "event" meaning this is an event, not a group
 Worksheets(sheet).Cells(my_row, 1) = "E" & funcs.UUIDGenerator(CategoryListBox.value, _
+                                        StartDateTextBox.Text, NameTextBox.Text)
+' S stands for "single" meaning this event isn't in a group
+Worksheets(sheet).Cells(my_row, 72) = "S" & funcs.UUIDGenerator(CategoryListBox.value, _
                                         StartDateTextBox.Text, NameTextBox.Text)
 Worksheets(sheet).Cells(my_row, 2) = NameTextBox.Text
 Worksheets(sheet).Cells(my_row, 3) = StrManip.ConvertDate(StartDateTextBox.Text)
@@ -1676,6 +1715,7 @@ EditingCheck = False
 
 ' Update listboxes
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
 
 Call NewSearchTextBox_Change
 
