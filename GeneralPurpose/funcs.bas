@@ -49,11 +49,17 @@ search = myAddress
 
 End Function
 
-Function searchForAllOccurences(word As String, searchRange As Range) As Variant
+Function searchForAllOccurences(word As String, searchRange As Range, _
+                                ByRef numResults As Integer) As Variant
 ' Search for word over Range searchRange
 ' Output location of all occurrences as 2D array
 ' If nothing found, output (0,0)
 
+' Input:
+' word = string we're searching for
+' searchRange = range over which we're looking
+' numResults = number of results we find. passed back to user
+'
 ' Output: 2D array with 2 values in each row
 ' First item in row is row where item was found. Second is column
 
@@ -102,6 +108,9 @@ With searchRange ' Look over given range
     End If
 End With
 
+' "output" the number of results found
+numResults = counter
+
 ' Set size of output array
 If counter = 0 Then
     ReDim outputArr(0, 1)
@@ -140,8 +149,6 @@ End With
 
 ' Give function an output
 searchForAllOccurences = outputArr
-MsgBox (counter)
-
 End Function
 
 Public Function AddAllToListBox(word As String, searchRange As Range, _

@@ -235,12 +235,24 @@ Call funcs.RefreshListBox("Data", 1, EventIDListBox)
 '   what you get.
 HiddenEventIDListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchNameListBox.RemoveItem (SearchNameListBox.ListIndex)
-SearchGroupNameListBox.RemoveItem (SearchNameListBox.ListIndex)
+'SearchGroupNameListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchDateListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchTypeListBox.RemoveItem (SearchNameListBox.ListIndex)
 
 ' Update pivot table(s)
 Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
+End Sub
+
+Private Sub TestButton_Click()
+Dim non_empty_row As Long
+Dim DataRange As Range
+
+' non_empty_row = lst non-empty row for specific list(box)
+non_empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
+Set DataRange = Range(Worksheets("Data").Cells(2, 29), _
+                Worksheets("Data").Cells(non_empty_row, 29))
+
+MsgBox (FindGroupName(2))
 End Sub
 
 Private Sub GenreListBox_Change()
@@ -1129,6 +1141,13 @@ HiddenEventIDListBox.Clear
 Call funcs.AddSomeToListBox(NewSearchTextBox.Text, DataRange, Array(2, 3, 29, 1), SearchNameListBox, _
                            SearchDateListBox, SearchTypeListBox, HiddenEventIDListBox, "Data", 73, _
                            True)
+                           
+Dim i As Integer
+
+For i = 0 To SearchNameListBox.ListCount - 1
+    ' Go through list of results and add the name of the group the event is in to the list
+    SearchGroupNameListBox.AddItem (FindGroupName(HiddenEventIDListBox.list(i)))
+Next
 End Sub
 
 Private Sub GroupSearchBox_Change()
@@ -1317,7 +1336,7 @@ End Sub
 '' Search for events tab
 Private Sub SearchNameListBox_Click()
 ' Keep other listboxes in lockstep
-SearchGroupNameListBox = SearchNameListBox.ListIndex
+'SearchGroupNameListBox = SearchNameListBox.ListIndex
 SearchDateListBox.ListIndex = SearchNameListBox.ListIndex
 SearchTypeListBox.ListIndex = SearchNameListBox.ListIndex
 End Sub
@@ -2279,20 +2298,51 @@ MultiPage1.value = currentPage
 UpdateVolunteerMinutes = True
 End Function
 
-Private Function FindGroupName(event_row As Integer) As String
+Private Function FindGroupName(eventID As String) As String
 ' Purpose: find name of group event is in (if any)
 
 Dim ws As Worksheet
 Set ws = Sheets("Data")
 
+' Find event's row, given the group ID, which is assumed to be unique
+Dim event_row As Integer
+event_row = funcs.search(eventID, "Data")(0)
+
 ' Find event's group ID
-Dim eventGroupID
-eventGroupID = ws(Cells(event_row, 72))
+Dim eventGroupID As String
+eventGroupID = ws.Cells(event_row, 72)
+
 ' Search for group ID, note when group ID is found on the same row as a group
+Dim non_empty_row As Long
+Dim IDRange As Range
 
-' If multiple found, return error
+' non_empty_row = lst non-empty row for specific list(box)
+non_empty_row = ws.Cells(Rows.Count, 1).End(xlUp).row
+Set IDRange = Range(Worksheets("Data").Cells(2, 72), _
+                ws.Cells(non_empty_row, 72))
+                
+Dim numResults As Integer
+Dim resultAddresses As Variant
+resultAddresses = funcs.searchForAllOccurences(eventGroupID, IDRange, numResults)
 
-' look in the second column of the found row to find the name of the group
+Dim i As Integer
+Dim resultRow As Integer
+Dim counter As Integer: counter = 0
+For i = 0 To numResults - 1
+    ' row result was found on
+    resultRow = resultAddresses(i, 0)
+    If ws.Cells(resultRow, 73) = True And counter < 1 Then
+        ' This result is a group
+        ' Find name of group
+        FindGroupName = ws.Cells(resultRow, 2)
+        ' add to counter, so that we know if we have a duplicate
+        counter = counter + 1
+    ElseIf counter > 1 Then
+        MsgBox ("Multiple groups have the same ID")
+    End If
+Next
 
-' return group name
+If counter = 0 Then
+    FindGroupName = "N/A"
+End If
 End Function
