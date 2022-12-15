@@ -139,10 +139,40 @@ Worksheets(sheet).Cells(my_row, 29) = TypeListBox.value
 Worksheets(sheet).Cells(my_row, 73) = True
 Worksheets(sheet).Cells(my_row, 74) = StrManip.ConvertDate(EndDateTextBox.Text)
 
+' Index of what was previously selected
+Dim my_index As Integer
+' Length of listbox. Lets us know if the edit means the group no longer appears
+'   in the search
+Dim my_length As Integer
+If mode = False Then
+    MsgBox ("Group Added")
+Else
+    my_index = UserForm1.GroupNameListBox.ListIndex
+    my_length = UserForm1.GroupNameListBox.ListCount
+    MsgBox ("Group Edited")
+End If
+
 ' Update pivot table(s)
 Call funcs.ChangeSource(sheet, "Analysis", "PivotTable1")
 
 ' Update listboxes
-Call funcs.RefreshListBox("Data", 1, EventIDListBox)
-Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
+Call funcs.RefreshListBox("Data", 1, UserForm1.EventIDListBox)
+Call funcs.RefreshListBox("Data", 72, UserForm1.GroupIDListBox)
+' Refresh group search
+Dim search As String
+search = UserForm1.GroupSearchBox.Text
+UserForm1.GroupSearchBox.Text = ""
+UserForm1.GroupSearchBox.Text = search
+
+' Change selected event to one just added, if one was added (and not edited)
+If UserForm1.GroupIDListBox.ListCount > 0 And mode = False Then
+    ' Select final item in listbox
+    UserForm1.GroupIDListBox.ListIndex = UserForm1.GroupIDListBox.ListCount - 1
+    ' Find the event ID
+    UserForm1.HiddenGroupIDListBox.value = UserForm1.GroupIDListBox.value
+    ' Set user-facing listboxes to correct event
+    UserForm1.GroupNameListBox.ListIndex = UserForm1.HiddenGroupIDListBox.ListIndex
+ElseIf UserForm1.GroupNameListBox.ListCount = my_length Then
+    UserForm1.GroupNameListBox.ListIndex = my_index
+End If
 End Sub

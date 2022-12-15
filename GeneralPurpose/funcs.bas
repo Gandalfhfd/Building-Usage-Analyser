@@ -49,6 +49,54 @@ search = myAddress
 
 End Function
 
+Function searchForAllOccurences(word As String, searchRange As Range) As Variant
+' Search for word over Range searchRange
+' Output location of all occurrences as 2D array
+' If nothing found, output (0,0)
+
+' Output: 2D array with 2 values in each row
+' First item in row is row where item was found. Second is column
+
+' Search for stuff
+Dim c As Range
+Dim R1C1Address As String ' Address in R1C1 form
+Dim myAddress As Variant ' Address as array
+
+If word = "" Then
+    ' Impossible address. Means nothing found.
+    ReDim myAddress(1) As Variant
+    myAddress(0) = "0"
+    myAddress(1) = "0"
+    ' Give function an output
+    search = myAddress
+    Exit Function
+End If
+
+With ActiveWorkbook.Worksheets(sheetName).Cells ' Look in worksheet
+    ' This does the searching.
+    '   xlValues says we're looking at the values of the cells, as opposed to comments, say.
+    '   xlWhole means exact match,
+    '   so a search of "e", for example, wouldn't turn up everything'
+    '   in the sheet which contains an "e"
+    Set c = .Find(What:=word, LookIn:=xlValues, LookAt:=xlWhole)
+    If Not c Is Nothing Then ' If anything is found, then...
+        ' Give address in R1C1 form
+        R1C1Address = c.address(ReferenceStyle:=xlR1C1)
+        ' Convert R1C1 into array
+        myAddress = StrManip.SplitR1C1(R1C1Address)
+    Else
+        ' Impossible address. Means nothing found.
+        ReDim myAddress(1) As Variant
+        myAddress(0) = "0"
+        myAddress(1) = "0"
+    End If
+End With
+
+' Give function an output
+search = myAddress
+
+End Function
+
 Public Function AddAllToListBox(word As String, searchRange As Range, _
                                 listColumns As Variant, nameList As Control, dateList As Control, _
                                 typeList As Control, IDList As Control, dataSheet As String) _
