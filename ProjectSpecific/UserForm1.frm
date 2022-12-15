@@ -131,11 +131,10 @@ Else
 End If
 End Sub
 
+'' BUTTON CLICKING===============================================================
 Private Sub CreditsButton_Click()
 CreditsForm.Show
 End Sub
-
-'' BUTTON CLICKING===============================================================
 
 Private Sub EventButton1_Click()
 Call AddEvent(EditToggleCheckBox1.value)
@@ -193,7 +192,7 @@ End If
 
 ' Store response
 Dim response
-response = MsgBox("Are you sure you want to delete " & "test", vbYesNo)
+response = MsgBox("Are you sure you want to delete " & EventIDListBox.value, vbYesNo)
 If response = vbNo Then
     ' Exit the sub because they don't want to delete anything
     Exit Sub
@@ -235,24 +234,12 @@ Call funcs.RefreshListBox("Data", 1, EventIDListBox)
 '   what you get.
 HiddenEventIDListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchNameListBox.RemoveItem (SearchNameListBox.ListIndex)
-'SearchGroupNameListBox.RemoveItem (SearchNameListBox.ListIndex)
+SearchGroupNameListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchDateListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchTypeListBox.RemoveItem (SearchNameListBox.ListIndex)
 
 ' Update pivot table(s)
 Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
-End Sub
-
-Private Sub TestButton_Click()
-Dim non_empty_row As Long
-Dim DataRange As Range
-
-' non_empty_row = lst non-empty row for specific list(box)
-non_empty_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row
-Set DataRange = Range(Worksheets("Data").Cells(2, 29), _
-                Worksheets("Data").Cells(non_empty_row, 29))
-
-MsgBox (FindGroupName(2))
 End Sub
 
 Private Sub GenreListBox_Change()
@@ -413,17 +400,12 @@ If UpdateVolunteerMinutes = False Then
 End If
 End Sub
 
-Private Sub AddEventToGroupButton_Click()
-' Get row of event
-Dim event_row As Integer
-event_row = EventIDListBox.ListIndex + 2
-' Get row of group
-Dim group_row As Integer
-group_row = GroupIDListBox.ListIndex + 2
-' Set group ID of event to be group ID of group
-Worksheets("Data").Cells(event_row, 72) = Worksheets("Data").Cells(group_row, 72)
+Private Sub AddEventToGroupButton1_Click()
+Call AddEventToGroup
+End Sub
 
-MsgBox ("Event Added to Group")
+Private Sub AddEventToGroupButton2_Click()
+Call AddEventToGroup
 End Sub
 
 '' TEXT BOXES===============================================================
@@ -1336,11 +1318,17 @@ End Sub
 '' Search for events tab
 Private Sub SearchNameListBox_Click()
 ' Keep other listboxes in lockstep
-'SearchGroupNameListBox = SearchNameListBox.ListIndex
+SearchGroupNameListBox.ListIndex = SearchNameListBox.ListIndex
 SearchDateListBox.ListIndex = SearchNameListBox.ListIndex
 SearchTypeListBox.ListIndex = SearchNameListBox.ListIndex
 End Sub
 
+Private Sub SearchGroupNameListBox_click()
+' Keep other listboxes in lockstep
+SearchNameListBox.ListIndex = SearchGroupNameListBox.ListIndex
+SearchDateListBox.ListIndex = SearchGroupNameListBox.ListIndex
+SearchTypeListBox.ListIndex = SearchGroupNameListBox.ListIndex
+End Sub
 Private Sub SearchDateListBox_Click()
 ' These click subs act like change subs, so calling one
 '   calls the others because calling one changes the others.
@@ -2346,3 +2334,33 @@ If counter = 0 Then
     FindGroupName = "N/A"
 End If
 End Function
+
+Private Sub AddEventToGroup()
+' Get row of event
+Dim event_row As Integer
+event_row = EventIDListBox.ListIndex + 2
+' Get row of group
+Dim group_row As Integer
+group_row = GroupIDListBox.ListIndex + 2
+
+If event_row = 1 Then
+    MsgBox ("Please select an event")
+    Exit Sub
+ElseIf group_row = 1 Then
+    MsgBox ("Please select a group")
+    Exit Sub
+End If
+' Set group ID of event to be group ID of group
+Worksheets("Data").Cells(event_row, 72) = Worksheets("Data").Cells(group_row, 72)
+
+' Refresh group name listbox
+Dim my_index As Integer
+my_index = SearchGroupNameListBox.ListIndex
+
+Dim my_query As String
+my_query = NewSearchTextBox
+NewSearchTextBox.Text = ""
+NewSearchTextBox.Text = my_query
+
+MsgBox ("Event Added to Group")
+End Sub
