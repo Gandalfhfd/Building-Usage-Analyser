@@ -61,6 +61,7 @@ Function searchForAllOccurences(word As String, searchRange As Range) As Variant
 Dim c As Range
 Dim R1C1Address As String ' Address in R1C1 form
 Dim myAddress As Variant ' Address as array
+Dim outputArr As Variant ' 2D array which stores function output
 
 If word = "" Then
     ' Impossible address. Means nothing found.
@@ -68,11 +69,19 @@ If word = "" Then
     myAddress(0) = "0"
     myAddress(1) = "0"
     ' Give function an output
-    search = myAddress
+    searchForAllOccurences = myAddress
     Exit Function
 End If
 
-With ActiveWorkbook.Worksheets(sheetName).Cells ' Look in worksheet
+' Do this all twice. First time counting the matches, second time adding coords to
+'   array
+
+Dim counter As Integer
+counter = 0
+
+Dim firstAddress As String
+
+With searchRange ' Look over given range
     ' This does the searching.
     '   xlValues says we're looking at the values of the cells, as opposed to comments, say.
     '   xlWhole means exact match,
@@ -80,10 +89,47 @@ With ActiveWorkbook.Worksheets(sheetName).Cells ' Look in worksheet
     '   in the sheet which contains an "e"
     Set c = .Find(What:=word, LookIn:=xlValues, LookAt:=xlWhole)
     If Not c Is Nothing Then ' If anything is found, then...
-        ' Give address in R1C1 form
-        R1C1Address = c.address(ReferenceStyle:=xlR1C1)
-        ' Convert R1C1 into array
-        myAddress = StrManip.SplitR1C1(R1C1Address)
+        firstAddress = c.address
+        Do
+            counter = counter + 1
+            Set c = .FindNext(c)
+        Loop While firstAddress <> c.address
+    Else
+        ' Impossible address. Means nothing found.
+        ReDim myAddress(1) As Variant
+        myAddress(0) = "0"
+        myAddress(1) = "0"
+    End If
+End With
+
+' Set size of output array
+If counter = 0 Then
+    ReDim outputArr(0, 1)
+    outputArr(0, 0) = 0
+    outputArr(0, 1) = 0
+    Exit Function
+Else
+    ReDim outputArr(counter, 1)
+End If
+
+Dim i As Integer: i = 0
+' Fill in array with coordinates of found items
+With searchRange ' Look over given range
+    ' This does the searching.
+    '   xlValues says we're looking at the values of the cells, as opposed to comments, say.
+    '   xlWhole means exact match,
+    '   so a search of "e", for example, wouldn't turn up everything'
+    '   in the sheet which contains an "e"
+    Set c = .Find(What:=word, LookIn:=xlValues, LookAt:=xlWhole)
+    If Not c Is Nothing Then ' If anything is found, then...
+        firstAddress = c.address
+        Do
+            myAddress = StrManip.SplitR1C1(c.address(ReferenceStyle:=xlR1C1))
+            outputArr(i, 0) = myAddress(0)
+            outputArr(i, 1) = myAddress(1)
+            i = i + 1
+            Set c = .FindNext(c)
+        Loop While firstAddress <> c.address
     Else
         ' Impossible address. Means nothing found.
         ReDim myAddress(1) As Variant
@@ -93,7 +139,8 @@ With ActiveWorkbook.Worksheets(sheetName).Cells ' Look in worksheet
 End With
 
 ' Give function an output
-search = myAddress
+searchForAllOccurences = outputArr
+MsgBox (counter)
 
 End Function
 
