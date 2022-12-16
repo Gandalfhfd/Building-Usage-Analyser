@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "Events"
-   ClientHeight    =   7185
+   ClientHeight    =   10770
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   14595
@@ -237,6 +237,94 @@ SearchNameListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchGroupNameListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchDateListBox.RemoveItem (SearchNameListBox.ListIndex)
 SearchTypeListBox.RemoveItem (SearchNameListBox.ListIndex)
+
+' Update pivot table(s)
+Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
+End Sub
+
+Private Sub DeleteSelectedGroupButton_Click()
+' This breaks if GroupID is not unique
+
+' If nothing has been selected, do nothing but tell the user
+If GroupIDListBox.ListIndex = -1 Then
+    MsgBox ("Please select a group to delete")
+    Exit Sub
+End If
+
+' Store response
+'Dim response
+response = MsgBox("This only deletes the group, not any events in the group. " & _
+                    "Are you sure you want to delete " & GroupIDListBox.value, vbYesNo)
+If response = vbNo Then
+    ' Exit the sub because they don't want to delete anything
+    Exit Sub
+End If
+
+Dim ws As Worksheet
+Set ws = Sheets("Data")
+
+' detect if group has event children
+' Search for group ID, note when group ID is found on the same row as a group
+Dim non_empty_row As Long
+Dim IDRange As Range
+
+' non_empty_row = lst non-empty row
+non_empty_row = ws.Cells(Rows.Count, 1).End(xlUp).row
+Set IDRange = Range(Worksheets("Data").Cells(2, 72), _
+                ws.Cells(non_empty_row, 72))
+                
+Dim numResults As Integer
+Call funcs.searchForAllOccurences(GroupIDListBox.value, IDRange, numResults)
+
+If numResults > 1 Then
+    ' Group has children. Inform the user before deleting
+    response = MsgBox("This group contains events. Deleting this group will not delete the " & _
+                    "events. Do you want to continue?", vbExclamation + vbYesNo + vbDefaultButton2, _
+                    "Warning")
+ElseIf numResults = 1 Then
+    response = MsgBox("This group does not contain events. Do you want to continue?", _
+                    vbExclamation + vbYesNo + vbDefaultButton2, "Warning")
+Else
+    MsgBox "Group was not found. Contact support", vbCritical
+End If
+
+' find group's row
+Dim row As Integer
+row = GroupIDListBox.ListIndex + 2
+
+' delete row
+Dim my_index As Long
+my_index = EventIDListBox.ListIndex
+
+' Mess with listindex to prevent breakage
+If GroupIDListBox.ListCount < 1 Then
+    ' There are no more items, so select nothing
+    GroupIDListBox.ListIndex = -1
+    ' Delete entire row corresponding to selected event
+    ws.Rows(row).Delete
+ElseIf GroupIDListBox.ListCount = my_index + 1 Then
+    ' We are at end of list, so go up one
+    GroupIDListBox.ListIndex = my_index - 1
+    ' Delete entire row corresponding to selected event
+    ws.Rows(row).Delete
+Else
+    ' Delete entire row corresponding to selected event
+    ws.Rows(row).Delete
+End If
+
+'' Update listboxes
+' Update EventIDListBox
+Call funcs.RefreshListBox("Data", 1, GroupIDListBox)
+' Update search listboxes
+' HiddenEventIDListBox must be updated first so that the internal record
+'   of events is correct. If this doesn't make sense, dw, I got confused while
+'   writing this comment. It needs to go first though. Try it without and see
+'   what you get.
+HiddenGroupIDListBox.RemoveItem (GroupNameListBox.ListIndex)
+GroupNameListBox.RemoveItem (GroupNameListBox.ListIndex)
+StartDateListBox.RemoveItem (GroupNameListBox.ListIndex)
+EndDateListBox.RemoveItem (GroupNameListBox.ListIndex)
+GroupTypeListBox.RemoveItem (GroupNameListBox.ListIndex)
 
 ' Update pivot table(s)
 Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
@@ -2304,7 +2392,7 @@ eventGroupID = ws.Cells(event_row, 72)
 Dim non_empty_row As Long
 Dim IDRange As Range
 
-' non_empty_row = lst non-empty row for specific list(box)
+' non_empty_row = lst non-empty row
 non_empty_row = ws.Cells(Rows.Count, 1).End(xlUp).row
 Set IDRange = Range(Worksheets("Data").Cells(2, 72), _
                 ws.Cells(non_empty_row, 72))
