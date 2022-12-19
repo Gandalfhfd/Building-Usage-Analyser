@@ -419,7 +419,7 @@ Dim myIndex As Long
 myIndex = list.ListIndex
 
 ' empty_row = lst non-empty row for specific list(box)
-empty_row = Worksheets(sourceSheet).Cells(Rows.Count, 1).End(xlUp).row
+empty_row = Worksheets(sourceSheet).Cells(Rows.Count, sourceColumn).End(xlUp).row
 Set DataRange = Range(Worksheets(sourceSheet).Cells(2, sourceColumn), _
                 Worksheets(sourceSheet).Cells(empty_row, sourceColumn))
 list.RowSource = DataRange.address(External:=True)
