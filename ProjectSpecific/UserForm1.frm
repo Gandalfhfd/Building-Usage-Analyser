@@ -294,7 +294,7 @@ row = GroupIDListBox.ListIndex + 2
 
 ' delete row
 Dim my_index As Long
-my_index = EventIDListBox.ListIndex
+my_index = GroupIDListBox.ListIndex
 
 ' Mess with listindex to prevent breakage
 If GroupIDListBox.ListCount < 1 Then
@@ -314,7 +314,7 @@ End If
 
 '' Update listboxes
 ' Update EventIDListBox
-Call funcs.RefreshListBox("Data", 1, GroupIDListBox)
+Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
 ' Update search listboxes
 ' HiddenEventIDListBox must be updated first so that the internal record
 '   of events is correct. If this doesn't make sense, dw, I got confused while
