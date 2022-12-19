@@ -252,7 +252,7 @@ If GroupIDListBox.ListIndex = -1 Then
 End If
 
 ' Store response
-'Dim response
+Dim response
 response = MsgBox("This only deletes the group, not any events in the group. " & _
                     "Are you sure you want to delete " & GroupIDListBox.value, vbYesNo)
 If response = vbNo Then
@@ -1439,34 +1439,22 @@ End Sub
 '' Manage groups tab
 Private Sub GroupNameListBox_Click()
 ' Keep other listboxes in lockstep
-StartDateListBox.ListIndex = GroupNameListBox.ListIndex
-EndDateListBox.ListIndex = GroupNameListBox.ListIndex
-GroupTypeListBox.ListIndex = GroupNameListBox.ListIndex
-HiddenGroupIDListBox.ListIndex = GroupNameListBox.ListIndex
-
-' Select event in GroupIDListBox so that we know which row it is on
-GroupIDListBox.value = HiddenGroupIDListBox.value
+Call ChangeGroupListBoxIndexes(GroupNameListBox.ListIndex)
 End Sub
 
 Private Sub StartDateListBox_Click()
 ' Keep other listboxes in lockstep
-GroupNameListBox.ListIndex = StartDateListBox.ListIndex
-EndDateListBox.ListIndex = StartDateListBox.ListIndex
-GroupTypeListBox.ListIndex = StartDateListBox.ListIndex
+Call ChangeGroupListBoxIndexes(StartDateListBox.ListIndex)
 End Sub
 
 Private Sub EndDateListBox_Click()
 ' Keep other listboxes in lockstep
-GroupNameListBox.ListIndex = EndDateListBox.ListIndex
-StartDateListBox.ListIndex = EndDateListBox.ListIndex
-GroupTypeListBox.ListIndex = EndDateListBox.ListIndex
+Call ChangeGroupListBoxIndexes(EndDateListBox.ListIndex)
 End Sub
 
 Private Sub GroupTypeListBox_Click()
 ' Keep other listboxes in lockstep
-GroupNameListBox.ListIndex = GroupTypeListBox.ListIndex
-StartDateListBox.ListIndex = GroupTypeListBox.ListIndex
-EndDateListBox.ListIndex = GroupTypeListBox.ListIndex
+Call ChangeGroupListBoxIndexes(GroupTypeListBox.ListIndex)
 End Sub
 
 '' USERFORM/MULTIPAGE===============================================================
@@ -2451,4 +2439,14 @@ NewSearchTextBox.Text = ""
 NewSearchTextBox.Text = my_query
 
 MsgBox ("Event Added to Group")
+End Sub
+
+Private Sub ChangeGroupListBoxIndexes(my_index As Integer)
+' Keep listboxes on group search page in lockstep
+GroupNameListBox.ListIndex = my_index
+StartDateListBox.ListIndex = my_index
+EndDateListBox.ListIndex = my_index
+GroupTypeListBox.ListIndex = my_index
+HiddenGroupIDListBox.ListIndex = my_index
+GroupIDListBox.value = HiddenGroupIDListBox.value
 End Sub
