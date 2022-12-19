@@ -90,7 +90,7 @@ dataSheetName = "Data"
 
 ' Decide which event to import info into
 If mode = "Selected" Then
-    my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
+    my_row = funcs.search(UserForm1.EventIDListBox.value, dataSheetName)(0)
 ElseIf mode = "Previous" Then
     my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).row
 Else
@@ -203,9 +203,9 @@ End If
 Call funcs.ChangeSource(dataSheetName, "Analysis", "PivotTable1")
 
 ' Update autofilled info, if applicable
-If AutofillCheckBox = True Then
-    AutofillCheckBox = False
-    AutofillCheckBox = True
+If UserForm1.AutofillCheckBox = True Then
+    UserForm1.AutofillCheckBox = False
+    UserForm1.AutofillCheckBox = True
 End If
 
 ' Must go at the bottom
@@ -226,7 +226,7 @@ dataSheetName = "Data"
 
 ' Decide which event to import info into
 If mode = "Selected" Then
-    my_row = funcs.search(SearchBox.Text, dataSheetName)(0)
+    my_row = funcs.search(UserForm1.EventIDListBox.value, dataSheetName)(0)
 ElseIf mode = "Previous" Then
     my_row = Worksheets(dataSheetName).Cells(Rows.Count, 1).End(xlUp).row
 Else
@@ -344,9 +344,9 @@ Next
 Worksheets(dataSheetName).Cells(my_row, 25) = revenue
 
 ' Update autofilled info, if applicable
-If AutofillCheckBox = True Then
-    AutofillCheckBox = False
-    AutofillCheckBox = True
+If UserForm1.AutofillCheckBox = True Then
+    UserForm1.AutofillCheckBox = False
+    UserForm1.AutofillCheckBox = True
 End If
 
 If revenue <> 0 Then

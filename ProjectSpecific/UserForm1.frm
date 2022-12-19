@@ -209,20 +209,14 @@ my_index = EventIDListBox.ListIndex
 If EventIDListBox.ListCount < 1 Then
     ' There are no more items, so select nothing
     EventIDListBox.ListIndex = -1
-    EventDeleteIndicator = 1
-    ' Delete entire row corresponding to selected event
-    Sheets("Data").Rows(row).Delete
 ElseIf EventIDListBox.ListCount = my_index + 1 Then
     ' We are at end of list, so go up one
     EventIDListBox.ListIndex = my_index - 1
-    EventDeleteIndicator = 1
-    ' Delete entire row corresponding to selected event
-    Sheets("Data").Rows(row).Delete
-Else
-    ' Delete entire row corresponding to selected event
-    EventDeleteIndicator = 1
-    Sheets("Data").Rows(row).Delete
 End If
+
+' Delete entire row corresponding to selected event
+EventDeleteIndicator = 1
+Sheets("Data").Rows(row).Delete
 
 '' Update listboxes
 ' Update EventIDListBox
@@ -243,18 +237,16 @@ Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
 End Sub
 
 Private Sub DeleteSelectedGroupButton_Click()
-' This breaks if GroupID is not unique
-
 ' If nothing has been selected, do nothing but tell the user
-If GroupIDListBox.ListIndex = -1 Then
+If GroupEventIDListBox.ListIndex = -1 Then
     MsgBox ("Please select a group to delete")
     Exit Sub
 End If
 
 ' Store response
-'Dim response
+Dim response
 response = MsgBox("This only deletes the group, not any events in the group. " & _
-                    "Are you sure you want to delete " & GroupIDListBox.value, vbYesNo)
+                    "Are you sure you want to delete " & GroupEventIDListBox.value, vbYesNo)
 If response = vbNo Then
     ' Exit the sub because they don't want to delete anything
     Exit Sub
@@ -274,7 +266,8 @@ Set IDRange = Range(Worksheets("Data").Cells(2, 72), _
                 ws.Cells(non_empty_row, 72))
                 
 Dim numResults As Integer
-Call funcs.searchForAllOccurences(GroupIDListBox.value, IDRange, numResults)
+Dim groupAddresses As Variant
+groupAddresses = funcs.searchForAllOccurences(HiddenGroupIDListBox.value, IDRange, numResults)
 
 If numResults > 1 Then
     ' Group has children. Inform the user before deleting
@@ -286,45 +279,154 @@ ElseIf numResults = 1 Then
                     vbExclamation + vbYesNo + vbDefaultButton2, "Warning")
 Else
     MsgBox "Group was not found. Contact support", vbCritical
+    Exit Sub
+End If
+
+If response = vbNo Then
+    Exit Sub
 End If
 
 ' find group's row
 Dim row As Integer
-row = GroupIDListBox.ListIndex + 2
+row = GroupEventIDListBox.ListIndex + 2
 
-' delete row
 Dim my_index As Long
-my_index = EventIDListBox.ListIndex
+my_index = GroupEventIDListBox.ListIndex
 
 ' Mess with listindex to prevent breakage
-If GroupIDListBox.ListCount < 1 Then
+If GroupEventIDListBox.ListCount < 1 Then
     ' There are no more items, so select nothing
+    GroupEventIDListBox.ListIndex = -1
     GroupIDListBox.ListIndex = -1
-    ' Delete entire row corresponding to selected event
-    ws.Rows(row).Delete
-ElseIf GroupIDListBox.ListCount = my_index + 1 Then
+ElseIf GroupEventIDListBox.ListCount = my_index + 1 Then
     ' We are at end of list, so go up one
-    GroupIDListBox.ListIndex = my_index - 1
-    ' Delete entire row corresponding to selected event
-    ws.Rows(row).Delete
-Else
-    ' Delete entire row corresponding to selected event
-    ws.Rows(row).Delete
+    GroupEventIDListBox.ListIndex = my_index - 1
+    GroupIDListBox.ListIndex = -1
 End If
 
+' Delete entire row corresponding to selected group
+ws.Rows(row).Delete
+
+' reassign group IDs to orphaned event children
+Dim i As Integer
+For i = 0 To numResults - 1
+    If ws.Cells(groupAddresses(i, 0), 73) = False Then
+        ws.Cells(groupAddresses(i, 0), 72) = ws.Cells(groupAddresses(i, 0), 1)
+    End If
+Next
+
 '' Update listboxes
-' Update EventIDListBox
-Call funcs.RefreshListBox("Data", 1, GroupIDListBox)
+' Update IDListBoxes
+Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, GroupEventIDListBox)
+Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
+
 ' Update search listboxes
-' HiddenEventIDListBox must be updated first so that the internal record
-'   of events is correct. If this doesn't make sense, dw, I got confused while
-'   writing this comment. It needs to go first though. Try it without and see
-'   what you get.
-HiddenGroupIDListBox.RemoveItem (GroupNameListBox.ListIndex)
-GroupNameListBox.RemoveItem (GroupNameListBox.ListIndex)
-StartDateListBox.RemoveItem (GroupNameListBox.ListIndex)
-EndDateListBox.RemoveItem (GroupNameListBox.ListIndex)
-GroupTypeListBox.RemoveItem (GroupNameListBox.ListIndex)
+Dim searchText As String
+searchText = GroupSearchBox.Text
+GroupSearchBox.Text = ""
+GroupSearchBox.Text = searchText
+
+searchText = NewSearchTextBox.Text
+NewSearchTextBox.Text = ""
+NewSearchTextBox.Text = searchText
+
+' Update pivot table(s)
+Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
+End Sub
+
+Private Sub DeleteSelectedGroupAndEventsButton_Click()
+' If nothing has been selected, do nothing but tell the user
+If GroupEventIDListBox.ListIndex = -1 Then
+    MsgBox ("Please select a group to delete")
+    Exit Sub
+End If
+
+' Store response
+Dim response
+response = MsgBox("This ALL events in the group and the group itself. " & _
+                    "Are you sure you want to delete " & GroupEventIDListBox.value & _
+                    "ALL associated events (if any)", vbYesNo)
+If response = vbNo Then
+    ' Exit the sub because they don't want to delete anything
+    Exit Sub
+End If
+
+Dim ws As Worksheet
+Set ws = Sheets("Data")
+
+' detect if group has event children
+' Search for group ID, note when group ID is found on the same row as a group
+Dim non_empty_row As Long
+Dim IDRange As Range
+
+' non_empty_row = lst non-empty row
+non_empty_row = ws.Cells(Rows.Count, 1).End(xlUp).row
+Set IDRange = Range(Worksheets("Data").Cells(2, 72), _
+                ws.Cells(non_empty_row, 72))
+                
+' Find out about other events in the group
+Dim numResults As Integer
+Dim groupAddresses As Variant
+groupAddresses = funcs.searchForAllOccurences(HiddenGroupIDListBox.value, IDRange, numResults)
+
+If numResults > 1 Then
+    ' Group has children. Inform the user before deleting
+    response = MsgBox("This group contains events. Deleting this group will delete the " & _
+                    "events. Do you want to continue?", vbExclamation + vbYesNo + vbDefaultButton2, _
+                    "Warning")
+ElseIf numResults = 1 Then
+    response = MsgBox("This group does not contain events. Do you want to continue?", _
+                    vbExclamation + vbYesNo + vbDefaultButton2, "Warning")
+Else
+    MsgBox "Group was not found. Contact support", vbCritical
+    Exit Sub
+End If
+
+If response = vbNo Then
+    Exit Sub
+End If
+
+' find group's row
+Dim row As Integer
+row = GroupEventIDListBox.ListIndex + 2
+
+' select new row
+Dim my_index As Long
+my_index = GroupEventIDListBox.ListIndex
+
+' Mess with listindex to prevent breakage
+If GroupEventIDListBox.ListCount < 1 Then
+    ' There are no more items, so select nothing
+    GroupEventIDListBox.ListIndex = -1
+    GroupIDListBox.ListIndex = -1
+ElseIf GroupEventIDListBox.ListCount = my_index + 1 Then
+    ' We are at end of list, so go up one
+    GroupEventIDListBox.ListIndex = my_index - 1
+    GroupIDListBox.ListIndex = -1
+End If
+
+' Delete all events related to the group and the group itself
+Dim i As Integer
+For i = 0 To numResults - 1
+    ws.Rows(groupAddresses(i, 0)).Delete
+Next
+
+'' Update listboxes
+' Update IDListBoxes
+Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, GroupEventIDListBox)
+Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
+
+' Update search listboxes
+Dim searchText As String
+searchText = GroupSearchBox.Text
+GroupSearchBox.Text = ""
+GroupSearchBox.Text = searchText
+
+searchText = NewSearchTextBox.Text
+NewSearchTextBox.Text = ""
+NewSearchTextBox.Text = searchText
 
 ' Update pivot table(s)
 Call funcs.ChangeSource("Data", "Analysis", "PivotTable1")
@@ -373,16 +475,17 @@ End If
 End Sub
 
 Private Sub TicketsolveImportSelectedButton_Click()
+' Input validation. If tests fail, sub must be exited.
+If SearchNameListBox.ListIndex = -1 Then
+    MsgBox ("Please select an event")
+    Exit Sub
+End If
+
 ' Find the row of the selected event
 Dim event_row As Long
-event_row = funcs.search(SearchBox.Text, "Data")(0)
+event_row = funcs.search(EventIDListBox.value, "Data")(0)
 
-' Input validation. If tests fail, sub must be exited.
-If SearchBox.Text = "" Then
-    MsgBox ("Please enter the Event ID into the search box so that " & _
-            "we know which event to import the data into")
-    Exit Sub
-ElseIf event_row = "0" Then
+If event_row = "0" Then
     MsgBox ("Event ID could not be found")
     Exit Sub
 End If
@@ -397,16 +500,17 @@ Call Import.ImportFromTicketsolve("Previous")
 End Sub
 
 Private Sub ZettleImportSelectedButton_Click()
+' Input validation. If tests fail, sub must be exited.
+If SearchNameListBox.ListIndex = -1 Then
+    MsgBox ("Please select an event")
+    Exit Sub
+End If
+
 ' Find the row of the selected event
 Dim event_row As Long
-event_row = funcs.search(SearchBox.Text, "Data")(0)
+event_row = funcs.search(EventIDListBox.value, "Data")(0)
 
-' Input validation. If tests fail, sub must be exited.
-If SearchBox.Text = "" Then
-    MsgBox ("Please enter the Event ID into the search box so that " & _
-            "we know which event to import the data into")
-    Exit Sub
-ElseIf event_row = "0" Then
+If event_row = "0" Then
     MsgBox ("Event ID could not be found")
     Exit Sub
 End If
@@ -417,43 +521,6 @@ End Sub
 Private Sub ZettleImportPreviousButton_Click()
 ' Import info from Zettle
 Call Import.ImportFromZettle("Previous")
-End Sub
-
-Private Sub NameSearchButton_Click()
-Dim myAddress As Variant
-
-' Search for an Event ID. Display address if found.
-' Future improvement: a "goto" button which takes the user to the cell.
-' Future improvement: some way of knowing if multiple references are found.
-
-If NameSearchTextBox.value = "" Then
-    MsgBox ("Please enter the name of the event in the search box.")
-ElseIf funcs.search(NameSearchTextBox.Text, "Data")(0) = 0 Then
-    MsgBox ("Event Not Found")
-Else
-    myAddress = funcs.search(NameSearchTextBox.Text, "Data")
-    MsgBox ("Event found on row " & myAddress(0))
-End If
-
-End Sub
-
-Private Sub SearchButton_Click()
-
-Dim myAddress As Variant
-
-' Search for an Event ID. Display address if found.
-' Future improvement: a "goto" button which takes the user to the cell.
-' Future improvement: some way of knowing if multiple references are found.
-
-If SearchBox.value = "" Then
-    MsgBox ("Please enter an Event ID in the search box.")
-ElseIf funcs.search(SearchBox.Text, "Data")(0) = 0 Then
-    MsgBox ("Event ID Not Found")
-Else
-    myAddress = funcs.search(SearchBox.Text, "Data")
-    MsgBox ("Event ID found on row " & myAddress(0))
-End If
-
 End Sub
 
 Private Sub ClearTimeButton_Click()
@@ -847,11 +914,6 @@ Private Sub SetupToTakedownEndDurationTextBox_Change()
 Call InptValid.SanitiseNonNegInt(SetupToTakedownEndDurationTextBox, SetupToTakedownEndDuration)
 End Sub
 
-Private Sub SetupAvailableDurationTextBox_Change()
-' Sanitise input to ensure only non-negative integers are input
-Call InptValid.SanitiseNonNegInt(SetupAvailableDurationTextBox, SetupAvailableDuration)
-End Sub
-
 Private Sub SetupTakedownTextBox_Change()
 ' This box shouldn't affect anything else, but should be affected
 '   by other timings in a minor way.
@@ -1234,14 +1296,16 @@ GroupNameListBox.Clear
 StartDateListBox.Clear
 EndDateListBox.Clear
 GroupTypeListBox.Clear
+HiddenGroupEventIDListBox.Clear
 HiddenGroupIDListBox.Clear
 
 ' Use "Union(Range1, Range2)" to combine ranges
 
 ' Search for events and add them to the listbox
-Call funcs.AddSomeToListBox(GroupSearchBox.Text, DataRange, Array(2, 3, 29, 72, 74), _
+Call funcs.AddSomeToListBox(GroupSearchBox.Text, DataRange, Array(2, 3, 29, 72, 74, 1), _
                             GroupNameListBox, StartDateListBox, GroupTypeListBox, _
-                            HiddenGroupIDListBox, "Data", 73, False, EndDateListBox)
+                            HiddenGroupIDListBox, "Data", 73, False, EndDateListBox, _
+                            HiddenGroupEventIDListBox)
 End Sub
 
 '' LIST BOXES===============================================================
@@ -1377,7 +1441,7 @@ If AutofillCheckBox.value = True Then
 End If
 End Sub
 
-Private Sub GroupIdListbox_Change()
+Private Sub GroupEventIDListBox_Change()
 ' Stop it freaking out when an item is deleted
 If GroupDeleteIndicator = 1 Then
     GroupDeleteIndicator = 2
@@ -1406,67 +1470,42 @@ End Sub
 '' Search for events tab
 Private Sub SearchNameListBox_Click()
 ' Keep other listboxes in lockstep
-SearchGroupNameListBox.ListIndex = SearchNameListBox.ListIndex
-SearchDateListBox.ListIndex = SearchNameListBox.ListIndex
-SearchTypeListBox.ListIndex = SearchNameListBox.ListIndex
+Call ChangeEventListBoxIndexes(SearchNameListBox.ListIndex)
 End Sub
 
 Private Sub SearchGroupNameListBox_click()
 ' Keep other listboxes in lockstep
-SearchNameListBox.ListIndex = SearchGroupNameListBox.ListIndex
-SearchDateListBox.ListIndex = SearchGroupNameListBox.ListIndex
-SearchTypeListBox.ListIndex = SearchGroupNameListBox.ListIndex
+Call ChangeEventListBoxIndexes(SearchGroupNameListBox.ListIndex)
 End Sub
 Private Sub SearchDateListBox_Click()
-' These click subs act like change subs, so calling one
-'   calls the others because calling one changes the others.
-
 ' Keep other listboxes in lockstep
-SearchNameListBox.ListIndex = SearchDateListBox.ListIndex
-SearchTypeListBox.ListIndex = SearchDateListBox.ListIndex
-HiddenEventIDListBox.ListIndex = SearchDateListBox.ListIndex
-
-' Select event in EventIDListBox so that we know which row it is on
-EventIDListBox.value = HiddenEventIDListBox.value
+Call ChangeEventListBoxIndexes(SearchDateListBox.ListIndex)
 End Sub
 
 Private Sub SearchTypeListBox_Click()
 ' Keep other listboxes in lockstep
-SearchNameListBox.ListIndex = SearchTypeListBox.ListIndex
-SearchDateListBox.ListIndex = SearchTypeListBox.ListIndex
+Call ChangeEventListBoxIndexes(SearchTypeListBox.ListIndex)
 End Sub
 
 '' Manage groups tab
 Private Sub GroupNameListBox_Click()
 ' Keep other listboxes in lockstep
-StartDateListBox.ListIndex = GroupNameListBox.ListIndex
-EndDateListBox.ListIndex = GroupNameListBox.ListIndex
-GroupTypeListBox.ListIndex = GroupNameListBox.ListIndex
-HiddenGroupIDListBox.ListIndex = GroupNameListBox.ListIndex
-
-' Select event in GroupIDListBox so that we know which row it is on
-GroupIDListBox.value = HiddenGroupIDListBox.value
+Call ChangeGroupListBoxIndexes(GroupNameListBox.ListIndex)
 End Sub
 
 Private Sub StartDateListBox_Click()
 ' Keep other listboxes in lockstep
-GroupNameListBox.ListIndex = StartDateListBox.ListIndex
-EndDateListBox.ListIndex = StartDateListBox.ListIndex
-GroupTypeListBox.ListIndex = StartDateListBox.ListIndex
+Call ChangeGroupListBoxIndexes(StartDateListBox.ListIndex)
 End Sub
 
 Private Sub EndDateListBox_Click()
 ' Keep other listboxes in lockstep
-GroupNameListBox.ListIndex = EndDateListBox.ListIndex
-StartDateListBox.ListIndex = EndDateListBox.ListIndex
-GroupTypeListBox.ListIndex = EndDateListBox.ListIndex
+Call ChangeGroupListBoxIndexes(EndDateListBox.ListIndex)
 End Sub
 
 Private Sub GroupTypeListBox_Click()
 ' Keep other listboxes in lockstep
-GroupNameListBox.ListIndex = GroupTypeListBox.ListIndex
-StartDateListBox.ListIndex = GroupTypeListBox.ListIndex
-EndDateListBox.ListIndex = GroupTypeListBox.ListIndex
+Call ChangeGroupListBoxIndexes(GroupTypeListBox.ListIndex)
 End Sub
 
 '' USERFORM/MULTIPAGE===============================================================
@@ -1483,6 +1522,8 @@ spec = "Type-Specific Defaults"
 
 ' EVENT ID
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+' Event ID for group search page
+Call funcs.RefreshListBox("Data", 1, GroupEventIDListBox)
 ' GROUP ID
 Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
 ' CATEGORY
@@ -1836,7 +1877,7 @@ EditingCheck = False
 
 ' Update listboxes
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
-Call funcs.RefreshListBox("Data", 72, GroupIDListBox)
+Call funcs.RefreshListBox("Data", 72, GroupEventIDListBox)
 
 Call NewSearchTextBox_Change
 
@@ -2031,7 +2072,7 @@ AutofillCheck = True
 
 ' Sheet data is stored on. Makes things easier to read.
 Dim ws As Worksheet
-Set sheet = Sheets("Data")
+Set ws = Sheets("Data")
 
 ' Store current page user is on
 Dim currentPage As Integer
@@ -2424,12 +2465,18 @@ End If
 End Function
 
 Private Sub AddEventToGroup()
+' Purpose:
+' Add an existing event to an existing group
+' We need to find their respective rows, then set their group IDs to be
+'   the same, then refresh everything relevant
+
+
 ' Get row of event
 Dim event_row As Integer
 event_row = EventIDListBox.ListIndex + 2
 ' Get row of group
 Dim group_row As Integer
-group_row = GroupIDListBox.ListIndex + 2
+group_row = GroupEventIDListBox.ListIndex + 2
 
 If event_row = 1 Then
     MsgBox ("Please select an event")
@@ -2441,14 +2488,50 @@ End If
 ' Set group ID of event to be group ID of group
 Worksheets("Data").Cells(event_row, 72) = Worksheets("Data").Cells(group_row, 72)
 
+Dim my_page As Integer
+my_page = MultiPage1.value
+MultiPage1.value = 0
 ' Refresh group name listbox
 Dim my_index As Integer
 my_index = SearchGroupNameListBox.ListIndex
 
+' Refresh search
 Dim my_query As String
 my_query = NewSearchTextBox
 NewSearchTextBox.Text = ""
 NewSearchTextBox.Text = my_query
 
+' Select what was previously selected
+SearchGroupNameListBox.ListIndex = my_index
+
+MultiPage1.value = my_page
+
 MsgBox ("Event Added to Group")
+End Sub
+
+Private Sub ChangeEventListBoxIndexes(my_index As Integer)
+' Keep other listboxes on event search page in lockstep
+SearchNameListBox.ListIndex = my_index
+SearchGroupNameListBox.ListIndex = my_index
+SearchDateListBox.ListIndex = my_index
+SearchTypeListBox.ListIndex = my_index
+HiddenEventIDListBox.ListIndex = my_index
+
+' Select event in EventIDListBox so that we know which row it is on
+EventIDListBox.SetFocus
+EventIDListBox.value = HiddenEventIDListBox.list(HiddenEventIDListBox.ListIndex)
+End Sub
+
+Private Sub ChangeGroupListBoxIndexes(my_index As Integer)
+' Keep listboxes on group search page in lockstep
+GroupNameListBox.ListIndex = my_index
+StartDateListBox.ListIndex = my_index
+EndDateListBox.ListIndex = my_index
+GroupTypeListBox.ListIndex = my_index
+HiddenGroupIDListBox.ListIndex = my_index
+HiddenGroupEventIDListBox.ListIndex = my_index
+
+' Select event in GroupEventIDListBox so that we know which row it is on
+GroupEventIDListBox.SetFocus
+GroupEventIDListBox.value = HiddenGroupEventIDListBox.list(HiddenGroupEventIDListBox.ListIndex)
 End Sub

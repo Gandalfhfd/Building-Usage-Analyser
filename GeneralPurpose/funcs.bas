@@ -134,8 +134,8 @@ With searchRange ' Look over given range
         firstAddress = c.address
         Do
             myAddress = StrManip.SplitR1C1(c.address(ReferenceStyle:=xlR1C1))
-            outputArr(i, 0) = myAddress(0)
-            outputArr(i, 1) = myAddress(1)
+            outputArr(i, 0) = myAddress(0) ' set the row value
+            outputArr(i, 1) = myAddress(1) ' set the column value
             i = i + 1
             Set c = .FindNext(c)
         Loop While firstAddress <> c.address
@@ -206,7 +206,8 @@ Public Function AddSomeToListBox(word As String, searchRange As Range, _
                                 listColumns As Variant, nameList As Control, startDateList As Control, _
                                 typeList As Control, IDList As Control, dataSheet As String, _
                                 discriminatorCol As Long, discriminator As Boolean, _
-                                Optional endDateList As Control) _
+                                Optional endDateList As Control, _
+                                Optional GroupIDList As Control) _
                                 As Boolean
 ' Find all entries matching word, then add them to the listbox called list
 ' Data from the row where the match is found is shown in the listbox, according to the
@@ -218,7 +219,8 @@ Public Function AddSomeToListBox(word As String, searchRange As Range, _
 ' startDatelist = the listbox that the start date should be written to
 ' typeList = a listbox to be written to
 ' IDList = a listbox to be written to
-' endDateList = an optional listbox to be written to.
+' endDateList = an optional listbox to be written to
+' GroupIDList = an optional listbox to be written to
 ' dataSheet = the name of the sheet we're pulling data from
 ' discriminatorCol = column in which to look for the discriminator
 ' discriminator = in the cell where the row is the (row where the word is found) where the
@@ -260,13 +262,20 @@ With searchRange
                                     listColumns(1)), "dd/mm/yyyy"))
                 typeList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), _
                                     listColumns(2)))
-                ' Add item to hidden Group ID listbox. This listbox is hidden, but links
-                '   the groups on this page to the data.
+                ' Add item to hidden ID listbox. This listbox is hidden, but links
+                '   the events on this page to the data.
                 IDList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), listColumns(3)))
                 
+                ' If this optional argument has been used then...
                 If Not endDateList Is Nothing Then
                     endDateList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), _
                                             listColumns(4)))
+                End If
+                
+                ' If this optional argument has been used then...
+                If Not GroupIDList Is Nothing Then
+                    GroupIDList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), _
+                                        listColumns(5)))
                 End If
             End If
             
@@ -395,7 +404,6 @@ Set StartPoint = Data_Sheet.Range("A1")
 LastCol = StartPoint.End(xlToRight).Column
 DownCell = StartPoint.End(xlDown).row
 Set DataRange = Data_Sheet.Range(StartPoint, Data_Sheet.Cells(DownCell, LastCol))
-'Set DataRange = Data_Sheet.Range(StartPoint, Cells(42, 46))
 
 newRange = Data_Sheet.name & "!" & DataRange.address(ReferenceStyle:=xlR1C1)
 
@@ -419,7 +427,7 @@ Dim myIndex As Long
 myIndex = list.ListIndex
 
 ' empty_row = lst non-empty row for specific list(box)
-empty_row = Worksheets(sourceSheet).Cells(Rows.Count, 1).End(xlUp).row
+empty_row = Worksheets(sourceSheet).Cells(Rows.Count, sourceColumn).End(xlUp).row
 Set DataRange = Range(Worksheets(sourceSheet).Cells(2, sourceColumn), _
                 Worksheets(sourceSheet).Cells(empty_row, sourceColumn))
 list.RowSource = DataRange.address(External:=True)

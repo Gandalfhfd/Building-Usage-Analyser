@@ -59,6 +59,8 @@ End Sub
 Private Sub EndDateTextBox_Change()
 If EndDateTextBox.Text = "" Then
     EndDateTextBox.Text = StartDateTextBox.Text
+ElseIf StartDateTextBox.Text = "" Then
+    ' Do nothing
 ElseIf CDate(EndDateTextBox.Text) < CDate(StartDateTextBox.Text) Then
     MsgBox ("The start date cannot be after the end date")
     EndDateTextBox.Text = ""
@@ -75,6 +77,15 @@ Call funcs.GetCalendar(GroupManagementForm.EndDateTextBox) ' Show Date Picker
 End Sub
 
 Private Sub Userform_Initialize()
+' Set rowsource of listboxes
+Call funcs.RefreshListBox("Non-Specific Defaults", 4, CategoryListBox)
+Call funcs.RefreshListBox("Type-Specific Defaults", 1, TypeListBox)
+
+' Set default value of category
+CategoryListBox.ListIndex = 0
+End Sub
+
+Private Sub Userform_Activate()
 ' Set rowsource of listboxes
 Call funcs.RefreshListBox("Non-Specific Defaults", 4, CategoryListBox)
 Call funcs.RefreshListBox("Type-Specific Defaults", 1, TypeListBox)
