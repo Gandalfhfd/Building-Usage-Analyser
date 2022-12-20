@@ -341,6 +341,8 @@ Public Function IsWorkBookOpen(FileName As String)
 End Function
 
 Function GenerateRandomInt(lowbound As Integer, upbound As Integer) As Integer
+' Initialise Rnd with seed based on system time
+Randomize
 ' Return a random integer between lowbound and upbound
 GenerateRandomInt = Int((upbound - lowbound + 1) * Rnd + lowbound)
 End Function
@@ -359,6 +361,9 @@ randomStr = ""
 
 ' for loop index
 Dim i As Integer
+
+' Initialise Rnd with seed based on system time
+Randomize
 
 ' Repeat length times
 For i = 0 To length - 1
@@ -396,8 +401,8 @@ Dim lastRow As Long
 Dim DownCell As Long
 
 'Set Pivot Table & Source Worksheet
-Set Data_Sheet = ThisWorkbook.Worksheets(dataSheetName)
-Set Pivot_Sheet = ThisWorkbook.Worksheets(pivotSheetName)
+Set Data_Sheet = ActiveWorkbook.Worksheets(dataSheetName)
+Set Pivot_Sheet = ActiveWorkbook.Worksheets(pivotSheetName)
 
 'Dynamically Retrieve Range Address of Data
 Set StartPoint = Data_Sheet.Range("A1")
@@ -407,13 +412,13 @@ Set DataRange = Data_Sheet.Range(StartPoint, Data_Sheet.Cells(DownCell, LastCol)
 
 newRange = Data_Sheet.name & "!" & DataRange.address(ReferenceStyle:=xlR1C1)
 
-'Change Pivot Table Data Source Range Address
-Pivot_Sheet.PivotTables(pivotName). _
-ChangePivotCache ActiveWorkbook. _
-PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newRange)
-
- 'Ensure Pivot Table is Refreshed
-Pivot_Sheet.PivotTables(pivotName).RefreshTable
+' Refresh all pivot tables and change data source
+Dim pt As PivotTable
+For Each pt In Pivot_Sheet.PivotTables
+    pt.ChangePivotCache ActiveWorkbook. _
+    PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newRange)
+    pt.RefreshTable
+Next pt
 
 End Function
 
