@@ -122,8 +122,8 @@ End Sub
 Private Sub AddGroup(mode As Boolean)
 ' Add or edit group
 
-' mode = False = Add event
-' mode = True = Edit event
+' mode = False = Add group
+' mode = True = Edit group
 
 ' Store which mode we're in publically
 If mode = True Then
@@ -133,6 +133,9 @@ Else
 End If
 
 ' Ensure everything that needs to be entered has been entered
+If mode = True And UserForm1.GroupIDListBox.ListIndex = -1 Then
+    MsgBox ("You are in edit mode. " & _
+            "Please select a group to edit on the Manage Groups page")
 If GroupNameTextBox.Text = "" Then
     MsgBox ("Please enter a name")
     Exit Sub
@@ -156,20 +159,20 @@ ElseIf GroupRevenueTextBox.Text = "" Then
         & "not easily divided across each event.")
 End If
 
-Dim my_row As Long
-If mode = False Then
-    ' Next available row
-    my_row = Worksheets("Data").Cells(Rows.Count, 1).End(xlUp).row + 1
-ElseIf mode = True Then
-    ' Row corresponds to the row of the event selected by the user
-    my_row = UserForm1.GroupIDListBox.ListIndex + 2
-End If
-
 Dim sheet As String
 sheet = "Data"
 
 Dim ws As Worksheet
 Set ws = Sheets(sheet)
+
+Dim my_row As Long
+If mode = False Then
+    ' Next available row
+    my_row = ws.Cells(Rows.Count, 1).End(xlUp).row + 1
+ElseIf mode = True Then
+    ' Row corresponds to the row of the event selected by the user
+    my_row = UserForm1.GroupIDListBox.ListIndex + 2
+End If
 
 ' Add data given by user into spreadsheet
 ' G stands for "group"
