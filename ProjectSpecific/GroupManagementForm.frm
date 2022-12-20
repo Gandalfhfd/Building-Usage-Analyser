@@ -17,8 +17,10 @@ Option Explicit
 
 Public EditingCheck As Boolean
 
-'' TEXT BOXES===============================================================
+Public GroupCosts As String
+Public GroupRevenue As String
 
+'' BUTTONS===================================================================
 Private Sub AddGroupButton_Click()
 Call AddGroup(EditToggleCheckBox1.value)
 End Sub
@@ -34,6 +36,25 @@ If EditToggleCheckBox1.value = True Then
 Else
     AddGroupButton.Caption = "Add New Group"
 End If
+End Sub
+
+'' TEXT BOXES===============================================================
+Private Sub GroupCostsTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitiseReal(GroupCostsTextBox, GroupCosts)
+End Sub
+
+Private Sub GroupCostsTextBox_Exit(ByVal cancel As MSForms.ReturnBoolean)
+GroupCostsTextBox.Text = StrManip.Convert2Currency(GroupCostsTextBox)
+End Sub
+
+Private Sub GroupRevenueTextBox_Change()
+' Sanitise input to ensure only real numbers are input
+Call InptValid.SanitiseReal(GroupRevenueTextBox, GroupRevenue)
+End Sub
+
+Private Sub GroupRevenueTextBox_Exit(ByVal cancel As MSForms.ReturnBoolean)
+GroupRevenueTextBox.Text = StrManip.Convert2Currency(GroupRevenueTextBox)
 End Sub
 
 Private Sub StartDateTextBox_change()
@@ -76,13 +97,15 @@ Private Sub EndDateTextBox_Enter()
 Call funcs.GetCalendar(GroupManagementForm.EndDateTextBox) ' Show Date Picker
 End Sub
 
+'' USERFORM====================================================================
 Private Sub Userform_Initialize()
 ' Set rowsource of listboxes
 Call funcs.RefreshListBox("Non-Specific Defaults", 4, CategoryListBox)
 Call funcs.RefreshListBox("Type-Specific Defaults", 1, TypeListBox)
 
+' Don't do this because it doesn't always work
 ' Set default value of category
-CategoryListBox.ListIndex = 0
+'CategoryListBox.ListIndex = 0
 End Sub
 
 Private Sub Userform_Activate()
@@ -90,10 +113,12 @@ Private Sub Userform_Activate()
 Call funcs.RefreshListBox("Non-Specific Defaults", 4, CategoryListBox)
 Call funcs.RefreshListBox("Type-Specific Defaults", 1, TypeListBox)
 
+' Don't do this because it doesn't always work
 ' Set default value of category
-CategoryListBox.ListIndex = 0
+'CategoryListBox.ListIndex = 0
 End Sub
 
+'' FUNCTIONS=============================================================
 Private Sub AddGroup(mode As Boolean)
 ' Add or edit group
 
@@ -123,6 +148,12 @@ ElseIf CategoryListBox.ListIndex = -1 Then
 ElseIf TypeListBox.ListIndex = -1 Then
     MsgBox ("Please enter a type")
     Exit Sub
+ElseIf GroupCostsTextBox.Text = "" Then
+    MsgBox ("Please enter costs incurred specifically for the group of events, " _
+            & "not easily divided across each event.")
+ElseIf GroupRevenueTextBox.Text = "" Then
+    MsgBox ("Please enter revenue acrued specifically for the group of events, " _
+        & "not easily divided across each event.")
 End If
 
 Dim my_row As Long
@@ -137,18 +168,23 @@ End If
 Dim sheet As String
 sheet = "Data"
 
+Dim ws As Worksheet
+Set ws = Sheets(sheet)
+
 ' Add data given by user into spreadsheet
 ' G stands for "group"
-Worksheets(sheet).Cells(my_row, 1) = "G" & funcs.UUIDGenerator(CategoryListBox.value, _
+ws.Cells(my_row, 1) = "G" & funcs.UUIDGenerator(CategoryListBox.value, _
                                 StartDateTextBox.Text, GroupNameTextBox.Text)
-Worksheets(sheet).Cells(my_row, 72) = "G" & funcs.UUIDGenerator(CategoryListBox.value, _
+ws.Cells(my_row, 72) = "G" & funcs.UUIDGenerator(CategoryListBox.value, _
                                 StartDateTextBox.Text, GroupNameTextBox.Text)
-Worksheets(sheet).Cells(my_row, 2) = GroupNameTextBox.Text
-Worksheets(sheet).Cells(my_row, 3) = StrManip.ConvertDate(StartDateTextBox.Text)
-Worksheets(sheet).Cells(my_row, 24) = CategoryListBox.value
-Worksheets(sheet).Cells(my_row, 29) = TypeListBox.value
-Worksheets(sheet).Cells(my_row, 73) = True
-Worksheets(sheet).Cells(my_row, 74) = StrManip.ConvertDate(EndDateTextBox.Text)
+ws.Cells(my_row, 2) = GroupNameTextBox.Text
+ws.Cells(my_row, 3) = StrManip.ConvertDate(StartDateTextBox.Text)
+ws.Cells(my_row, 24) = CategoryListBox.value
+ws.Cells(my_row, 29) = TypeListBox.value
+ws.Cells(my_row, 73) = True
+ws.Cells(my_row, 74) = StrManip.ConvertDate(EndDateTextBox.Text)
+ws.Cells(my_row, 75) = GroupCostsTextBox.Text
+ws.Cells(my_row, 76) = GroupRevenueTextBox.Text
 
 ' Index of what was previously selected
 Dim my_index As Integer
@@ -168,7 +204,9 @@ Call funcs.ChangeSource(sheet, "Analysis", "PivotTable1")
 
 ' Update listboxes
 Call funcs.RefreshListBox("Data", 1, UserForm1.EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, UserForm1.GroupEventIDListBox)
 Call funcs.RefreshListBox("Data", 72, UserForm1.GroupIDListBox)
+
 ' Refresh group search
 Dim search As String
 search = UserForm1.GroupSearchBox.Text
