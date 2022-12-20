@@ -268,8 +268,8 @@ With searchRange
                 
                 ' If this optional argument has been used then...
                 If Not endDateList Is Nothing Then
-                    endDateList.AddItem (Worksheets(dataSheet).Cells(resultAddress(0), _
-                                            listColumns(4)))
+                    endDateList.AddItem (Format(Worksheets(dataSheet).Cells(resultAddress(0), _
+                                            listColumns(4)), "dd/mm/yyyy"))
                 End If
                 
                 ' If this optional argument has been used then...
