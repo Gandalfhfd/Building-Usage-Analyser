@@ -221,6 +221,9 @@ Sheets("Data").Rows(row).Delete
 '' Update listboxes
 ' Update EventIDListBox
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, GroupIDListBox)
+Call funcs.RefreshListBox("Data", 72, GroupEventIDListBox)
+
 ' Update search listboxes
 ' HiddenEventIDListBox must be updated first so that the internal record
 '   of events is correct. If this doesn't make sense, dw, I got confused while
@@ -307,11 +310,12 @@ End If
 ' Delete entire row corresponding to selected group
 ws.Rows(row).Delete
 
-' reassign group IDs to orphaned event children
+' reassign group info to orphaned event children
 Dim i As Integer
 For i = 0 To numResults - 1
     If ws.Cells(groupAddresses(i, 0), 73) = False Then
         ws.Cells(groupAddresses(i, 0), 72) = ws.Cells(groupAddresses(i, 0), 1)
+        ws.Cells(groupAddresses(i, 0), 77) = ws.Cells(groupAddresses(i, 0), 2)
     End If
 Next
 
@@ -637,8 +641,8 @@ If AutoTimeCheckBox = False Then
 End If
 
 ' Make rest of sub easier to read
-Dim sheet As String
-sheet = "Type-Specific Defaults"
+Dim ws As Worksheet
+ws = Sheets("Type-Specific Defaults")
 
 ' Find out which row we are getting our defaults from
 Dim row As Integer
@@ -651,25 +655,25 @@ End If
 
 ' Change doors open time
 If DoorsTimeTextBox.Text = "" Then
-    DoorsTimeTextBox.Text = Format(DateAdd("n", (Worksheets(sheet).Cells(row, 9) - _
-        Worksheets(sheet).Cells(row, 11)), SetupStartTimeTextBox.value), "hh:mm")
+    DoorsTimeTextBox.Text = Format(DateAdd("n", (ws.Cells(row, 9) - _
+        ws.Cells(row, 11)), SetupStartTimeTextBox.value), "hh:mm")
 End If
 
 ' Change event start time
 If EventStartTimeTextBox.Text = "" Then
-    EventStartTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 9), _
+    EventStartTimeTextBox.Text = Format(DateAdd("n", ws.Cells(row, 9), _
         SetupStartTimeTextBox.value), "hh:mm")
 End If
 
 ' Change event end time
 If EventEndTimeTextBox.Text = "" Then
-    EventEndTimeTextBox.Text = Format(DateAdd("n", (Worksheets(sheet).Cells(row, 9) + _
-        Worksheets(sheet).Cells(row, 10)), SetupStartTimeTextBox.value), "hh:mm")
+    EventEndTimeTextBox.Text = Format(DateAdd("n", (ws.Cells(row, 9) + _
+        ws.Cells(row, 10)), SetupStartTimeTextBox.value), "hh:mm")
 End If
 
 ' Change takedown end time
 If TakedownEndTimeTextBox.Text = "" Then
-    TakedownEndTimeTextBox.Text = Format(DateAdd("n", Worksheets(sheet).Cells(row, 13), _
+    TakedownEndTimeTextBox.Text = Format(DateAdd("n", ws.Cells(row, 13), _
         SetupStartTimeTextBox.value), "hh:mm")
 End If
 
@@ -1728,6 +1732,7 @@ ws.Cells(my_row, 1) = "E" & funcs.UUIDGenerator(CategoryListBox.value, _
 ws.Cells(my_row, 72) = "S" & funcs.UUIDGenerator(CategoryListBox.value, _
                                         StartDateTextBox.Text, NameTextBox.Text)
 ws.Cells(my_row, 2) = NameTextBox.Text
+ws.Cells(my_row, 77) = NameTextBox.Text
 ws.Cells(my_row, 3) = StrManip.ConvertDate(StartDateTextBox.Text)
 ws.Cells(my_row, 4) = LocationListBox.value
 ws.Cells(my_row, 24) = CategoryListBox.value
@@ -1877,6 +1882,7 @@ EditingCheck = False
 
 ' Update listboxes
 Call funcs.RefreshListBox("Data", 1, EventIDListBox)
+Call funcs.RefreshListBox("Data", 1, GroupIDListBox)
 Call funcs.RefreshListBox("Data", 72, GroupEventIDListBox)
 
 Call NewSearchTextBox_Change
@@ -2487,7 +2493,8 @@ ElseIf group_row = 1 Then
 End If
 ' Set group ID of event to be group ID of group
 Worksheets("Data").Cells(event_row, 72) = Worksheets("Data").Cells(group_row, 72)
-
+' Set group name of event to be group name of group
+Worksheets("Data").Cells(event_row, 77) = Worksheets("Data").Cells(group_row, 77)
 Dim my_page As Integer
 my_page = MultiPage1.value
 MultiPage1.value = 0
@@ -2518,7 +2525,6 @@ SearchTypeListBox.ListIndex = my_index
 HiddenEventIDListBox.ListIndex = my_index
 
 ' Select event in EventIDListBox so that we know which row it is on
-EventIDListBox.SetFocus
 EventIDListBox.value = HiddenEventIDListBox.list(HiddenEventIDListBox.ListIndex)
 End Sub
 
@@ -2532,6 +2538,5 @@ HiddenGroupIDListBox.ListIndex = my_index
 HiddenGroupEventIDListBox.ListIndex = my_index
 
 ' Select event in GroupEventIDListBox so that we know which row it is on
-GroupEventIDListBox.SetFocus
 GroupEventIDListBox.value = HiddenGroupEventIDListBox.list(HiddenGroupEventIDListBox.ListIndex)
 End Sub

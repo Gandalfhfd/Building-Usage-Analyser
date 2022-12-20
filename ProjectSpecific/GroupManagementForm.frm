@@ -188,6 +188,7 @@ ws.Cells(my_row, 73) = True
 ws.Cells(my_row, 74) = StrManip.ConvertDate(EndDateTextBox.Text)
 ws.Cells(my_row, 75) = GroupCostsTextBox.Text
 ws.Cells(my_row, 76) = GroupRevenueTextBox.Text
+ws.Cells(my_row, 77) = GroupNameTextBox.Text
 
 ' Index of what was previously selected
 Dim my_index As Integer
