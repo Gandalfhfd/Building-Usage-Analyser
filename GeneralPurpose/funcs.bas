@@ -414,12 +414,14 @@ newRange = Data_Sheet.name & "!" & DataRange.address(ReferenceStyle:=xlR1C1)
 
 ' Refresh all pivot tables and change data source
 Dim pt As PivotTable
-For Each pt In Pivot_Sheet.PivotTables
-    pt.ChangePivotCache ActiveWorkbook. _
-    PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newRange)
-    pt.RefreshTable
-Next pt
-
+Dim ws As Worksheet
+For Each ws In Worksheets
+    For Each pt In ws.PivotTables
+        pt.ChangePivotCache ActiveWorkbook. _
+        PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newRange)
+        pt.RefreshTable
+    Next pt
+Next ws
 End Function
 
 Public Sub RefreshListBox(sourceSheet As String, sourceColumn As Integer, list As Control)
