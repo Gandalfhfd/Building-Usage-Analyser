@@ -136,7 +136,7 @@ End If
 If mode = True And UserForm1.GroupIDListBox.ListIndex = -1 Then
     MsgBox ("You are in edit mode. " & _
             "Please select a group to edit on the Manage Groups page")
-If GroupNameTextBox.Text = "" Then
+ElseIf GroupNameTextBox.Text = "" Then
     MsgBox ("Please enter a name")
     Exit Sub
 ElseIf StartDateTextBox.Text = "" Then

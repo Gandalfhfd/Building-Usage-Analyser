@@ -642,7 +642,7 @@ End If
 
 ' Make rest of sub easier to read
 Dim ws As Worksheet
-ws = Sheets("Type-Specific Defaults")
+Set ws = Sheets("Type-Specific Defaults")
 
 ' Find out which row we are getting our defaults from
 Dim row As Integer
